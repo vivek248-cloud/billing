@@ -1,0 +1,267 @@
+{% load extra_filters %}
+{% load static %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Client Dashboard</title>
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background-color: #f3f4f6;
+      padding: 40px;
+      margin: 0;
+    }
+
+    .dashboard {
+      max-width: 800px;
+      margin: auto;
+      background-color: white;
+      border-radius: 12px;
+      padding: 30px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #1f2937;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 15px;
+    }
+
+    th {
+      background-color: #10b981;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    tr:hover {
+      background-color: #e6f4f1;
+    }
+
+    .value {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    /* Status badge styles */
+    .status {
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: inline-block;
+      margin: 10px 0;
+      font-weight: 600;
+    }
+
+    .status.pending { background-color: #facc15; color: #92400e; }
+    .status.ongoing { background-color: #60a5fa; color: #1e3a8a; }
+    .status.completed { background-color: #34d399; color: #065f46; }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #10b981;
+      padding-bottom: 5px;
+    }
+
+
+    .milestone-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 30px 0;
+      position: relative;
+    }
+    
+    .milestone-step {
+      text-align: center;
+      flex: 1;
+      position: relative;
+    }
+    
+    .milestone-step .circle {
+      height: 35px;
+      width: 35px;
+      border-radius: 50%;
+      background-color: #d1d5db;
+      display: inline-block;
+      line-height: 35px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 8px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .milestone-step.active .circle {
+      background-color: #10b981;
+    }
+    
+    .milestone-step span {
+      font-size: 14px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+    
+    .line {
+      height: 4px;
+      background-color: #d1d5db;
+      flex: 0.5;
+      margin: 0 10px;
+      border-radius: 2px;
+      transition: background-color 0.3s ease;
+    }
+    
+    .line.active {
+      background-color: #10b981;
+    }
+    ul {
+      padding-left: 18px;
+      width: 10%;
+      list-style: none;
+      text-align: center;
+  }
+  ul li {
+      margin-bottom: 8px;
+      background-color: green;
+      padding: 8px;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+  }
+  ul li:hover {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+      background-color: blue;
+  }
+  a{
+      text-decoration: none;
+      color: #ffffff;
+      font-weight: bold;
+  }
+  </style>
+</head>
+<body>
+  <nav>
+   
+    <ul>
+        <li><a href="{% url 'home' %}">➤&nbsp; &nbsp;Home</a></li>
+    </ul>
+</nav>
+<div class="dashboard">
+  
+  <h2>Welcome, {{ project.client_name }}</h2>
+
+  <!-- Status Badge -->
+  <!-- Project Status Milestone -->
+<div class="section-title">Project Progress</div>
+<div class="milestone-wrapper">
+  <div class="milestone-step {% if project.status == 'Not Started' or project.status == 'In Progress'  or project.status == 'Completed' or project.status == 'On Hold'%}active{% endif %}">
+    <div class="circle">1</div>
+    <span>Not Started</span>
+  </div>
+  <div class="line {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}"></div>
+  <div class="milestone-step {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}">
+    <div class="circle">2</div>
+    <span>In Progress</span>
+  </div>
+  <div class="line {% if project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}"></div>
+  <div class="milestone-step {% if project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}">
+    <div class="circle">3</div>
+    <span>Completed</span>
+  </div>
+  <div class="line {% if project.status == 'On Hold' %}active{% endif %}"></div>
+  <div class="milestone-step {% if  project.status == 'On Hold' %}active{% endif %}">
+    <div class="circle" >4</div>
+    <span>On Hold</span>
+  </div>
+</div>
+
+  <!-- Project Overview Table -->
+  <div class="section-title">Project Summary</div>
+  <table>
+    <tbody>
+      <tr>
+        <td>Phone</td>
+        <td class="value">{{ project.phone }}</td>
+      </tr>
+      <tr>
+        <td>Total Expenses</td>
+        <td class="value">{{ project.total_expenses|indian_currency }}</td>
+      </tr>
+      <tr>
+        <td>Amount Paid</td>
+        <td class="value">{{ project.payments.all|total_payment|indian_currency }}</td>
+      </tr>
+      <tr>
+        <td>Remaining Amount</td>
+        <td class="value">{{ project.remaining|indian_currency }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <!-- Expense Table -->
+  
+    <div class="section-title">Expense Details</div>
+    <table>
+      <thead>
+        <tr>
+          <th>Description</th>
+          <th>Amount (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for expense in expense %}
+        <tr>
+          <td>{{ expense.description }}</td>
+          <td>{{ expense.amount|indian_currency }}</td>
+        </tr>
+        {% empty %}
+          <p>No expenses recorded yet.</p>
+        {% endfor %}
+      </tbody>
+    </table>
+  
+  
+
+  <div class="footer-note">
+    You can contact your project manager for detailed updates.
+  </div>
+</div>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+{% comment %} {{ data.total_expenses_project|floatformat:0|intcomma }} {% endcomment %}

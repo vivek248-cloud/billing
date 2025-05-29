@@ -1,0 +1,245 @@
+
+{% load extra_filters %}
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Invoice - {{ project.name }}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Arial', sans-serif;
+            font-size: 13px;
+            color: #222;
+            margin: 20px;
+            background: #f6f6f6;
+        }
+
+        .invoice-box {
+            max-width: 950px;
+            margin: auto;
+            padding: 25px 30px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.06);
+        }
+
+        .top-section {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .top-section img {
+            height: 50px;
+            margin-bottom: 10px;
+        }
+
+        .top-section h1 {
+            font-size: 22px;
+            margin: 0;
+            color: #2c3e50;
+            font-weight: bold;
+        }
+
+        .top-section p {
+            margin: 2px 0;
+            font-size: 11px;
+            color: #555;
+        }
+
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #444;
+            margin: 25px 0 10px;
+            border-bottom: 2px solid #ddd;
+            padding-bottom: 4px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            font-size: 12px;
+        }
+
+        thead {
+            background-color: #f0f3f5;
+        }
+
+        th, td {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ddd;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #fbfbfb;
+        }
+
+        .total-row {
+            font-size: 16px;
+            font-weight: bold;
+            background-color:rgb(199, 199, 199);
+        }
+
+        .highlight-td {
+            background-color: #d5e8d4;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .notes {
+            font-size: 11px;
+            line-height: 1.6;
+            margin-top: 20px;
+        }
+
+        .notes ol {
+            padding-left: 16px;
+        }
+
+        .signature {
+            margin-top: 50px;
+            text-align: right;
+            font-size: 13px;
+        }
+
+        .signature p {
+            margin: 4px 0;
+        }
+  
+        .rupees {
+            text-align: right;
+            font-size: 16px;
+            font-weight: 400;
+            padding-right: .5px;
+        }
+        @media print {
+            body {
+                background: #fff;
+                margin: 0;
+            }
+
+            .invoice-box {
+                border: none;
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+            }
+
+            .no-print {
+                display: none;
+            }
+        }
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+    </style>
+</head>
+<body>
+<div class="invoice-box">
+    <div class="top-section">
+        <img src="{{ logo_url }}" alt="Company Logo">
+        <h1>THE ELITE DREAM BUILDERS</h1>
+        <p>NO.9, MSK BUILDING 1ST FLOOR, GANESHNAGAR, KATTUR, TRICHY-19</p>
+        <p>GSTIN: 33AKTPH2053F1ZC | www.elitedreambuilders.in</p>
+    </div>
+
+    <p class="section-title">CLIENT INFORMATION</p>
+    <p><strong>Client Name:</strong> {{ project.client_name }}</p>
+
+    <p class="section-title">PROJECT SUMMARY</p>
+    <table>
+        <thead>
+        <tr>
+            <th>Description</th>
+            <th>Area (Sq.Ft)</th>
+            <th>Rate/Sq.Ft</th>
+            <th>Total</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for expense in expenses %}
+            <tr>
+                <td>{{ expense.description }}</td>
+                <td class="rupees">{{ expense.area }}</td>
+                <td class="rupees">{{ expense.rate }}</td>
+                <td class="rupees">{{ expense.amount|floatformat:0|intcomma }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4">No expenses found for this project.</td></tr>
+        {% endfor %}
+        <tr class="total-row">
+            <td colspan="3">Total Expense</td>
+            <td class="rupees">{{ total_expense|floatformat:0|intcomma }}</td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p class="section-title">PAYMENT DETAILS</p>
+    <table>
+        <thead>
+        <tr>
+            <th>Date</th>
+            <th>Total Amount</th>
+            <th>Previously Received</th>
+            <th>Now Received</th>
+            <th>Balance</th>
+            <th>Payment Mode</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for row in payment_rows %}
+            <tr>
+                <td>{{ row.date }}</td>
+                <td class="rupees">{{ project|total_budget_with_expense|floatformat:0|intcomma }}</td>
+                <td class="rupees">{% if forloop.first %}-{% else %}{{ row.cumulative_paid_before|floatformat:0|intcomma }}{% endif %}</td>
+                <td class="rupees">{{ row.amount|floatformat:0|intcomma }}</td>
+                <td class="rupees">{{ row.remaining_after_payment|floatformat:0|intcomma }}</td>
+                <td>{{ row.payment_mode|title }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6">No payments found.</td></tr>
+        {% endfor %}
+        </tbody>
+        <tfoot>
+        <tr class="total-row">
+            <td colspan="2" class="total-row">Total Received</td>
+            <td colspan="4" class="total-row rupees">{{ total_received|floatformat:0|intcomma }}</td>
+        </tr>
+        <tr class="total-row">
+            <td colspan="2" class="total-row">Yet to Receive</td>
+            <td colspan="4" class="total-row rupees">{{ yet_to_receive|floatformat:2|default:"N/A" }}</td>
+        </tr>
+        </tfoot>
+    </table>
+
+    {% if expenses %}
+    <div class="notes">
+        <strong>NOTES:</strong>
+        <ol>
+            {% for expense in expenses %}
+                {% if expense.note %}
+                <li><strong>{{ expense.description }}:</strong> {{ expense.note }}</li>
+                {% endif %}
+            {% endfor %}
+        </ol>
+    </div>
+    {% endif %}
+
+    <div class="signature">
+        <p>For: <strong>THE ELITE DREAM BUILDERS</strong></p>
+        <br>
+        <img src="{% static 'images/sign.png' %}" alt="E-signature" style="height: 60px; margin-bottom: -10px;">
+        <p style="margin-top: 0;">Authorized Signatory</p>
+    </div>
+</div>
+</body>
+</html>

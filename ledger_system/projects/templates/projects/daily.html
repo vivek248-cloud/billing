@@ -1,0 +1,381 @@
+{% load static %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Daily Report</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 30px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: #fff;
+            border-radius: 10px;
+            padding: 20px 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .form-inline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-inline label {
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        .form-inline input,
+        .form-inline select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #3b82f6;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #2563eb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #1f2937;
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        .edit {
+            color: #3b82f6;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .edit:hover {
+            background-color: #e0edff;
+        }
+
+        .highlight-total-expense {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            background-color: #e5e7eb;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 40px;
+            position:fixed;
+            bottom: 10px;
+            left:1.7%;
+        }
+
+        .expense-value {
+            color: red;
+            font-weight: 800;
+            font-size: 26px;
+            margin-left: 10px;
+        }
+
+        ul {
+            padding-left: 18px;
+            width: 10%;
+            list-style: none;
+            text-align: center;
+        }
+        ul li {
+            margin-bottom: 8px;
+            background-color: green;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        ul li:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background-color: blue;
+        }
+        a{
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .message {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .message.error {
+            color: red;
+        }
+
+        .message.success {
+            color: green;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+        <h1>Daily Expense Report > ></h1>
+    </div>
+
+        <nav  class="nav-links">
+            <ul>
+                <li><a href="{% url 'billing' %}">➤&nbsp; &nbsp; Billing</a></li>
+            </ul>
+            
+        </nav>
+    
+
+    <div class="card">
+        <form method="get" class="form-inline">
+            <label>Start Month:</label>
+            <select name="start_month">
+                <option value="">All</option>
+                {% for m in months %}
+                    <option value="{{ m }}" {% if selected_start_month == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+
+            <label>End Month:</label>
+            <select name="end_month">
+                <option value="">All</option>
+                {% for m in months %}
+                    <option value="{{ m }}" {% if selected_end_month == m %}selected{% endif %}>{{ m }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Year:</label>
+            <select name="year">
+                <option value="">All</option>
+                {% for y in years %}
+                    <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+                {% endfor %}
+            </select>
+
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h4>Add New Expense</h4>
+        <form method="post" class="form-inline">
+            {% csrf_token %}
+            <input type="hidden" name="add_expense" value="true" placeholder="Add Expense">
+
+            <label>Client:</label>
+            <select name="project" required>
+                <option value="">Select Client</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.client_name }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Description:</label>
+            <input type="text" name="description" placeholder="Description" required>
+
+            <label>Amount:</label>
+            <input type="number" step="0.01" name="amount" placeholder="Amount" required>
+
+            <label>Date:</label>
+            <input type="date" name="date" required>
+
+            <button type="submit">Add Expense</button>
+        </form>
+    </div>
+
+    <div class="card">
+        <h4>Add Daily Spent Amount</h4>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="add_daily_expense" value="true">
+    
+            <label>Client:</label>
+            <select name="project" required>
+                <option value="">Select Client</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.client_name }}</option>
+                {% endfor %}
+            </select>
+    
+            <label>Category:</label>
+            <input type="text" name="category" placeholder="e.g. Food, Medical" required>
+    
+            <label>Description:</label>
+            <input type="text" name="description" placeholder="Optional">
+    
+            <label>Amount:</label>
+            <input type="number" step="0.01" name="amount" required>
+    
+            <label>Date:</label>
+            <input type="date" name="date" required>
+    
+            <button type="submit">Add Spending</button>
+        </form>
+    </div>
+    
+
+    {% comment %} <div class="card">
+        <h4>Add New Project</h4>
+        <form method="POST" action="{% url 'add_custom_project' %}" class="form-inline">
+            {% csrf_token %}
+            <label>Project Name:</label>
+            <input type="text" name="name" placeholder="Project name" required>
+
+            <label>Client Name:</label>
+            <input type="text" name="client_name" placeholder="Client Name" required>
+            <label>Client mobile:</label>
+            <input type="text" name="phone" placeholder="Client Phone Number" required>
+            <button type="submit">Add Project</button>
+        </form>
+    </div> {% endcomment %}
+
+    {% if error_message %}
+        <div class="message error">{{ error_message }}</div>
+    {% endif %}
+    {% if success_message %}
+        <div class="message success">{{ success_message }}</div>
+    {% endif %}
+
+    {% comment %} {% if edit_expense %}
+        <div class="card">
+            <h4>Edit Expense</h4>
+            <form method="post" class="form-inline">
+                {% csrf_token %}
+                <input type="hidden" name="edit_expense_id" value="{{ edit_expense.id }}">
+
+                <label>Project:</label>
+                <select name="project" required>
+                    {% for project in projects %}
+                        <option value="{{ project.id }}" {% if project.id == edit_expense.project.id %}selected{% endif %}>{{ project.name }}</option>
+                    {% endfor %}
+                </select>
+
+                <label>Description:</label>
+                <input type="text" name="description" value="{{ edit_expense.description }}" required>
+
+                <label>Amount:</label>
+                <input type="number" step="0.01" name="amount" value="{{ edit_expense.amount }}" required>
+
+                <label>Date:</label>
+                <input type="date" name="date" value="{{ edit_expense.date|date:'Y-m-d' }}" required>
+
+                <button type="submit">Update Expense</button>
+            </form>
+        </div>
+    {% endif %} {% endcomment %}
+    {% for data in projects_data %}
+    <div class="card">
+      <h3>{{ data.project.name }} <small>(Client: {{ data.project.client_name }})</small></h3>
+      <p><strong>Total Budget: ₹{{ data.running_total|floatformat:0|intcomma }}</strong></p>
+  
+      <table>
+        <thead>
+            <tr>
+              <th>S.No</th>
+              <th>Description</th>
+              <th>Spent</th>
+              <th>Balance</th>
+              <th>Remarks</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for row in data.daily_expenses %}
+            <tr>
+              <td>{{ forloop.counter }}</td>
+              <td>{{ row.description }}</td>
+              <td>₹{{ row.spend|floatformat:0|intcomma }}</td>
+              <td>₹{{ row.balance|floatformat:0|intcomma }}</td>
+              <td>{{ row.description }}</td>
+              <td>
+                <a href="?edit={{ row.expense.id }}&start_month={{ selected_start_month }}&end_month={{ selected_end_month }}&year={{ selected_year }}" class="edit">Edit</a>
+                <form method="post" style="display:inline;">
+                  {% csrf_token %}
+                  <input type="hidden" name="delete_expense_id" value="{{ row.expense.id }}">
+                  <button type="submit" onclick="return confirm('Delete this daily expense?')" style="background-color: red; color: white; border: none; padding: 6px 10px; border-radius: 4px;">Delete</button>
+                </form>
+              </td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td colspan="2"><strong>Total Spent</strong></td>
+              <td colspan="4"><strong>₹{{ data.total_spent|floatformat:0|intcomma }}</strong></td>
+            </tr>
+          </tbody>
+      </table>
+    </div>
+  {% endfor %}
+
+
+
+
+    
+    
+
+
+    
+
+</body>
+</html>
+
+{% comment %}value : _domainconnect.gd.domaincontrol.com. {% endcomment %}
+{% comment %}name: _domainconnect {% endcomment %}

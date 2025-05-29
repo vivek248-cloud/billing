@@ -1,0 +1,19 @@
+<!-- templates/500.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>500 Server Error</title>
+  <style>
+    body { background-color: #fff3cd; font-family: 'Segoe UI', sans-serif; text-align: center; padding: 60px; }
+    h1 { font-size: 100px; margin: 0; color: #856404; }
+    p { font-size: 20px; margin-top: 10px; }
+    a { color: #856404; text-decoration: underline; }
+  </style>
+</head>
+<body>
+  <h1>500</h1>
+  <p>Something went wrong on our end. Please try again later.</p>
+  <p><a href="{% url 'billing' %}">Go to Homepage</a></p>
+</body>
+</html>

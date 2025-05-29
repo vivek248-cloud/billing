@@ -1,0 +1,74 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Payment</title>
+    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
+    <style>
+        form {
+            max-width: 400px;
+            margin: auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        label {
+            display: block;
+            margin-top: 10px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        
+        h2 {
+            text-align: center;
+        }
+    
+    </style>
+</head>
+<body>
+
+    <div class="header">
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+        <h1>Edit Payment > ></h1>
+    </div>
+    Goto   ➤
+    <nav>
+        <ul>
+            <li><a href="{% url 'billing' %}" class="active">Billing</a></li>
+        </ul>
+    </nav>
+    <form method="POST">
+        {% csrf_token %}
+        <label for="amount">Amount</label>
+        <input type="number" name="amount" id="amount" step="0.01" value="{{ payment.amount }}" required>
+
+        <label for="payment_mode">Payment Mode:</label>
+        <select name="payment_mode" id="payment_mode" required>
+            <option value="">-- Select Payment Mode --</option>
+            <option value="cash">Cash</option>
+            <option value="cheque">Cheque</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+        </select>
+        
+        <label for="project">Project</label>
+        <select name="project" id="project">
+            {% for project in projects %}
+                <option value="{{ project.id }}" {% if project.id == payment.project.id %}selected{% endif %}>{{ project.name }}</option>
+            {% endfor %}
+        </select>
+
+        <button type="submit">Save Changes</button>
+    </form>
+</body>
+</html>
+

@@ -1,0 +1,326 @@
+
+
+
+{% comment %} <script>
+    // Disable right click
+    document.addEventListener('contextmenu', event => event.preventDefault());
+  
+    // Disable specific key combinations
+    document.addEventListener('keydown', function (event) {
+      if (event.keyCode == 123) { // F12
+        event.preventDefault();
+      }
+      if (event.ctrlKey && event.shiftKey && (event.keyCode == 73 || event.keyCode == 74)) {
+        // Ctrl+Shift+I or Ctrl+Shift+J
+        event.preventDefault();
+      }
+      if (event.ctrlKey && event.keyCode == 85) {
+        // Ctrl+U
+        event.preventDefault();
+      }
+    });
+  </script>
+   {% endcomment %}
+   {% comment %} <script>
+    (function() {
+      const threshold = 160;
+      setInterval(function() {
+        if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
+          document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%;'>Inspecting is Disabled</h1>";
+        }
+      }, 1000);
+    })();
+  </script> {% endcomment %}
+
+{% load extra_filters %}
+{% load static %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Billing System</title>
+    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
+    <style>
+        /* Add your custom styles here */
+    </style>
+</head>
+<body>
+<div class="header">
+    <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+    <h1>Billing System > ></h1>
+</div>
+<nav>
+   
+    <ul>
+        <li><a href="{% url 'daily_expense' %}">➤&nbsp; &nbsp;Daily Expense</a></li>
+        <li><a href="{% url 'logout' %}">➤&nbsp; &nbsp;Logout</a></li>
+    </ul>
+</nav>
+
+<!-- Add Expense Form -->
+
+
+<div style="margin-top: 10px;" class="add_form_div">
+    
+    <form method="post" action="{% url 'add_expense'  %}" class="add-expense-form">
+        {% csrf_token %}
+        <h2> Add  Budget</h2>
+        <label>Project:</label>
+        <select name="project" class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50 text-gray-800">
+                <option value="">Select Client</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.client_name }}</option>
+                {% endfor %}
+            </select>
+        <input type="date" name="date" required>
+        <input type="text" name="description" placeholder="Description" required>
+        <input type="number" name="area" placeholder="Area" required step="0.01">
+        <input type="number" name="rate" placeholder="Rate" required step="0.01">
+        <input type="number" name="cost" placeholder="Cost" required step="0.01">
+        <input type="text" name="note" placeholder="Note">
+        <button type="submit">Add Budget</button>
+    </form>
+
+    
+
+    
+    <form method="post" action="{% url 'add_payment' %}" class="add-expense-form">
+        {% csrf_token %}
+        <h2> Add Payments</h2>
+        <label>Project:</label>
+        <select name="project" required class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50 text-gray-800">
+            <option value="">Select Client</option>
+            {% for project in projects %}
+            <option value="{{ project.id }}">{{ project.client_name }}</option>
+            {% endfor %}
+        </select>
+        <input type="number" name="amount" placeholder="Amount" required step="0.01">
+        
+        <select name="payment_mode" required class="w-full p-2 rounded-md border border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-400 bg-gray-50 text-gray-800">
+            <option value="">Payment Mode</option>
+            <option value="Cash">Cash</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Cheque">Cheque</option>
+            <!-- add more options if needed -->
+        </select>
+        <br>
+        <button type="submit">Add Payment</button>
+        
+    </form>
+</div>
+
+
+{% if messages %}
+  <div class="alert-messages">
+    {% for message in messages %}
+      <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<table class="main-table">
+    <thead >
+        <tr>
+            <th style="width: 5%;">S.No</th>
+            {% comment %} <th>Project Name</th> {% endcomment %}
+            <th style="width: 8%;">Client Name</th>
+            <th style="width: 15%;">Status</th>
+            <th style="width: 50%;">Expenses</th> <!-- Your new expense section -->
+            <th style="width: 30%;">Payments</th>
+            <th style="width: 15%;">Remaining</th>
+            {% comment %} <th>Exceeded</th> {% endcomment %}
+            <th style="width: 15%;">Yet to Receive</th>
+            <th style="width: 10%;">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in projects %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            {% comment %} <td>{{ project.name }}</td> {% endcomment %}
+            <td>{{ project.client_name }}</td>
+            <td>
+                {{project.status}}
+                <button class="up_project_status"> <a href="{% url 'update_project_status' project.id %}">Update Project Status</a> </button>
+            </td>
+            <!-- EXPENSES COLUMN -->
+            <td>
+                <!-- Expense List Table -->
+                <table  class="main-table" style="width: 100%; border-collapse: collapse; table-layout: fixed;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th>Date</th>
+                            <th>Description</th>
+                            <th>Area</th>
+                            <th style="width: 14%;">Rate</th>
+                            <th style="width: 24%;">Amount</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in project.expenses_set.all %}
+                        <tr>
+                            <td>{{ expense.date }}</td>
+                            <td>{{ expense.description }}</td>
+                            <td class="right-align">{{ expense.area }}</td>
+                            <td  class="right-align">{{ expense.rate|indian_currency }}</td>
+                            <td  class="right-align">{{ expense.amount|indian_currency }}</td>
+                            <td>
+                                <form method="post" action="{% url 'remove_expense' expense.id %}" style="display:inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="remove-btn" style="background-color: red;">Remove</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="6" style="text-align: center;">No expenses yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            
+                
+            
+                <!-- Budget Summary -->
+                <div style="margin-top: 10px;">
+                    {% comment %} <p><strong>Budget:</strong> ₹{{ project.budget }}</p> {% endcomment %}
+                    {% comment %} <p><strong>Budget:</strong> ₹{{ project.total_expenses }}</p> {% endcomment %}
+                    <p><strong>Total Budget:</strong> {{ project|total_budget_with_expense|indian_currency }}</p>
+                    
+                    <div class="notes">
+                        <strong>NOTES:</strong>
+                        <ol>
+                            {% for expense in  project.expenses_set.all %}
+                                {% if expense.note %}
+                                <li>
+                                    {{ expense.note }}
+                                    <form method="post" action="{% url 'remove_notes' expense.id %}" style="display:inline;">
+                                        {% csrf_token %}
+                                        <button type="submit" style="color:red; background:none; border:none; cursor:pointer;">🗑️</button>
+                                    </form>
+                                </li>
+                                {% endif %}
+                            {% endfor %}
+                        </ol>
+                        
+                    </div>
+                </div>
+            </td>
+
+            <!-- PAYMENTS COLUMN -->
+           
+            <td>
+                <!-- Payments List Table -->
+                <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 10px;">
+                    <thead>
+                        <tr style="border-bottom: 1px solid #ccc;">
+                            <th>Payment Amount</th>
+                            <th>Payment Mode</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in project.payments.all %}
+                        <tr>
+                            <td  class="right-align">{{ payment.amount|indian_currency }}</td>
+                            <td>{{ payment.payment_mode }}</td>
+                            <td>
+                                <!-- Update Payment Form -->
+                                <form method="post" action="{% url 'edit_payment' payment.id %}" style="display:block;">
+                                    {% csrf_token %}
+                                    <button type="submit" style="background-color: blue; color: white;">Update</button>
+                                </form>
+                                <br>
+                                <!-- Delete Payment Form -->
+                                <form method="post" action="{% url 'delete_payment' payment.id %}" style="display:block;">
+                                    {% csrf_token %}
+                                    <button type="submit" class="remove-btn" style="background-color: red;">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="3" style="text-align: center;">No payments yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+                <!-- Add Payment Form -->
+                <div style="margin-top: 10px;">
+                    {% comment %} <form method="post" action="{% url 'add_payment' project.id %}" style="display:block;" class="add-expense-form">
+                        {% csrf_token %}
+                        <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+                        <br>
+                       
+                        <select name="payment_mode" id="payment_mode" required>
+                            <option value="">-- Select Payment Mode --</option>
+                            <option value="cash">Cash</option>
+                            <option value="cheque">Cheque</option>
+                            <option value="online">Online</option>
+                        </select>
+                        <button type="submit" class="add-expense-form" style="display:block;">Add Payment</button>
+                    </form> {% endcomment %}
+                </div>
+
+                <!-- Total Paid and Remaining -->
+                <div style="margin-top: 10px;">
+                    <strong class="right-align">Total Paid: {{ project.payments.all|total_payment|indian_currency }}</strong><br>
+                    {% if project.remaining > 0 %}
+                    <strong class="right-align">Remaining: {{ project.remaining|indian_currency }}</strong>
+                    {% endif %}
+                    {% if project.remaining < 0 %}
+                        <strong style="color: red;"  class="right-align">Exceeded: {{ project.remaining|indian_currency }}</strong>
+                    {% endif %}
+                </div>
+            </td>
+
+
+            <!-- Remaining, Exceeded, Total Cost, Actions -->
+            <td  class="right-align">{{ project.remaining|indian_currency }}</td>
+            {% comment %} <td>
+                {% if project.estimated_cost > project.budget %}
+                    <span style="color: red;">₹{{ project.estimated_cost|sub:project.budget|floatformat:2|intcomma }}</span>
+                {% else %}
+                    ₹0
+                {% endif %}
+            </td> {% endcomment %}
+            <td  class="right-align">{{ project.remaining|indian_currency }}</td>
+            <td>
+                <a href="{% url 'download_invoice' project.id %}">
+                    <button class="download_invoice">Download</button>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<div class="add-expense-form">
+    <h2>Add New Project</h2>
+    <form method="POST" action="{% url 'add_project' %}">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Project Name" required>
+        <input type="text" name="client_name" placeholder="Client Name" required>
+        <input type="text" name="phone" placeholder="Client Phone Number" required>
+     
+        <button type="submit">Add Project</button>
+    </form>
+    
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</div>
+
+
+
+
+</body>
+</html>
