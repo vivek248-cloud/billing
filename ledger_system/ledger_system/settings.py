@@ -19,7 +19,7 @@ SECRET_KEY = 'django-insecure-nyo_fa03512tqw8lj2i=p)i9^bs+qg*%lxwm-ib-%)8u#18c@_
 
 DEBUG = True
 
-ALLOWED_HOSTS = ['*']  # Later for production: ['yourdomain.com', 'www.yourdomain.com']
+ALLOWED_HOSTS = ['*', 'billing-r8ie.onrender.com'] # Later for production: ['yourdomain.com', 'www.yourdomain.com']
 
 # Application definition
 INSTALLED_APPS = [
