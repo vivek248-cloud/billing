@@ -6,18 +6,24 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Client Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
   <style>
     body {
       font-family: 'Poppins', sans-serif;
-      background-color: #f3f4f6;
-      padding: 40px;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
       margin: 0;
+      overflow-X: hidden;
+      padding: 20px;
     }
 
     .dashboard {
-      max-width: 800px;
+      max-width: 900px;
       margin: auto;
       background-color: white;
       border-radius: 12px;
@@ -68,20 +74,6 @@
       color: #6b7280;
     }
 
-    /* Status badge styles */
-    .status {
-      padding: 8px 14px;
-      border-radius: 20px;
-      font-size: 14px;
-      display: inline-block;
-      margin: 10px 0;
-      font-weight: 600;
-    }
-
-    .status.pending { background-color: #facc15; color: #92400e; }
-    .status.ongoing { background-color: #60a5fa; color: #1e3a8a; }
-    .status.completed { background-color: #34d399; color: #065f46; }
-
     .section-title {
       font-size: 18px;
       font-weight: 600;
@@ -92,21 +84,19 @@
       padding-bottom: 5px;
     }
 
-
     .milestone-wrapper {
       display: flex;
       align-items: center;
       justify-content: space-between;
       margin: 30px 0;
-      position: relative;
     }
-    
+
     .milestone-step {
       text-align: center;
       flex: 1;
       position: relative;
     }
-    
+
     .milestone-step .circle {
       height: 35px;
       width: 35px;
@@ -119,17 +109,17 @@
       margin-bottom: 8px;
       transition: background-color 0.3s ease;
     }
-    
+
     .milestone-step.active .circle {
-      background-color: #10b981;
+      background-color:#2563eb;
     }
-    
+
     .milestone-step span {
       font-size: 14px;
       color: #4b5563;
       font-weight: 500;
     }
-    
+
     .line {
       height: 4px;
       background-color: #d1d5db;
@@ -138,75 +128,226 @@
       border-radius: 2px;
       transition: background-color 0.3s ease;
     }
-    
+
     .line.active {
-      background-color: #10b981;
+      background-color: #2563eb;
     }
-    ul {
-      padding-left: 18px;
-      width: 10%;
+
+    nav ul {
       list-style: none;
-      text-align: center;
-  }
-  ul li {
-      margin-bottom: 8px;
-      background-color: green;
-      padding: 8px;
+      display: flex;
+      justify-content: flex-start;
+      padding: 0;
+      justify-content: center;
+      margin-bottom: 20px;
+    }
+
+    nav ul li {
+      margin-right: 15px;
+      background-color: #2563eb;
+      padding: 10px 18px;
       border-radius: 6px;
-      transition: all 0.3s ease;
-  }
-  ul li:hover {
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-      background-color: blue;
-  }
-  a{
+    }
+
+    nav ul li:hover {
+      background-color: #3b82f6;
+    }
+
+    nav ul a {
       text-decoration: none;
       color: #ffffff;
       font-weight: bold;
+    }
+.project-info {
+      font-weight: 600;
+      color: #374151;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    .expense-summary-card {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  font-family: 'Poppins', sans-serif;
+}
+
+.expense-summary-card h2 {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #1e3a8a;
+}
+
+.expense-count {
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 16px;
+}
+
+.expense-list {
+  margin-bottom: 20px;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  background: #f9fafb;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 4px solid #2563eb;
+  transition: transform 0.2s ease;
+}
+
+.expense-item:hover {
+  transform: scale(1.02);
+  background: #eef2ff;
+}
+
+.expense-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin-right: 12px;
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.expense-detail {
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.expense-description {
+  font-weight: 500;
+  color: #111827;
+}
+
+.expense-amount {
+  font-weight: bold;
+  color: #10b981;
+}
+
+.expense-total {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.no-expense,
+.no-project {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.btn-download-invoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2563EB; /* Tailwind's blue-600 */
+  color: white;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 6px rgb(37 99 235 / 0.3);
+  user-select: none;
+}
+
+.btn-download-invoice:hover,
+.btn-download-invoice:focus {
+  background-color: #1E40AF; /* Tailwind's blue-800 */
+  box-shadow: 0 6px 12px rgb(30 64 175 / 0.5);
+  outline: none;
+  cursor: pointer;
+}
+
+.btn-download-invoice .icon {
+  width: 20px;
+  height: 20px;
+}
+
+ #projectChart {
+    animation: floatChart 4s ease-in-out infinite;
   }
+
+  @keyframes floatChart {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+  }
+    @media (max-width: 600px) {
+      .dashboard {
+        padding: 20px;
+        width: 80%;
+      }
+
+      table {
+        font-size: 14px;
+      }
+      body {
+        padding: 0px;
+      }
+    }
   </style>
 </head>
 <body>
-  <nav>
-   
-    <ul>
-        <li><a href="{% url 'home' %}">➤&nbsp; &nbsp;Home</a></li>
-    </ul>
+
+<nav>
+  <ul>
+    <a href="{% url 'home' %}"><li>🏠 Home</li></a>
+    <a href="{% url 'logout' %}"><li>🚪 Logout</li></a>
+  </ul>
 </nav>
+
 <div class="dashboard">
-  
-  <h2>Welcome, {{ project.client_name }}</h2>
+  <h2>Welcome,  {{ project.client_name|title }}</h2>
 
-  <!-- Status Badge -->
-  <!-- Project Status Milestone -->
-<div class="section-title">Project Progress</div>
-<div class="milestone-wrapper">
-  <div class="milestone-step {% if project.status == 'Not Started' or project.status == 'In Progress'  or project.status == 'Completed' or project.status == 'On Hold'%}active{% endif %}">
-    <div class="circle">1</div>
-    <span>Not Started</span>
-  </div>
-  <div class="line {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}"></div>
-  <div class="milestone-step {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}">
-    <div class="circle">2</div>
-    <span>In Progress</span>
-  </div>
-  <div class="line {% if project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}"></div>
-  <div class="milestone-step {% if project.status == 'Completed' or project.status == 'On Hold' %}active{% endif %}">
-    <div class="circle">3</div>
-    <span>Completed</span>
-  </div>
-  <div class="line {% if project.status == 'On Hold' %}active{% endif %}"></div>
-  <div class="milestone-step {% if  project.status == 'On Hold' %}active{% endif %}">
-    <div class="circle" >4</div>
-    <span>On Hold</span>
-  </div>
-</div>
+  <!-- Project Progress -->
+  <div class="section-title">Project Progress</div>
+  <div class="milestone-wrapper">
+    <div class="milestone-step {% if project.status in 'Not Started,In Progress,Completed,On Hold' %}active{% endif %}">
+      <div class="circle">1</div>
+      <span>Not Started</span>
+    </div>
+    <div class="line {% if project.status in 'In Progress,Completed,On Hold' %}active{% endif %}"></div>
 
-  <!-- Project Overview Table -->
+    <div class="milestone-step {% if project.status in 'In Progress,Completed,On Hold' %}active{% endif %}">
+      <div class="circle">2</div>
+      <span>In Progress</span>
+    </div>
+    <div class="line {% if project.status in 'Completed,On Hold' %}active{% endif %}"></div>
+
+    <div class="milestone-step {% if project.status in 'Completed,On Hold' %}active{% endif %}">
+      <div class="circle">3</div>
+      <span>Completed</span>
+    </div>
+    <div class="line {% if project.status == 'On Hold' %}active{% endif %}"></div>
+
+    <div class="milestone-step {% if project.status == 'On Hold' %}active{% endif %}">
+      <div class="circle">4</div>
+      <span>On Hold</span>
+    </div>
+  </div>
+
+  <!-- Project Summary -->
   <div class="section-title">Project Summary</div>
   <table>
     <tbody>
-      <tr>
+      <tr class="project-info">
+        <td>Name</td>
+        <td class="value">{{ project.client_name|upper }}</td>
+      </tr>
+      <tr class="project-info">
         <td>Phone</td>
         <td class="value">{{ project.phone }}</td>
       </tr>
@@ -225,43 +366,129 @@
     </tbody>
   </table>
 
-  <!-- Expense Table -->
-  
-    <div class="section-title">Expense Details</div>
-    <table>
-      <thead>
-        <tr>
-          <th>Description</th>
-          <th>Amount (₹)</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for expense in expense %}
-        <tr>
-          <td>{{ expense.description }}</td>
-          <td>{{ expense.amount|indian_currency }}</td>
-        </tr>
-        {% empty %}
-          <p>No expenses recorded yet.</p>
-        {% endfor %}
-      </tbody>
-    </table>
-  
-  
+  <!-- Expense Details -->
+<div class="section-title">Expense Details</div>
 
-  <div class="footer-note">
-    You can contact your project manager for detailed updates.
+{% if project %}
+  <div class="expense-summary-card">
+    <p class="expense-count">Total Expenses: {{ project.expenses_set.count }}</p>
+
+    {% if project.expenses_set.all %}
+      <div class="expense-list">
+        {% for item in project.expenses_set.all %}
+          <div class="expense-item">
+            <div class="expense-date">{{ item.date|date:"Y-m-d" }}</div>
+            <div class="expense-detail">
+              <span class="expense-description">{{ item.description }}</span>
+              <span class="expense-amount">{{ item.amount|indian_currency }}</span>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div class="expense-total">
+        <strong>Total:</strong> {{ project.total_expenses|indian_currency }}
+      </div>
+    {% else %}
+      <p class="no-expense">No expenses found.</p>
+    {% endif %}
   </div>
-</div>
+  <a href="{% url 'download_invoice' project.id %}" class="btn-download-invoice">
+  <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
+  </svg>
+  Download Invoice
+</a>
+{% else %}
+  <p class="no-project">No project found.</p>
+{% endif %}
+
+
+<!-- Section Title with AOS -->
+<div class="section-title" data-aos="fade-up">Project Insights</div>
+
+<!-- Chart Canvas with animation -->
+<canvas id="projectChart" width="400" height="200" data-aos="zoom-in"></canvas>
+
+<!-- Chart.js & AOS CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+<!-- Initialize AOS -->
+<script>
+  AOS.init();
+</script>
+
+<!-- Chart Script -->
+<script>
+  const ctx = document.getElementById('projectChart').getContext('2d');
+
+  const chart = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: ['Project Budget', 'Amount Paid', 'Remaining'],
+      datasets: [{
+          label: 'Project Budget (in ₹ {{ project.total_expenses|indian_currency }})',
+        data: [
+          {{ project.total_expenses }},
+          {{ project.payments.all|total_payment }},
+          {{ project.remaining }}
+        ],
+        backgroundColor: [
+          'rgba(255, 99, 132, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(255, 206, 86, 0.6)'
+        ],
+        borderColor: [
+          'rgba(255, 99, 132, 1)',
+          'rgba(75, 192, 192, 1)',
+          'rgba(255, 206, 86, 1)'
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      animation: {
+        duration: 2000,
+        easing: 'easeOutElastic'
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'bottom'
+        },
+        tooltip: {
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          padding: 12,
+          borderRadius: 8,
+          titleFont: { size: 16 },
+          bodyFont: { size: 14 }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: {
+            font: {
+              size: 14
+            }
+          }
+        },
+        x: {
+          ticks: {
+            font: {
+              size: 14
+            }
+          }
+        }
+      }
+    }
+  });
+</script>
+
+
+
+
 
 </body>
 </html>
-
-
-
-
-
-
-
-
-{% comment %} {{ data.total_expenses_project|floatformat:0|intcomma }} {% endcomment %}

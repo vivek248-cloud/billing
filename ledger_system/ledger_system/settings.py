@@ -162,3 +162,8 @@ JAZZMIN_SETTINGS = {
     "hide_apps": [],
     "hide_models": [],
 }
+
+# Set session to expire after 5 minutes (300 seconds)
+SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_SAVE_EVERY_REQUEST = True

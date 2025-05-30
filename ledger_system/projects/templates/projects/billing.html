@@ -48,7 +48,67 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
     <style>
-        /* Add your custom styles here */
+        body {
+            cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-links ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+       
+        
+
+        .add_form_div {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .add-expense-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 48%;
+        }
+
+        
+
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .main-table th, .main-table td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        .main-table th {
+           
+            color: white;
+        }
+
+        .right-align {
+            text-align: right;
+        }
+
+        .remove-btn {
+            background-color: red; 
+            color: white; 
+            border-radius: 5px; 
+            padding: 5px; 
+            cursor:pointer; 
+        }
     </style>
 </head>
 <body>
@@ -56,11 +116,10 @@
     <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
     <h1>Billing System > ></h1>
 </div>
-<nav>
-   
+<nav class="nav-links">
     <ul>
-        <li><a href="{% url 'daily_expense' %}">➤&nbsp; &nbsp;Daily Expense</a></li>
-        <li><a href="{% url 'logout' %}">➤&nbsp; &nbsp;Logout</a></li>
+        <a href="{% url 'daily_expense' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;fill:#191919}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Daily Expense</li></a>
+        <a href="{% url 'logout' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;fill:#191919}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Logout</li></a>
     </ul>
 </nav>
 
@@ -130,14 +189,14 @@
         <tr>
             <th style="width: 5%;">S.No</th>
             {% comment %} <th>Project Name</th> {% endcomment %}
-            <th style="width: 8%;">Client Name</th>
+            <th style="width: 10%;">Client Name</th>
             <th style="width: 15%;">Status</th>
-            <th style="width: 50%;">Expenses</th> <!-- Your new expense section -->
+            <th style="width: 60%;">Expenses</th> <!-- Your new expense section -->
             <th style="width: 30%;">Payments</th>
-            <th style="width: 15%;">Remaining</th>
+            <th style="width: 13%;">Remaining</th>
             {% comment %} <th>Exceeded</th> {% endcomment %}
-            <th style="width: 15%;">Yet to Receive</th>
-            <th style="width: 10%;">Actions</th>
+            <th style="width: 13%;">Yet to Receive</th>
+            <th style="width: 15%;">Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -147,9 +206,15 @@
             {% comment %} <td>{{ project.name }}</td> {% endcomment %}
             <td>{{ project.client_name }}</td>
             <td>
-                {{project.status}}
-                <button class="up_project_status"> <a href="{% url 'update_project_status' project.id %}">Update Project Status</a> </button>
+                <span class="status-dot {% if project.status == 'Not Started' %}not-started
+                       {% elif project.status == 'In Progress' %}in-progress
+                       {% elif project.status == 'Completed' %}completed
+                       {% endif %}">
+                </span>
+                <span class="status-text">{{ project.status }}</span>
+                <a href="{% url 'update_project_status' project.id %}" class="btn-status-update">Update Project Status</a>
             </td>
+
             <!-- EXPENSES COLUMN -->
             <td>
                 <!-- Expense List Table -->
@@ -159,8 +224,8 @@
                             <th>Date</th>
                             <th>Description</th>
                             <th>Area</th>
-                            <th style="width: 14%;">Rate</th>
-                            <th style="width: 24%;">Amount</th>
+                            <th>Rate</th>
+                            <th>Amount</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
@@ -295,8 +360,11 @@
             </td> {% endcomment %}
             <td  class="right-align">{{ project.remaining|indian_currency }}</td>
             <td>
-                <a href="{% url 'download_invoice' project.id %}">
-                    <button class="download_invoice">Download</button>
+                <a href="{% url 'download_invoice' project.id %}" class="btn-download-invoice">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
+                    </svg>
+                    Download Invoice
                 </a>
             </td>
         </tr>

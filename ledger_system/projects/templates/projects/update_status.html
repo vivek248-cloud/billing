@@ -1,21 +1,103 @@
 {% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+  <meta charset="UTF-8">
   <title>Update Project Status</title>
-  <link rel="stylesheet" href="{% static "css/ledger.css" %}">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
+    }
+
+    .form-container {
+      background-color: white;
+      padding: 30px 40px;
+      border-radius: 10px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+      max-width: 500px;
+      width: 100%;
+    }
+
+    h2 {
+      text-align: center;
+      margin-bottom: 25px;
+      color: #1f2937;
+      font-size: 24px;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    select {
+      padding: 12px 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      transition: border-color 0.3s;
+    }
+
+    select:focus {
+      border-color: #10b981;
+    }
+
+    button {
+      margin-top: 25px;
+      padding: 12px;
+      background-color: #10b981;
+      border: none;
+      color: white;
+      font-weight: bold;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #0e9e6e;
+    }
+
+    @media (max-width: 600px) {
+      .form-container {
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      select, button {
+        font-size: 14px;
+      }
+    }
+  </style>
 </head>
 <body>
-  <h2>Update Status for {{ project.name }}</h2>
-  <form method="POST" class="add-expense-form">
-    {% csrf_token %}
-    <select name="status">
-      {% for value, label in project.STATUS_CHOICES %}
-        <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
-      {% endfor %}
-    </select>
-    <br><br><br>
-    <button type="submit">Update</button>
-  </form>
+  <div class="form-container">
+    <h2>Update Status for {{ project.name }}</h2>
+    <form method="POST" class="add-expense-form">
+      {% csrf_token %}
+      <select name="status">
+        {% for value, label in project.STATUS_CHOICES %}
+          <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+      <button type="submit">Update</button>
+    </form>
+  </div>
 </body>
 </html>
+

@@ -4,62 +4,181 @@
 <head>
     <meta charset="UTF-8">
     <title>Edit Payment</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- Important for responsiveness -->
     <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
     <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f5f7fa;
+            padding: 10px;
+            margin: 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
         form {
-            max-width: 400px;
+            max-width: 500px;
+            width: 100%;
             margin: auto;
             padding: 20px;
             background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
         }
+
         label {
             display: block;
-            margin-top: 10px;
+            margin-top: 15px;
+            font-weight: 600;
         }
+
         input, select, button {
             width: 100%;
-            padding: 10px;
-            margin-top: 5px;
+            padding: 12px;
+            margin-top: 6px;
             border: 1px solid #ccc;
-            border-radius: 4px;
+            border-radius: 6px;
+            font-size: 14px;
         }
-        
-        h2 {
+
+        button {
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            margin-top: 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1e40af;
+        }
+
+        ul {
+            padding-left: 0;
+            list-style: none;
+            margin-bottom: 20px;
             text-align: center;
         }
-    
+
+        ul li {
+            margin: 0 auto 12px;
+            background-color: #2563eb;
+            padding: 10px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            width: 90%;
+            max-width: 300px;
+        }
+
+        ul li:hover {
+            background-color: #0056b3;
+            transform: scale(1.05);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        a {
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .arrow {
+            width: 20px;
+            height: 20px;
+            fill: rgb(255, 255, 255);
+            transform: rotate(90deg);
+            margin-right: 8px;
+            transition: transform 0.3s ease, fill 0.3s ease;
+        }
+
+        .nav-links li:hover .arrow,
+        .nav-links li:active .arrow {
+            transform: rotate(-90deg);
+            fill: #ffffff !important;
+        }
+
+        @media (max-width: 768px) {
+            form {
+                padding: 15px;
+            }
+
+            input, select, button {
+                padding: 10px;
+                font-size: 13px;
+            }
+
+            h1, h2 {
+                font-size: 20px;
+            }
+
+            ul li {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .header img {
+                width: 80px;
+            }
+
+            h1 {
+                font-size: 18px;
+            }
+
+            .arrow {
+                width: 16px;
+                height: 16px;
+            }
+        }
     </style>
 </head>
 <body>
 
     <div class="header">
-        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
-        <h1>Edit Payment > ></h1>
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px;">
+        <h1>Edit Payment &gt;&gt;</h1>
     </div>
-    Goto   ➤
-    <nav>
+
+    <nav class="nav-links">
         <ul>
-            <li><a href="{% url 'billing' %}" class="active">Billing</a></li>
+            <li>
+                <a href="{% url 'billing' %}">
+                    <svg class="arrow" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+                        <path d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" />
+                    </svg>
+                    Billing
+                </a>
+            </li>
         </ul>
     </nav>
+
     <form method="POST">
         {% csrf_token %}
         <label for="amount">Amount</label>
         <input type="number" name="amount" id="amount" step="0.01" value="{{ payment.amount }}" required>
 
-        <label for="payment_mode">Payment Mode:</label>
+        <label for="payment_mode">Payment Mode</label>
         <select name="payment_mode" id="payment_mode" required>
             <option value="">-- Select Payment Mode --</option>
-            <option value="cash">Cash</option>
-            <option value="cheque">Cheque</option>
-            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="cash" {% if payment.payment_mode == 'cash' %}selected{% endif %}>Cash</option>
+            <option value="cheque" {% if payment.payment_mode == 'cheque' %}selected{% endif %}>Cheque</option>
+            <option value="Bank Transfer" {% if payment.payment_mode == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
         </select>
-        
+
         <label for="project">Project</label>
         <select name="project" id="project">
             {% for project in projects %}
@@ -69,6 +188,6 @@
 
         <button type="submit">Save Changes</button>
     </form>
+
 </body>
 </html>
-

@@ -30,4 +30,12 @@ class ExpenseForm(forms.ModelForm):
 class DailyExpenseForm(forms.ModelForm):
     class Meta:
         model = DailyExpense
-        fields = ['project', 'category', 'description', 'amount', 'date']
+        fields = ['project', 'category', 'description', 'remark', 'amount', 'date']
+        widgets = {
+            'project': forms.Select(attrs={'class': 'form-control'}),
+            'category': forms.TextInput(attrs={'class': 'form-control'}),
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'remark': forms.TextInput(attrs={'class': 'form-control'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control'}),
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }

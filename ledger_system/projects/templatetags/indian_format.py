@@ -17,4 +17,4 @@ def indian_currency(value):
     result = s[:3]
     for i in range(3, len(s), 2):
         result += ',' + s[i:i+2]
-    return '₹' + result[::-1]
+    return '' + result[::-1]

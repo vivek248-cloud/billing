@@ -119,6 +119,7 @@ class DailyExpense(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)
     category = models.CharField(max_length=100)  # e.g. Food, Transport, Medical
     description = models.TextField(blank=True)
+    remark = models.TextField(blank=True, null=True)  # Optional field for additional notes
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     date = models.DateField(_("Date"), auto_now=False, auto_now_add=False, null=True, blank=True)
 
