@@ -1,4 +1,4 @@
-arabic-reshaper==3.0.0\Billing-App-v2\ledger_system>
+arabic-reshaper==3.0.0
 asgiref==3.8.1
 asn1crypto==1.5.1
 Brotli==1.1.0
