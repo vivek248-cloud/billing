@@ -69,8 +69,8 @@ def admin_login(request):
 
             # Fix: Use consistent keys and save cookies only if "remember_me" checked
             if 'remember_me' in request.POST:
-                response.set_cookie('admin_username', username, max_age=864000) # 10 days
-                response.set_cookie('admin_password', password, max_age=864000) # 10 days
+                response.set_cookie('admin_username', username, max_age=2592000) # 30 days
+                response.set_cookie('admin_password', password, max_age=2592000) # 30 days
             else:
                 response.delete_cookie('admin_username')
                 response.delete_cookie('admin_password')
@@ -98,8 +98,8 @@ def client_login(request):
 
             # ✅ Remember Me logic
             if 'remember_me' in request.POST:
-                response.set_cookie('saved_username', uname, max_age=864000)  # 10 days
-                response.set_cookie('saved_password', pwd, max_age=864000)
+                response.set_cookie('saved_username', uname, max_age=2592000)  # 30 days
+                response.set_cookie('saved_password', pwd, max_age=2592000)
             else:
                 response.delete_cookie('saved_username')
                 response.delete_cookie('saved_password')
@@ -602,6 +602,86 @@ def daily_report(request):
     }
 
     return render(request, 'projects/daily.html', context)
+
+
+
+
+
+
+from collections import defaultdict
+from decimal import Decimal
+from django.db.models import Sum
+from django.db.models.functions import TruncMonth
+from datetime import datetime
+
+def daily_statistics(request):
+    start_month = request.GET.get('start_month')
+    end_month = request.GET.get('end_month')
+    year = request.GET.get('year')
+    project_id = request.GET.get('project_id')
+
+    start_month = int(start_month) if start_month and start_month != 'None' else None
+    end_month = int(end_month) if end_month and end_month != 'None' else None
+    year = int(year) if year and year != 'None' else None
+
+    filter_kwargs = {}
+    if year:
+        filter_kwargs['date__year'] = year
+    if start_month and end_month:
+        filter_kwargs['date__month__gte'] = start_month
+        filter_kwargs['date__month__lte'] = end_month
+    elif start_month:
+        filter_kwargs['date__month'] = start_month
+    elif end_month:
+        filter_kwargs['date__month'] = end_month
+    if project_id:
+        filter_kwargs['project_id'] = project_id
+
+    total_spending = DailyExpense.objects.filter(**filter_kwargs).aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+    category_data = DailyExpense.objects.filter(**filter_kwargs).values('category').annotate(total=Sum('amount')).order_by('-total')
+
+    monthly_data = DailyExpense.objects.filter(**filter_kwargs).annotate(month=TruncMonth('date')).values('month').annotate(total=Sum('amount')).order_by('month')
+
+    monthly_labels = [entry['month'].strftime('%b %Y') for entry in monthly_data]
+    monthly_totals = [float(entry['total']) for entry in monthly_data]
+
+    project_data = DailyExpense.objects.filter(**filter_kwargs).values('project__id', 'project__name', 'project__client_name').annotate(total=Sum('amount')).order_by('-total')
+
+    expenses = DailyExpense.objects.filter(**filter_kwargs).select_related('project').order_by('project__name', 'date')
+
+    expenses_by_project = defaultdict(list)
+    for expense in expenses:
+        expenses_by_project[expense.project.id].append(expense)
+
+
+    # Build total budget per project
+    project_budgets = {}
+    for project in Project.objects.all():
+        total_expense = project.expenses_set.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+        project_budgets[project.id] = project.budget + total_expense
+
+
+    context = {
+        'total_spending': total_spending,
+        'category_data': category_data,
+        'monthly_labels': monthly_labels,
+        'monthly_totals': monthly_totals,
+        'project_data': project_data,
+        'expenses': expenses_by_project,
+        'project_budgets': project_budgets,
+        'selected_start_month': start_month,
+        'selected_end_month': end_month,
+        'selected_year': year,
+        'selected_project': int(project_id) if project_id else None,
+        'projects': Project.objects.all(),
+        'months': [f"{i:02d}" for i in range(1, 13)],
+        'years': [str(y) for y in range(datetime.now().year - 2, datetime.now().year + 2)],
+    }
+
+    return render(request, 'projects/daily_statistics.html', context)
+
+
 
 
 # def add_custom_project(request):
