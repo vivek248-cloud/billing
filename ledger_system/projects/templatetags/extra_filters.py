@@ -36,3 +36,11 @@ def remaining_after_payment(project):
     balance = total_budget + total_expense - total_payment
 
     return balance
+
+@register.filter
+def get_item(dictionary, key):
+    return dictionary.get(key)
+
+@register.filter
+def dict_get(dict_obj, key):
+    return dict_obj.get(key)
