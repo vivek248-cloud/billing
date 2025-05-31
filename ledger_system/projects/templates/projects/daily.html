@@ -6,8 +6,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
     <title>Daily Report</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -396,13 +394,14 @@
 <body>
 
     <div class="header">
-        <img src="{% static 'images/logo.PNG' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+        <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
         <h1>Daily Expense Report > ></h1>
     </div>
 
         <nav  class="nav-links">
             <ul>
                 <a href="{% url 'billing' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Billing</li></a>
+                <a href="{% url 'daily_statistics' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Statistics</li></a>
             </ul>
             
         </nav>
@@ -558,7 +557,7 @@
             {% for row in data.daily_expenses %}
             <tr>
               <td>{{ forloop.counter }}</td>
-              <td>{{ row.expense.date|date:"Y-m-d" }}</td>
+              <td>{{ row.expense.date|date:"d-m-Y" }}</td>
               <td>{{ row.description }}</td>
               <td class="rupees">₹{{ row.spend|floatformat:0|intcomma }}</td>
               <td class="rupees">₹{{ row.balance|floatformat:0|intcomma }}</td>
@@ -584,7 +583,7 @@
   {% endfor %}
 {% if total_expenses_all_projects %}
   <div class="highlight-total-expense">
-      <span>Total Expense for month {{ selected_start_month }} to {{ selected_end_month }}: </span>
+      <span>Total Expense  {% if selected_start_month and selected_end_month %} month {{ selected_start_month }} to {{ selected_end_month }} : {% endif %}</span>
       <span class="expense-value">₹{{ total_expenses_all_projects|floatformat:0|intcomma }}</span>
   </div>
 {% endif %}
