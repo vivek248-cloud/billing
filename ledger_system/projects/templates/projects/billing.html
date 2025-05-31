@@ -31,7 +31,7 @@
       }, 1000);
     })();
   </script> {% endcomment %}
-  
+
 {% load static %}
 {% load extra_filters %}
 {% load humanize %}
@@ -109,11 +109,56 @@
             padding: 5px; 
             cursor:pointer; 
         }
+        .rotate-message {
+            background: #fffae6;
+            color: #665500;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #ffd700;  
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+/* Show only on small portrait devices */
+@media (max-width: 600px) and (orientation: portrait) {
+  #rotate-screen-message {
+    display: block !important;
+  }
+}
+
+/* Hide on landscape or larger screens */
+@media (orientation: landscape), (min-width: 601px) {
+  #rotate-screen-message {
+    display: none !important;
+  }
+}
     </style>
 </head>
 <body>
+
+ <script>
+        function checkOrientation() {
+        const msg = document.getElementById('rotate-screen-message');
+        if(window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches) {
+            msg.style.display = 'block';
+        } else {
+            msg.style.display = 'none';
+        }
+        }
+
+        // Check on load
+        window.addEventListener('load', checkOrientation);
+
+        // Check on orientation change
+        window.addEventListener('orientationchange', checkOrientation);
+    </script>
+    <div id="rotate-screen-message" class="rotate-message" style="display:none;">
+            📱 For better viewing, please rotate your device to <strong>landscape</strong> mode.
+    </div>
 <div class="header">
-    <img src="{% static 'images/logo.PNG' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
+    
+    <img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
     <h1>Billing System > ></h1>
 </div>
 <nav class="nav-links">
@@ -127,6 +172,22 @@
 
 
 <div style="margin-top: 10px;" class="add_form_div">
+
+    <div class="add-expense-form">
+    <h2>Add New Project</h2>
+    <form method="POST" action="{% url 'add_project' %}">
+        {% csrf_token %}
+        <input type="text" name="name" placeholder="Project Name" required>
+        <input type="text" name="client_name" placeholder="Client Name" required>
+        <input type="text" name="phone" placeholder="Client Phone Number" required>
+     
+        <button type="submit">Add Project</button>
+    </form>
+    
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+</div>
     
     <form method="post" action="{% url 'add_expense'  %}" class="add-expense-form">
         {% csrf_token %}
@@ -371,22 +432,8 @@
         {% endfor %}
     </tbody>
 </table>
-<div class="add-expense-form">
-    <h2>Add New Project</h2>
-    <form method="POST" action="{% url 'add_project' %}">
-        {% csrf_token %}
-        <input type="text" name="name" placeholder="Project Name" required>
-        <input type="text" name="client_name" placeholder="Client Name" required>
-        <input type="text" name="phone" placeholder="Client Phone Number" required>
-     
-        <button type="submit">Add Project</button>
-    </form>
-    
-    {% if error %}
-        <p style="color: red;">{{ error }}</p>
-    {% endif %}
-</div>
 
+   
 
 
 
