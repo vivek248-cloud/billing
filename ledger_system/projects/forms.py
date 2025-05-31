@@ -37,5 +37,14 @@ class DailyExpenseForm(forms.ModelForm):
             'description': forms.TextInput(attrs={'class': 'form-control'}),
             'remark': forms.TextInput(attrs={'class': 'form-control'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control'}),
-            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+            'date': forms.DateInput(
+                attrs={'class': 'form-control', 'type': 'date'},
+                format='%Y-%m-%d'  # This is crucial!
+            ),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Required so that initial date value is formatted correctly in the form field
+        if self.instance and self.instance.date:
+            self.fields['date'].initial = self.instance.date.strftime('%Y-%m-%d')
