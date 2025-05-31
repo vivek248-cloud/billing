@@ -1,1 +1,357 @@
+{% load static %}
+{% load extra_filters %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Daily Expense Statistics</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  :root {
+    --primary: #4f46e5;
+    --primary-light: #6366f1;
+    --text-dark: #1f2937;
+    --text-light: #6b7280;
+    --bg-light: #f9fafb;
+    --bg-main: #f3f4f6;
+    --white: #ffffff;
+  }
+
+  * {
+    box-sizing: border-box;
+  }
+
+  body {
+    font-family: 'Poppins', sans-serif;
+    background: var(--bg-main);
+    margin: 0;
+    padding: 20px;
+    color: var(--text-dark);
+  }
+
+  .container {
+    max-width: 1000px;
+    margin: auto;
+    background: var(--white);
+    padding: 30px 20px;
+    border-radius: 20px;
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.07);
+  }
+
+  h2 {
+    font-size: 2rem;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: var(--text-dark);
+  }
+
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 500;
+    margin: 30px 0 15px;
+    color: var(--text-dark);
+    border-left: 4px solid var(--primary);
+    padding-left: 12px;
+  }
+
+  p, li {
+    font-size: 1rem;
+    color: var(--text-light);
+    line-height: 1.6;
+  }
+
+  ul {
+    padding-left: 20px;
+    margin-bottom: 20px;
+  }
+
+  li {
+    margin-bottom: 8px;
+  }
+
+  .filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 30px;
+  }
+
+  .filter-form select,
+  .filter-form button {
+    padding: 10px 14px;
+    font-size: 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    background: var(--white);
+    color: var(--text-dark);
+    transition: all 0.3s ease;
+  }
+
+  .filter-form select:focus,
+  .filter-form button:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+  }
+
+  .filter-form button {
+    background: linear-gradient(to right, var(--primary-light), var(--primary));
+    color: var(--white);
+    border: none;
+    font-weight: 500;
+    cursor: pointer;
+  }
+
+  .filter-form button:hover {
+    opacity: 0.9;
+  }
+
+  canvas {
+    margin-top: 20px;
+    border-radius: 12px;
+    background: var(--bg-light);
+    padding: 15px;
+    width: 100%;
+  }
+ .nav-links ul {
+            padding-left: 18px;
+            width: 10%;
+            list-style: none;
+            text-align: center;
+        }
+       
+        .nav-links ul li {
+            margin-bottom: 8px;
+            background-color: #007BFF!important;
+            color: #ffffff;
+            padding: 8px;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        .nav-links ul li:hover {
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+            background-color: #0056b3;
+            transform: scale(1.05);
+        }
+        a{
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .arrow {
+            width: 20px;
+            height: 20px;
+            fill:rgb(255, 255, 255);
+            transform:rotate(90deg);
+            text-align: center;
+            margin-right: 8px;
+            margin-top: 3px;
+            transition: transform 0.3s ease, fill 0.3s ease;
+        }
+        .nav-links li:hover .arrow ,.nav-links li:active .arrow {
+        transform:rotate(-90deg);
+        fill:#ffffff !important;
+        color:#ffffff !important;
+    }
+
+  /* Responsive layout */
+  @media (max-width: 768px) {
+    .filter-form {
+      flex-direction: column;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    h3 {
+      font-size: 1.1rem;
+    }
+
+    .container {
+      padding: 20px 16px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .filter-form select,
+    .filter-form button {
+      font-size: 0.95rem;
+      padding: 10px 12px;
+    }
+  }
+</style>
+
+</head>
+<body>
+    <nav  class="nav-links">
+            <ul>
+                <a href="{% url 'billing' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Billing</li></a>
+                <a href="{% url 'daily_expense' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Daily Expense</li></a>
+            </ul>
+        </nav>
+  <div class="container">
+    <h2>📊 Daily Expenses Statistics</h2>
+
+    <p><strong>Total Spending:</strong> ₹{{ total_spending|floatformat:0 }}</p>
+    {% if selected_project %}
+        {% for project in projects %}
+            {% if project.id == selected_project %}
+            <p><strong>Project Budget:</strong> ₹{{ project_budgets|get_item:project.id|floatformat:2 }}</p>
+            {% endif %}
+        {% endfor %}
+    {% endif %}
+
+
+    <h3>📂 Spending by Category</h3>
+    <ul>
+      {% for item in category_data %}
+        <li>🟢 {{ item.category }}: ₹{{ item.total|floatformat:0 }}</li>
+      {% empty %}
+        <li>No data available</li>
+      {% endfor %}
+    </ul>
+
+    <form method="get" class="filter-form">
+      <select name="project_id">
+        <option value="">All Projects</option>
+        {% for project in projects %}
+          <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>
+            {{ project.client_name }}
+          </option>
+        {% endfor %}
+      </select>
+
+      <select name="start_month">
+        <option value="">All Start Months</option>
+        {% for m in months %}
+          <option value="{{ m }}" {% if selected_start_month == m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="end_month">
+        <option value="">All End Months</option>
+        {% for m in months %}
+          <option value="{{ m }}" {% if selected_end_month == m %}selected{% endif %}>{{ m }}</option>
+        {% endfor %}
+      </select>
+
+      <select name="year">
+        <option value="">All Years</option>
+        {% for y in years %}
+          <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
+        {% endfor %}
+      </select>
+
+      <button type="submit">Apply Filters</button>
+    </form>
+
+    {% for project in project_data %}
+        <h4>{{ project.project__client_name }} ({{ project.project__name }}) - ₹{{ project.total|floatformat:0 }}</h4>
+        <ul>
+            {% for expense in expenses|dict_get:project.project__id %}
+            <li>{{ expense.date }} - {{ expense.description }} : ₹{{ expense.amount }}</li>
+            {% empty %}
+            <li>No expenses recorded</li>
+            {% endfor %}
+        </ul>
+        {% empty %}
+        <p>No project spend data available.</p>
+    {% endfor %}
+
+
+
+    <div style="max-height:800px ;">
+        <h3>📈 Monthly Spending Trend</h3>
+        <canvas id="monthlyChart"></canvas>
+    </div>
+
+  </div>
+
+  <script>
+  const ctx = document.getElementById('monthlyChart').getContext('2d');
+
+  const chart = new Chart(ctx, {
+    type: 'line',
+    data: {
+    labels: {{ monthly_labels|safe }},
+    datasets: [{
+      label: 'Monthly Spending (₹)',
+      data: {{ monthly_totals|safe }},
+      fill: true,
+      borderColor: '#6366f1',
+      backgroundColor: 'rgba(99, 102, 241, 0.1)',
+      pointBackgroundColor: '#6366f1',
+      pointRadius: 6,
+      pointHoverRadius: 8,
+      tension: 0.4,
+    }]
+  },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      animation: {
+        duration: 1200,
+        easing: 'easeOutQuart'
+      },
+      scales: {
+        x: {
+          grid: {
+            display: false
+          },
+          ticks: {
+            color: '#6b7280',
+            font: {
+              family: 'Poppins'
+            }
+          }
+        },
+        y: {
+          beginAtZero: true,
+          ticks: {
+            stepSize: 500,
+            color: '#6b7280',
+            font: {
+              family: 'Poppins'
+            }
+          },
+          grid: {
+            color: '#e5e7eb'
+          }
+        }
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          labels: {
+            color: '#374151',
+            font: {
+              family: 'Poppins',
+              size: 14
+            }
+          }
+        },
+        tooltip: {
+          callbacks: {
+            label: function(context) {
+              return `₹${context.parsed.y.toLocaleString()}`;
+            }
+          },
+          backgroundColor: '#1f2937',
+          titleColor: '#fff',
+          bodyColor: '#d1d5db',
+          cornerRadius: 6,
+          padding: 10
+        }
+      }
+    }
+  });
+</script>
+
+</body>
+</html>
 
