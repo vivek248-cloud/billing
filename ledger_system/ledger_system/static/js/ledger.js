@@ -53,3 +53,17 @@ document.addEventListener("touchmove", (e) => {
 
   startInactivityTimer();  // Start on page load
 
+function checkOrientation() {
+  const msg = document.getElementById('rotate-screen-message');
+  if(window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches) {
+    msg.style.display = 'block';
+  } else {
+    msg.style.display = 'none';
+  }
+}
+
+// Check on load
+window.addEventListener('load', checkOrientation);
+
+// Check on orientation change
+window.addEventListener('orientationchange', checkOrientation);
