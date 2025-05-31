@@ -1,39 +1,5 @@
-
-
-
-{% comment %} <script>
-    // Disable right click
-    document.addEventListener('contextmenu', event => event.preventDefault());
-  
-    // Disable specific key combinations
-    document.addEventListener('keydown', function (event) {
-      if (event.keyCode == 123) { // F12
-        event.preventDefault();
-      }
-      if (event.ctrlKey && event.shiftKey && (event.keyCode == 73 || event.keyCode == 74)) {
-        // Ctrl+Shift+I or Ctrl+Shift+J
-        event.preventDefault();
-      }
-      if (event.ctrlKey && event.keyCode == 85) {
-        // Ctrl+U
-        event.preventDefault();
-      }
-    });
-  </script>
-   {% endcomment %}
-   {% comment %} <script>
-    (function() {
-      const threshold = 160;
-      setInterval(function() {
-        if (window.outerWidth - window.innerWidth > threshold || window.outerHeight - window.innerHeight > threshold) {
-          document.body.innerHTML = "<h1 style='text-align:center;margin-top:20%;'>Inspecting is Disabled</h1>";
-        }
-      }, 1000);
-    })();
-  </script> {% endcomment %}
-
-{% load extra_filters %}
 {% load static %}
+{% load extra_filters %}
 {% load humanize %}
 {% load indian_format %}
 
