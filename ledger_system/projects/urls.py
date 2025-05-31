@@ -52,6 +52,9 @@ urlpatterns = [
     path('remove_daily_expense/<int:expense_id>/', views.remove_daily_expense, name='remove_daily_expense'),
     # path('add_custom_project/', views.add_custom_project, name='add_custom_project'),
     path('remove-note/<int:expense_id>/', views.remove_notes, name='remove_notes'),
-    path('daily-expense',views.daily_report,name='daily_expense')
+    path('daily-expense',views.daily_report,name='daily_expense'),
+
+    path('daily-statistics/', views.daily_statistics, name='daily_statistics'),
+
 ]
 
