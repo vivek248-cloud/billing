@@ -262,11 +262,11 @@
         <tfoot>
         <tr class="total-row">
             <td colspan="4">Total Received</td>
-            <td colspan="2" class="rupees">{{ total_received|indian_currency }}</td>
+            <td colspan="2" class="rupees" style="text-align:right;">{{ total_received|indian_currency }}</td>
         </tr>
         <tr class="total-row">
             <td colspan="4">Yet to Receive</td>
-            <td colspan="2" class="rupees">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
+            <td colspan="2" class="rupees" style="text-align:right;">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
         </tr>
         </tfoot>
     </table>
