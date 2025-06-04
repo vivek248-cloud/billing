@@ -1,18 +1,3 @@
-# from django.urls import path
-# from . import views
-
-# urlpatterns = [
-#     path('home/', views.ProjectListView.as_view(), name='project_list'),
-#     path('projects/<int:pk>/', views.ProjectDetailView.as_view(), name='project_detail'),
-#     path('clients/', views.ClientListView.as_view(), name='client_list'),
-#     path('clients/<int:pk>/', views.ClientDetailView.as_view(), name='client_detail'),
-#     path('ledger/', views.ledger_view, name='ledger'),
-#     path('project/<int:project_id>/add-expense/', views.add_expense, name='add_expense'),
-#     path('expenses/<int:expense_id>/delete/', views.delete_expense, name='delete_expense'),
-#     path('projects/<int:project_id>/', views.ProjectDetailView.as_view(), name='project_detail'),
-#     path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
-
-# ]
 
 from django.urls import path
 from . import views
@@ -27,14 +12,23 @@ urlpatterns = [
 
 
     # client dashboard
-    path('client/<str:phone>/', views.client_dashboard, name='client_dashboard'),
+    path('client/dashboard/<str:phone>/', views.client_dashboard, name='client_dashboard'),
+
 
     # update project status
     path('project/<int:project_id>/update-status/', views.update_project_status, name='update_project_status'),
 
+    path('client/<int:project_id>/', views.client_details, name='client_details'),
+
+    # Payment Invoice
+    path('payment-invoice/<int:payment_id>/', views.payment_invoice, name='payment_invoice'),
+
+
+    path('expense/edit/<int:expense_id>/', views.edit_expense, name='edit_expense'),
+    path('expense/delete/<int:expense_id>/', views.delete_expense, name='delete_expense'),
 
     path('billing/', views.project_billing, name='billing'),
-    path('add_expense/', views.add_expense, name='add_expense'),
+    path('add-expense/', views.add_expense, name='add_expense'),
     path('add_project/', views.add_project, name='add_project'),
     path('remove_expense/<int:expense_id>/', views.remove_expense, name='remove_expense'),
     path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
