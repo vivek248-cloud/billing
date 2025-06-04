@@ -113,7 +113,8 @@ def client_login(request):
         except Project.DoesNotExist:
             error = "Invalid username or password."
 
-    retur
+    return render(request, 'projects/client_login.html', {'error': error})
+
 
 
 
