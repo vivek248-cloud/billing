@@ -10,9 +10,8 @@
     <title>Invoice - {{ project.client_name }} ({{ invoice_date }})</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
    <!-- Add this to <head> -->
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
 <style>
     body {
@@ -81,7 +80,6 @@
 
     th {
         background-color: #f0f0f0;
-        color:#000;
         font-weight: 600;
         border-top: 2px solid #333;
         border-bottom: 2px solid #333;
@@ -184,6 +182,66 @@
         display: none;
     }
 }
+/* RESPONSIVE STYLES */
+@media screen and (max-width: 768px) {
+    .invoice-box {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .top-section h1 {
+        font-size: 28px;
+        text-align: center;
+    }
+
+    .invoice-meta {
+        float: none;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .invoice-meta h1 {
+        font-size: 36px;
+    }
+
+    .top-section img {
+        height: 100px;
+        display: block;
+        margin: 0 auto 10px auto;
+    }
+
+    table th, table td {
+        font-size: 12px;
+        padding: 6px 4px;
+    }
+
+    .payment-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signature, .qr-sign {
+        width: 100%;
+        text-align: center;
+    }
+
+    .qr-code {
+        margin-bottom: 20px;
+    }
+
+    .notes ol {
+        padding-left: 20px;
+        font-size: 12px;
+    }
+
+    .no-print button,
+    .no-print a {
+        display: inline-block;
+        width: 90%;
+        margin: 8px auto;
+        font-size: 15px;
+    }
+}
 
 </style>
 
@@ -198,7 +256,7 @@
             <p><strong>Invoice No:</strong> {{ invoice_number }}</p>
             <p><strong>Date:</strong> {{ invoice_date }}</p>
         </div>
-        <img src="{% static 'images/logo.PNG' %}"  alt="Company Logo" style="height: 180px; margin-bottom: 10px;">
+        <img src="{{ logo_url }}" alt="Company Logo" style="height: 180px; margin-bottom: 10px;">
         <h1>THE ELITE DREAM BUILDERS</h1>
         <p>NO.9, MSK BUILDING 1ST FLOOR, GANESHNAGAR, KATTUR, TRICHY-19</p>
         <p>GSTIN: 33AKTPH2053F1ZC | www.elitedreambuilders.in</p>
@@ -208,68 +266,72 @@
     <p><strong>Client Name:</strong> <strong>{{ project.client_name }}</strong></p>
 
     <p class="section-title">PROJECT SUMMARY</p>
-    <table>
-        <thead>
-        <tr>
-            <th>Description</th>
-            <th>Area</th>
-            <th>Unit</th>
-            <th>Rate/Unit</th>
-            <th>Total</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for expense in expenses %}
-            <tr>
-                <td>{{ expense.description }}</td>
-                <td class="rupees">{{ expense.area }}</td>
-                <td class="rupees">{{ expense.unit }}</td>
-                <td class="rupees">{{ expense.rate|indian_currency }}</td>
-                <td class="rupees">{{ expense.amount|indian_currency }}</td>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+            <tr class="highlight-td">
+                <th>Description</th>
+                <th>Area</th>
+                <th>Unit</th>
+                <th>Rate/Unit</th>
+                <th>Total</th>
             </tr>
-        {% endfor %}
-        <tr class="total-row">
-            <td colspan="4">Total Expense</td>
-            <td class="rupees">{{ total_expense|indian_currency }}</td>
-        </tr>
-        </tbody>
-    </table>
-
+            </thead>
+            <tbody>
+            {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.description }}</td>
+                    <td class="rupees">{{ expense.area }}</td>
+                    <td class="rupees">{{ expense.unit }}</td>
+                    <td class="rupees">{{ expense.rate|indian_currency }}</td>
+                    <td class="rupees">{{ expense.amount|indian_currency }}</td>
+                </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="4">Total Expense</td>
+                <td class="rupees">{{ total_expense|indian_currency }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
     <p class="section-title">PAYMENT DETAILS</p>
-    <table>
-        <thead>
-        <tr class="highlight-td">
-            <th>Date</th>
-            <th>Total Amount</th>
-            <th>Previously Received</th>
-            <th>Now Received</th>
-            <th>Balance</th>
-            <th>Payment Mode</th>
-        </tr>
-        </thead>
-        <tbody>
-        {% for row in payment_rows %}
-            <tr>
-                <td>{{ row.date }}</td>
-                <td class="rupees">{{ project|total_budget_with_expense|indian_currency }}</td>
-                <td class="rupees">{% if forloop.first %}-{% else %}{{ row.cumulative_paid_before|indian_currency }}{% endif %}</td>
-                <td class="rupees">{{ row.amount|indian_currency }}</td>
-                <td class="rupees">{{ row.remaining_after_payment|indian_currency }}</td>
-                <td>{{ row.payment_mode|title }}</td>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+            <tr class="highlight-td">
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Previously Received</th>
+                <th>Now Received</th>
+                <th>Balance</th>
+                <th>Payment Mode</th>
             </tr>
-        {% endfor %}
-        </tbody>
-        <tfoot>
-        <tr class="total-row">
-            <td colspan="4">Total Received</td>
-            <td colspan="2" class="rupees" style="text-align:right;">{{ total_received|indian_currency }}</td>
-        </tr>
-        <tr class="total-row">
-            <td colspan="4">Yet to Receive</td>
-            <td colspan="2" class="rupees" style="text-align:right;">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
-        </tr>
-        </tfoot>
-    </table>
+            </thead>
+            <tbody>
+            {% for row in payment_rows %}
+                <tr>
+                    <td>{{ row.date }}</td>
+                    <td class="rupees">{{ project|total_budget_with_expense|indian_currency }}</td>
+                    <td class="rupees">{% if forloop.first %}-{% else %}{{ row.cumulative_paid_before|indian_currency }}{% endif %}</td>
+                    <td class="rupees">{{ row.amount|indian_currency }}</td>
+                    <td class="rupees">{{ row.remaining_after_payment|indian_currency }}</td>
+                    <td>{{ row.payment_mode|title }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr class="total-row">
+                <td colspan="2">Total Received</td>
+                <td colspan="4" class="rupees">{{ total_received|indian_currency }}</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="2">Yet to Receive</td>
+                <td colspan="4" class="rupees">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
 
     {% if expenses %}
     <div class="notes">
