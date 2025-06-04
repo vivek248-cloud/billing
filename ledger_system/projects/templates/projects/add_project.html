@@ -23,5 +23,10 @@
     </div>
     <button type="submit" class="btn btn-success">Add Project</button>
   </form>
+  {% for project in projects %}
+  <ul>
+    <li style="text-decoration:none; list-style:none;">{{ forloop.counter }}. {{ project.name }} - {{ project.client_name }} ({{ project.phone }})</li>
+  </ul>
+  {% endfor %}
 </div>
 {% endblock %}
