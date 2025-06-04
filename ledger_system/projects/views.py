@@ -287,6 +287,7 @@ def payment_invoice(request, payment_id):
 
 # add_project
 def add_project(request):
+    projects = Project.objects.all().order_by('id')
     error = None
 
     if request.method == 'POST':
@@ -324,7 +325,7 @@ def add_project(request):
                 except Exception as e:
                     error = f"Error creating project: {str(e)}"
 
-    return render(request, 'projects/add_project.html', {'error': error})
+    return render(request, 'projects/add_project.html', {'error': error, 'projects': projects})
 
 
 
