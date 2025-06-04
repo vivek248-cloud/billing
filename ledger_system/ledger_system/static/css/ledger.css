@@ -8,7 +8,6 @@ html
 }
 body {
     margin: 0;
-    padding: 20px;
     background: linear-gradient(135deg, #e0eafc, #cfdef3);
     
 }
@@ -20,10 +19,8 @@ h1, h2 {
 
 
 .main-table {
-    width: 100%;
+   
     table-layout: fixed;
-    /* position: sticky;
-    top: 0; */
     overflow:scroll;
     z-index: 1;
 }
@@ -42,13 +39,7 @@ h1, h2 {
     word-wrap: break-word;
     border: 1px solid #ccc;
 }
-.main-table td {
-    padding: 8px;
-    text-align: center;
-    vertical-align: middle;
-    word-wrap: break-word;
-    
-}
+
 .right-align
 {
     padding: 7px;
@@ -67,12 +58,7 @@ table {
     overflow-x: auto;
 }
 
-th, td {
-    padding: 12px 15px;
-    text-align: left;
-    /* border-bottom: 1px solid #eee; */
-    border: 1px solid #ddd;
-}
+
 
 th {
     background-color: #1f2937;
@@ -178,34 +164,7 @@ button[type="submit"] {
 }
 
 /* Status-specific colors */
-.status-dot.not-started {
-  background-color: #f59e0b; /* Amber */
-}
-.status-dot.in-progress {
-  background-color: #3b82f6; /* Blue */
-}
-.status-dot.completed {
-  background-color: #10b981; /* Green */
-}
-.status-dot.on-hold {
-  background-color: #ef4444; /* Red */
-}
 
-/* Pulse animation */
-@keyframes pulse {
-  0% {
-    transform: scale(0.9);
-    opacity: 0.7;
-  }
-  50% {
-    transform: scale(1.2);
-    opacity: 1;
-  }
-  100% {
-    transform: scale(0.9);
-    opacity: 0.7;
-  }
-}
 
 .status-text {
   font-weight: 600;
@@ -236,7 +195,7 @@ button[type="submit"] {
 }
 
 .btn-status-update::after {
-  content: '→';
+  content: '';
   position: absolute;
   right: 12px;
   opacity: 0;
@@ -274,7 +233,10 @@ button[type="submit"] {
   background-color: green;
   box-shadow: 0 0 6px rgba(0, 128, 0, 0.5);
 }
-
+.status-dot.on-hold {
+  background-color: rgb(0, 0, 0);
+  box-shadow: 0 0 6px rgba(80, 80, 80, 0.5);
+}
 @keyframes pulseBlink {
   0% {
     transform: scale(1);
@@ -336,7 +298,7 @@ form input[type="text"], form input[type="number"] , form input[type="date"],sel
 }
 
 
-ul {
+/* ul {
     padding-left: 18px;
     width: 10%;
     list-style: none;
@@ -353,7 +315,7 @@ ul li:hover {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
     background-color: #0056b3;
     transform: scale(1.05);
-}
+} */
 a{
     text-decoration: none;
     color: #ffffff;
@@ -498,7 +460,7 @@ select[name="project"]:focus {
 
 @media (max-width: 768px) {
     body {
-        padding: 10px;
+        padding: 0px;
     }
 
     .main-table {
@@ -671,4 +633,83 @@ select[name="project"]:focus {
         justify-content: center;
         gap: 10px;
     }
+}
+
+
+.rotate-message {
+  background: #fffae6;
+  color: #665500;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #ffd700;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+/* Show only on small portrait devices */
+@media (max-width: 600px) and (orientation: portrait) {
+  #rotate-screen-message {
+    display: block !important;
+  }
+}
+
+/* Hide on landscape or larger screens */
+@media (orientation: landscape), (min-width: 601px) {
+  #rotate-screen-message {
+    display: none !important;
+  }
+}
+
+
+
+
+
+
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #1f1f1f;
+  padding: 1rem 2rem;
+  color: #fff;
+}
+.logo {
+  font-weight: bold;
+  font-size: 1.5rem;
+}
+.nav-menu {
+  display: flex;
+  gap: 1.5rem;
+  list-style: none;
+}
+.nav-menu a {
+  color: white;
+  text-decoration: none;
+  font-weight: 500;
+}
+.nav-menu a:hover {
+  color: #facc15; /* yellow */
+}
+.hamburger {
+  display: none;
+  font-size: 2rem;
+  cursor: pointer;
+}
+
+@media (max-width: 768px) {
+  .nav-menu {
+    display: none;
+    flex-direction: column;
+    background-color: #1f1f1f;
+    position: absolute;
+    top: 70px;
+    right: 0;
+    width: 200px;
+    padding: 1rem;
+  }
+  .hamburger {
+    display: block;
+  }
 }
