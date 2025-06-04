@@ -90,14 +90,15 @@ from django.shortcuts import redirect
 def client_login(request):
     error = ""
     if request.method == 'POST':
-        uname = request.POST['username'].lower()
+        uname = request.POST['username']
         pwd = request.POST['password']
 
         try:
-            project = Project.objects.get(client_name=uname, phone=pwd)
+            # Use __iexact for case-insensitive username matching
+            project = Project.objects.get(client_name__iexact=uname, phone=pwd)
             request.session['client_project_id'] = project.id
 
-            response = redirect('client_dashboard', phone=project.phone)  # ✅ create response first
+            response = redirect('client_dashboard', phone=project.phone)
 
             # ✅ Remember Me logic
             if 'remember_me' in request.POST:
@@ -107,12 +108,13 @@ def client_login(request):
                 response.delete_cookie('saved_username')
                 response.delete_cookie('saved_password')
 
-            return response  # ✅ return after cookies set
+            return response
 
         except Project.DoesNotExist:
             error = "Invalid username or password."
 
-    return render(request, 'projects/client_login.html', {'error': error})
+    retur
+
 
 
 # client_dashboard
