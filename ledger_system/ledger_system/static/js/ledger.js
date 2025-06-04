@@ -1,11 +1,19 @@
-function togglePassword() {
-    const passwordField = document.getElementById("passwordField");
-    const eyeIcon = document.getElementById("eyeIcon");
-    const isPassword = passwordField.type === "password";
 
-    passwordField.type = isPassword ? "text" : "password";
-    eyeIcon.textContent = isPassword ? "🚫" : "👁️";  // Toggle icon
-  }
+
+function togglePassword() {
+      const passwordInput = document.getElementById("passwordField");
+      const eyeIcon = document.getElementById("eyeIcon");
+
+      if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        eyeIcon.classList.remove("fa-eye");
+        eyeIcon.classList.add("fa-eye-slash");
+      } else {
+        passwordInput.type = "password";
+        eyeIcon.classList.remove("fa-eye-slash");
+        eyeIcon.classList.add("fa-eye");
+      }
+    }
 
   
 
