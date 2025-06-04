@@ -1,8 +1,5 @@
 from django.shortcuts import redirect
 
-
-
-
 class BlockUnauthorizedMiddleware:
     def __init__(self, get_response):
         self.get_response = get_response
@@ -29,7 +26,7 @@ class BlockUnauthorizedMiddleware:
         # Admin not logged in
         if not request.session.get('admin_logged_in') and not request.session.get('user_logged_in'):
             if path not in allowed_paths:
-                return redirect('/home/')
+                return redirect('/admin-login/')
 
         # Prevent login pages after logged in
         elif path in ['/admin-login/', '/client/login/']:
