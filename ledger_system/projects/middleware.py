@@ -16,6 +16,8 @@ class BlockUnauthorizedMiddleware:
         if path.startswith('/projects/') and path.endswith('/download_invoice/'):
             return self.get_response(request)
         
+        if path.startswith('/logout/'):
+            return self.get_response(request)
 
         # Allow payment invoice for clients
         if path.startswith('/client/dashboard/'):
