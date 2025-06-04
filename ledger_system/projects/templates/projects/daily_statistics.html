@@ -1,3 +1,6 @@
+{% extends "projects/base.html" %}
+{% block title %}Daily Report{% endblock %}
+{% block content %}
 {% load static %}
 {% load extra_filters %}
 
@@ -29,7 +32,7 @@
     font-family: 'Poppins', sans-serif;
     background: var(--bg-main);
     margin: 0;
-    padding: 20px;
+    padding: 0px;
     color: var(--text-dark);
   }
 
@@ -192,12 +195,6 @@
 
 </head>
 <body>
-    <nav  class="nav-links">
-            <ul>
-                <a href="{% url 'billing' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Billing</li></a>
-                <a href="{% url 'daily_expense' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Daily Expense</li></a>
-            </ul>
-        </nav>
   <div class="container">
     <h2>📊 Daily Expenses Statistics</h2>
 
@@ -222,7 +219,7 @@
 
     <form method="get" class="filter-form">
       <select name="project_id">
-        <option value="">All Projects</option>
+        <option value="">All Clients</option>
         {% for project in projects %}
           <option value="{{ project.id }}" {% if project.id == selected_project %}selected{% endif %}>
             {{ project.client_name }}
@@ -356,6 +353,6 @@
     }
   });
 </script>
-
+{% endblock %}
 </body>
 </html>
