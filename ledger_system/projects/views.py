@@ -1,4 +1,4 @@
-
+from urllib.parse import urlencode
 
 from django.db.models import Sum
 from decimal import Decimal
@@ -69,8 +69,8 @@ def admin_login(request):
 
             # Fix: Use consistent keys and save cookies only if "remember_me" checked
             if 'remember_me' in request.POST:
-                response.set_cookie('admin_username', username, max_age=2592000) # 30 days
-                response.set_cookie('admin_password', password, max_age=2592000) # 30 days
+                response.set_cookie('admin_username', username, max_age=604800) # 7 days
+                response.set_cookie('admin_password', password, max_age=604800) # 7 days
             else:
                 response.delete_cookie('admin_username')
                 response.delete_cookie('admin_password')
@@ -85,16 +85,19 @@ def admin_login(request):
 
 
 # client_login
+from django.shortcuts import redirect
+
 def client_login(request):
     error = ""
     if request.method == 'POST':
         uname = request.POST['username']
-        pwd   = request.POST['password']
+        pwd = request.POST['password']
 
         try:
             project = Project.objects.get(client_name=uname, phone=pwd)
             request.session['client_project_id'] = project.id
-            response = render(request, 'projects/client_dashboard.html', {'project': project})
+
+            response = redirect('client_dashboard', phone=project.phone)  # ✅ create response first
 
             # ✅ Remember Me logic
             if 'remember_me' in request.POST:
@@ -104,28 +107,69 @@ def client_login(request):
                 response.delete_cookie('saved_username')
                 response.delete_cookie('saved_password')
 
-            return response
+            return response  # ✅ return after cookies set
 
         except Project.DoesNotExist:
             error = "Invalid username or password."
 
     return render(request, 'projects/client_login.html', {'error': error})
 
+
 # client_dashboard
+
 def client_dashboard(request, phone):
-    # Get all projects associated with this phone number
     project = Project.objects.filter(phone=phone).first()
-    expenses = Expense.objects.filter(project=project)
+
+    if not project:
+        return HttpResponseForbidden("Project not found.")
+    
     if request.session.get('client_project_id') != project.id:
         return HttpResponseForbidden("Access denied.")
-    
+
+    expenses = Expense.objects.filter(project=project)
+    payments = Payment.objects.filter(project=project).order_by('date')
+     
+    print("Payments:", list(payments))
+
+    total_expense = sum(exp.amount for exp in expenses)
+    budget = project.budget or Decimal('0')
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+
+    for payment in payments:
+        amount = Decimal(str(payment.amount))
+        cumulative_paid += amount
+        payment_rows.append({
+            'payment_obj': payment,
+            'id': payment.id,
+            'date': payment.date,
+            'amount': amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+        })
+        cumulative_paid_before = cumulative_paid
+
+    remaining = budget - total_expense
+    remaining_after_payment = remaining - cumulative_paid
+
     context = {
-    'project': project,
-    'phone': phone,
-    'client_name': project.client_name if project else '',
-    'expenses': expenses,
+        'project': project,
+        'phone': phone,
+        'client_name': project.client_name,
+        'expenses': expenses,
+        'payment_rows': payment_rows,
+        'total_paid': cumulative_paid,
+        'remaining': remaining,
+        'remaining_after_payment': remaining_after_payment
     }
+
     return render(request, 'projects/client_dashboard.html', context)
+
+
+
 
 # logout_view
 def logout_view(request):
@@ -141,60 +185,202 @@ from django.contrib.auth.decorators import login_required
 def project_billing(request):
     projects = Project.objects.all()
     if not request.session.get('admin_logged_in'):
-        return redirect('/home/')
+        return redirect('/admin_login/')
     return render(request, 'projects/billing.html', {'projects': projects})
+
+from django.shortcuts import get_object_or_404
+
+from decimal import Decimal
+from django.db.models import Sum
+
+def client_details(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    expenses = Expense.objects.filter(project=project)
+    payments = Payment.objects.filter(project=project).order_by('date')
+
+    total_expense = sum(exp.amount for exp in expenses)
+    budget = project.budget or Decimal('0')
+    remaining = budget - total_expense
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+    
+    for payment in payments:
+        amount = Decimal(str(payment.amount))
+        cumulative_paid += amount
+        payment_rows.append({
+            'payment_obj': payment,  # full object here
+            'date': payment.date,
+            'amount': amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+        })
+        cumulative_paid_before = cumulative_paid
+
+    context = {
+        'project': project,
+        'expenses': expenses,
+        'total_expense': total_expense,
+        'remaining': remaining,
+        'payment_rows': payment_rows,
+        'total_paid': cumulative_paid,  # ✅ Added here
+    }
+
+    return render(request, 'projects/client_details.html', context)
+
+def payment_invoice(request, payment_id):
+    payment = get_object_or_404(Payment, id=payment_id)
+    project = payment.project
+
+    invoice_number = f"INV-{project.id}-{payment.id}-{payment.date.strftime('%Y%m%d')}"
+    invoice_date = payment.date.strftime('%d-%m-%Y')
+    payments = Payment.objects.filter(project=project).order_by('date')
+    expenses = Expense.objects.filter(project=project)
+
+    # Calculate cumulative payments and build payment_rows
+    cumulative_paid = Decimal('0.00')
+    payment_rows = []
+    for pay in payments:
+        amount = Decimal(str(pay.amount))
+        if pay.id == payment.id:
+            remaining_after = (project.budget + project.total_expenses) - (cumulative_paid + amount)
+            payment_rows.append({
+                'date': pay.date,
+                'amount': amount,
+                'cumulative_paid_before': cumulative_paid,
+                'remaining_after_payment': remaining_after,
+                'payment_mode': pay.payment_mode,
+            })
+            break
+        payment_rows.append({
+            'date': pay.date,
+            'amount': amount,
+            'cumulative_paid_before': cumulative_paid,
+            'remaining_after_payment': (project.budget + project.total_expenses) - (cumulative_paid + amount),
+            'payment_mode': pay.payment_mode,
+        })
+        cumulative_paid += amount
+
+    # Compute total expenses
+    total_expense = sum([expense.amount for expense in expenses])
+    total_received = sum([p.amount for p in payments])
+    yet_to_receive = (project.budget + total_expense) - Decimal(total_received)
+
+
+    context = {
+        'payment': payment,
+        'project': project,
+        'expenses': expenses,
+        'total_expense': total_expense,
+        'payment_rows': payment_rows,
+        'total_received': total_received,
+        'yet_to_receive': yet_to_receive,
+        'logo_url': '/static/images/logo.png',  # Adjust if you have a dynamic logo path
+        'invoice_number': invoice_number,
+        'invoice_date': invoice_date,
+    }
+
+    return render(request, 'projects/payment_invoice.html', context)
 
 
 # add_project
 def add_project(request):
+    error = None
+
     if request.method == 'POST':
-        name = request.POST.get('name')
+        name = request.POST.get('name').strip()
         client_name = request.POST.get('client_name')
-        phone = request.POST.get('phone')
-        
-        # Get budget and estimated cost from the form data
-        budget = request.POST.get('budget', '0.00')  # Default to '0.00' if not provided
-        estimated_cost = request.POST.get('estimated_cost', '0.00')  # Default to '0.00' if not provided
+        phone = request.POST.get('phone').strip()
+        budget = request.POST.get('budget', '0.00')
+        estimated_cost = request.POST.get('estimated_cost', '0.00')
 
-        # Ensure that budget and estimated cost are valid Decimals
-        try:
-            budget = Decimal(budget)
-            estimated_cost = Decimal(estimated_cost)
-        except ValueError:
-            return render(request, 'projects/add_project.html', {'error': 'Invalid budget or estimated cost'})
+        # Check for duplicate name
+        if Project.objects.filter(name=name).exists():
+            error = f"A project with name '{name}' already exists."
+        # Check for duplicate phone
+        elif Project.objects.filter(phone=phone).exists():
+            error = f"A project with phone number '{phone}' already exists."
+        else:
+            # Validate budget and estimated cost
+            try:
+                budget = Decimal(budget)
+                estimated_cost = Decimal(estimated_cost)
+            except Exception:
+                error = "Invalid budget or estimated cost."
 
-        # Create the project
-        try:
-            Project.objects.create(
-                name=name,
-                client_name=client_name,
-                budget=budget,
-                estimated_cost=estimated_cost,
-                phone=phone
-            )
-            return redirect('billing')
-        except Exception as e:
-            return render(request, 'projects/billing.html', {'error': f"Error creating project: {str(e)}"})
+            # Create project if no errors
+            if not error:
+                try:
+                    Project.objects.create(
+                        name=name,
+                        client_name=client_name,
+                        phone=phone,
+                        budget=budget,
+                        estimated_cost=estimated_cost
+                    )
+                    return redirect('billing')
+                except Exception as e:
+                    error = f"Error creating project: {str(e)}"
 
-    return render(request, 'projects/billing.html')
+    return render(request, 'projects/add_project.html', {'error': error})
 
 
 
 
 # add_expense
-def add_expense(request):
+from .forms import ExpenseForm2  # Assuming you have this
+
+from decimal import Decimal
+from django.db.models import Sum
+from django.shortcuts import render, get_object_or_404, redirect
+from .models import Project, Expense
+from .forms import ExpenseForm2
+
+def add_expense(request, project_id=None):
+    success = False
+    selected_project_id = None
+    total_expense = Decimal('0.00')  # default
+
     if request.method == 'POST':
         project_id = request.POST.get('project')
+        selected_project_id = project_id
         project = get_object_or_404(Project, id=project_id)
-        
+
         form = ExpenseForm2(request.POST)
         if form.is_valid():
             expense = form.save(commit=False)
             expense.project = project
-            expense.date = request.POST.get('date') or timezone.now().date()
-            expense.amount = form.cleaned_data['amount']  # calculated in form
+            expense.amount = form.cleaned_data['area'] * form.cleaned_data['rate']
             expense.save()
-    return redirect('billing')
+            success = True
+            return redirect(f"{request.path}?success=1&project={selected_project_id}")
+    else:
+        form = ExpenseForm2()
+        selected_project_id = request.GET.get('project')
+
+    # Get expenses and total expense if a project is selected
+    if selected_project_id:
+        expenses = Expense.objects.filter(project_id=selected_project_id).order_by('-date')
+        total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+    else:
+        expenses = Expense.objects.none()
+
+    projects = Project.objects.all()
+
+    if request.GET.get('success'):
+        success = True
+
+    return render(request, 'projects/add_expense.html', {
+        'projects': projects,
+        'form': form,
+        'success': success,
+        'expenses': expenses,
+        'total_expense': total_expense,
+        'selected_project_id': int(selected_project_id) if selected_project_id else None,
+    })
+
 
 # remove_expense
 def remove_expense(request, expense_id):
@@ -211,50 +397,81 @@ def remove_notes(request, expense_id):
 
 # invoice_view
 def invoice_view(request, project_id):
+    print(f"Download invoice called for project_id: {project_id}")
+
     project = get_object_or_404(Project, id=project_id)
-    
-    # Fetch the expenses related to the project
-    expenses = Expense.objects.filter(project=project)
-    
-    cumulative_paid = 0
+    print(f"Project found: {project.name}")
 
-    # Debugging: Print expenses to check the data
-    print(expenses)  # Check if this prints the correct expenses data in the terminal
+    # Check permissions
+    if request.user.is_authenticated and request.user.is_staff:
+        allowed = True
+        print(f"User {request.user.username} is staff, allowed to download.")
+    else:
+        # Check client session
+        session_project_id = request.session.get('client_project_id')
+        allowed = (session_project_id == project.id)
+        print(f"Session project id: {session_project_id}, Allowed: {allowed}")
 
-    # Calculate total expense
-    total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
-    
-    # Fetch payment details (assuming you have a model for payments)
-    payment_rows = project.payments.all()  # Adjust this if the relation is different
-    total_received = payment_rows.aggregate(Sum('amount'))['amount__sum'] or 0
-    yet_to_receive = total_expense - total_received
-    
-    # Prepare context data
+    if not allowed:
+        print("Access denied.")
+        return HttpResponse("Access Denied", status=403)
+
+    logo_url = request.build_absolute_uri(static('images/logo.PNG'))
+
+    # Query expenses
+    expense_rows = Expense.objects.filter(project=project)
+    total_expense = Decimal(expense_rows.aggregate(Sum('amount'))['amount__sum'] or 0)
+    print(f"Total expense: {total_expense}")
+
+    # Query payments
+    raw_payments = Payment.objects.filter(project=project).order_by('date')
+    total_received = Decimal(raw_payments.aggregate(Sum('amount'))['amount__sum'] or 0)
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+
+    latest_payment = Payment.objects.filter(project=project).order_by('-date').first()
+
+    if latest_payment:
+        invoice_number = f"INV-{project.id}-{latest_payment.id}-{latest_payment.date.strftime('%Y%m%d')}"
+        invoice_date = latest_payment.date.strftime('%d-%m-%Y')
+    else:
+        invoice_number = f"INV-{project.id}-0000"
+        invoice_date = datetime.now().strftime('%d-%m-%Y')
+
+    for payment in raw_payments:
+        payment_amount = Decimal(str(payment.amount))
+        cumulative_paid += payment_amount
+        row = {
+            'date': payment.date,
+            'amount': payment_amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (Decimal(project.budget) + total_expense) - cumulative_paid
+        }
+        cumulative_paid_before = cumulative_paid
+        payment_rows.append(row)
+
+    yet_to_receive = (Decimal(project.budget) + total_expense) - cumulative_paid
+    current_date = datetime.now().strftime('%Y-%m-%d')
+
     context = {
         'project': project,
-        'expenses': expenses,
-        'total_expense': total_expense,
+        'expenses': expense_rows,
         'payment_rows': payment_rows,
+        'total_expense': total_expense,
         'total_received': total_received,
-        'yet_to_receive': yet_to_receive
+        'yet_to_receive': yet_to_receive,
+        'date': current_date,
+        'logo_url': logo_url,
+        'invoice_number': invoice_number,
+        'invoice_date': invoice_date,
     }
+
     
-    # Render the HTML template to a string
-    template = get_template('projects/invoice.html')
-    html = template.render(context)
-    
-    # Convert HTML to PDF
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{project.id}.pdf"'
-    
-    # Use xhtml2pdf to generate the PDF
-    pisa_status = pisa.CreatePDF(html, dest=response)
-    
-    # If error occurs, return an error message
-    if pisa_status.err:
-        return HttpResponse('We had some errors while generating the PDF.')
-    
-    return response
+
+    return render(request, 'projects/invoice.html', context)
 
 
 # download_invoice
@@ -263,6 +480,15 @@ def download_invoice(request, project_id):
 
     project = get_object_or_404(Project, id=project_id)
     print(f"Project found: {project.name}")
+
+    latest_payment = Payment.objects.filter(project=project).order_by('-date').first()
+
+    if latest_payment:
+        invoice_number = f"INV-{project.id}-{latest_payment.id}-{latest_payment.date.strftime('%Y%m%d')}"
+        invoice_date = latest_payment.date.strftime('%d-%m-%Y')
+    else:
+        invoice_number = f"INV-{project.id}-0000"
+        invoice_date = datetime.now().strftime('%d-%m-%Y')
 
     # Check permissions
     if request.user.is_authenticated and request.user.is_staff:
@@ -318,6 +544,8 @@ def download_invoice(request, project_id):
         'yet_to_receive': yet_to_receive,
         'date': current_date,
         'logo_url': logo_url,
+        'invoice_number': invoice_number,
+        'invoice_date': invoice_date,
     }
 
     template = get_template('projects/invoice.html')
@@ -337,21 +565,29 @@ def download_invoice(request, project_id):
 # edit_payment
 def edit_payment(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
-    projects = Project.objects.all()  # Fetch all projects for the dropdown
+    projects = Project.objects.all()
     
     if request.method == 'POST':
         amount = request.POST.get('amount')
         payment_method = request.POST.get('payment_mode')
-        project_id = request.POST.get('project')  # Optionally handle project change
-        
+        project_id = request.POST.get('project')
+
         if amount and payment_method:
-            payment.amount = amount
-            payment.payment_method = payment_method
-            if project_id:  # Optionally update the project if the dropdown is used
-                payment.project = Project.objects.get(id=project_id)
-            payment.save()
-            return redirect('billing')  # Or your main billing view name
-    
+            try:
+                payment.amount = float(amount)
+                payment.payment_method = payment_method
+
+                if project_id and int(project_id) != payment.project.id:
+                    payment.project = Project.objects.get(id=project_id)
+
+                payment.save()
+                messages.success(request, "Payment updated successfully.")
+                return redirect('client_details' , project_id=payment.project.id)
+            except (ValueError, Project.DoesNotExist):
+                messages.error(request, "Invalid input. Please check again.")
+        else:
+            messages.error(request, "Amount and payment method are required.")
+
     return render(request, 'projects/edit_payment.html', {
         'payment': payment,
         'projects': projects,
@@ -361,29 +597,103 @@ def edit_payment(request, payment_id):
 # delete_payment
 def delete_payment(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
-    project_id = payment.project.id  # to redirect back if needed
     if request.method == 'POST':
         payment.delete()
-        return redirect('billing')  # your billing page name
-    return redirect('billing')  # fallback
+        messages.success(request, "Payment deleted successfully.")
+    return redirect('add_payment')
 
 
-# add_payment
+from decimal import Decimal
+from django.db.models import Sum
+from django.contrib import messages
+from django.utils import timezone
+from .models import Project, Payment  # Adjust this import as per your structure
+
 def add_payment(request):
+    projects = Project.objects.all()
+    selected_project_id = None
+    total_paid = Decimal('0')
+    amount_remaining = Decimal('0')
+    project = None  # ✅ Initialize to avoid UnboundLocalError
+
     if request.method == 'POST':
         project_id = request.POST.get('project')
         amount = request.POST.get('amount')
         payment_mode = request.POST.get('payment_mode')
 
-        if project_id and amount and payment_mode:
-            project = get_object_or_404(Project, id=project_id)
-            Payment.objects.create(
-                project=project,
-                amount=amount,
-                payment_mode=payment_mode,
-                date=timezone.now().date()
-            )
-    return redirect('billing')
+        if project_id and not amount and not payment_mode:
+            # Just a dropdown selection
+            try:
+                project = Project.objects.get(id=project_id)
+                selected_project_id = project.id
+                total_paid_raw = project.payments.aggregate(total=Sum('amount'))['total']
+                total_paid = Decimal(str(total_paid_raw)) if total_paid_raw is not None else Decimal('0')
+                budget = project.budget or Decimal('0')
+                amount_remaining = budget - total_paid
+            except Project.DoesNotExist:
+                messages.error(request, 'Selected project does not exist.')
+
+        elif project_id and amount and payment_mode:
+            try:
+                project = Project.objects.get(id=project_id)
+                selected_project_id = project.id
+
+                amount_decimal = Decimal(amount)
+
+                Payment.objects.create(
+                    project=project,
+                    amount=amount_decimal,
+                    payment_mode=payment_mode,
+                    date=timezone.now().date()
+                )
+
+                messages.success(request, f'Payment of ₹{amount_decimal} added successfully for project "{project.name}".')
+
+                # Recalculate total and remaining
+                total_paid_raw = project.payments.aggregate(total=Sum('amount'))['total']
+                total_paid = Decimal(str(total_paid_raw)) if total_paid_raw is not None else Decimal('0')
+                budget = project.budget or Decimal('0')
+                amount_remaining = budget - total_paid
+
+                return redirect(f"{request.path}?project={project.id}")
+
+            except Project.DoesNotExist:
+                messages.error(request, 'Selected project does not exist.')
+            except Exception as e:
+                messages.error(request, f'Error: {str(e)}')
+
+        else:
+            messages.error(request, 'Please fill all required fields.')
+
+    elif request.method == 'GET':
+        selected_project_id = request.GET.get('project')
+        if selected_project_id:
+            try:
+                project = Project.objects.get(id=selected_project_id)
+                selected_project_id = project.id
+                total_paid_raw = project.payments.aggregate(total=Sum('amount'))['total']
+                total_paid = Decimal(str(total_paid_raw)) if total_paid_raw is not None else Decimal('0')
+                budget = project.budget or Decimal('0')
+                amount_remaining = budget - total_paid
+            except Project.DoesNotExist:
+                selected_project_id = None
+
+    # Payments list for display
+    payments = Payment.objects.filter(project=project) if project else []
+
+    context = {
+        'projects': projects,
+        'selected_project_id': int(selected_project_id) if selected_project_id else None,
+        'selected_project': project,
+        'total_paid': total_paid,
+        'amount_remaining': amount_remaining,
+        'payments': payments,  # Needed to display in template
+    }
+
+    return render(request, 'projects/add_payment.html', context)
+
+
+
 
 
 
@@ -494,28 +804,56 @@ def remove_daily_expense(request, expense_id):
 #     }
 
 #     return render(request, 'projects/daily.html', context)
+
+def edit_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id)
+    projects = Project.objects.all()  # In case you want to pass this to the template
+
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+            return redirect('client_details', project_id=expense.project.id)  # Make sure this URL name exists
+    else:
+        form = ExpenseForm(instance=expense)
+
+    return render(request, 'projects/edit_expense.html', {
+        'form': form,
+        'projects': projects,
+        'selected_project_id': expense.project.id
+    })
+
+def delete_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id)
+    project_id = expense.project.id
+    expense.delete()
+    return redirect('client_details', project_id=project_id)  # Adjust as needed
+
 def daily_report(request):
-    start_month = request.GET.get('start_month')
-    end_month = request.GET.get('end_month')
-    year = request.GET.get('year')
+    start_date = request.GET.get('start_date')
+    end_date = request.GET.get('end_date')
     edit_id = request.GET.get('edit')
 
-    start_month = int(start_month) if start_month and start_month != 'None' else None
-    end_month = int(end_month) if end_month and end_month != 'None' else None
-    year = int(year) if year and year != 'None' else None
-
+    # Convert inputs
     filter_kwargs = {}
-    if year:
-        filter_kwargs['date__year'] = year
-    if start_month and end_month:
-        filter_kwargs['date__month__gte'] = start_month
-        filter_kwargs['date__month__lte'] = end_month
-    elif start_month:
-        filter_kwargs['date__month'] = start_month
-    elif end_month:
-        filter_kwargs['date__month'] = end_month
 
-    # ✅ Fetch edit_expense regardless of request method
+   
+
+    if start_date:
+        try:
+            start_date_obj = datetime.strptime(start_date, '%Y-%m-%d')
+            filter_kwargs['date__gte'] = start_date_obj
+        except ValueError:
+            pass
+
+    if end_date:
+        try:
+            end_date_obj = datetime.strptime(end_date, '%Y-%m-%d')
+            filter_kwargs['date__lte'] = end_date_obj
+        except ValueError:
+            pass
+
+    # Edit / delete / add logic remains unchanged...
     edit_expense = None
     edit_form = None
     if edit_id:
@@ -531,9 +869,15 @@ def daily_report(request):
             form = DailyExpenseForm(request.POST, instance=expense)
             if form.is_valid():
                 form.save()
-                return redirect(request.get_full_path())
+                # Remove 'edit' param after saving to avoid showing edit form again
+                query_dict = request.GET.copy()
+                query_dict.pop('edit', None)
+                return redirect(f"{request.path}?{urlencode(query_dict)}")
             else:
-                edit_form = form  # Show validation errors in form
+                # Send form with errors back to template
+                edit_form = form
+                edit_expense = expense
+
 
         elif 'delete_expense_id' in request.POST:
             expense = get_object_or_404(DailyExpense, id=request.POST['delete_expense_id'])
@@ -548,7 +892,7 @@ def daily_report(request):
             else:
                 print("Add DailyExpense form is invalid:", form.errors)
 
-
+    # Process data
     projects_data = []
     total_expenses_all_projects = Decimal('0.00')
 
@@ -556,14 +900,12 @@ def daily_report(request):
         total_budget = project.expenses_set.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
 
         daily_expenses = DailyExpense.objects.filter(project=project, **filter_kwargs).order_by('date')
-
         running_total = Decimal('0.00')
         all_entries = []
 
         for dex in daily_expenses:
             running_total += dex.amount
             balance = total_budget - running_total
-
             all_entries.append({
                 'expense': dex,
                 'form': None,
@@ -588,17 +930,16 @@ def daily_report(request):
 
     context = {
         'projects_data': projects_data,
-        'selected_start_month': start_month,
-        'selected_end_month': end_month,
-        'selected_year': year,
+    
+        'start_date': start_date,
+        'end_date': end_date,
         'months': [f"{i:02d}" for i in range(1, 13)],
         'years': [str(y) for y in range(datetime.now().year - 2, datetime.now().year + 2)],
         'total_expenses_all_projects': total_expenses_all_projects,
         'projects': Project.objects.all(),
         'edit_id': edit_id,
-        'edit_expense': edit_expense,# ✅ always available
+        'edit_expense': edit_expense,
         'edit_form': edit_form,
-        
     }
 
     return render(request, 'projects/daily.html', context)
