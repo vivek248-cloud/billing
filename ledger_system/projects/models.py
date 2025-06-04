@@ -40,7 +40,7 @@ class Project(models.Model):
     @property
     def total_expenses(self):
         return self.expenses_set.aggregate(total=models.Sum('amount'))['total'] or 0
-
+    
     @property
     def remaining(self):
         budget = Decimal(str(self.budget))
@@ -65,6 +65,7 @@ class Expense(models.Model):
     amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     project = models.ForeignKey(Project, related_name='expenses_set', on_delete=models.CASCADE)
     area = models.DecimalField(max_digits=10, decimal_places=2, default=0)  # Changed to area for clarity
+    unit = models.CharField(max_length=50, default='sq ft',null=True)  # Default unit for area
     rate = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     note = models.TextField(blank=True, null=True)  # Optional field for additional notes
     date = models.DateField(_("Date"), auto_now=False, auto_now_add=False, null=True, blank=True)
@@ -98,18 +99,23 @@ class Payment(models.Model):
     def __str__(self):
         return f"{self.project.name} - {self.date} - {self.amount}"
 
-    @property
-    def remaining(self):
-        return self.budget - self.estimated_cost
+   
 
     @property
     def total_payment(self):
-        return sum(payment.amount for payment in self.payments.all())
+        return sum(Decimal(p.amount) for p in self.project.payments.all())
+
+    @property
+    def total_expense(self):
+        return sum(Decimal(e.amount) for e in self.project.expenses_set.all())
 
     @property
     def remaining_after_payment(self):
-        # Assuming you have remaining as a property in the model
-        return self.remaining - sum(payment.amount for payment in self.payments.all())
+        budget = Decimal(self.project.budget or 0)
+        total_expense = self.total_expense
+        total_paid = self.total_payment
+        return (budget + total_expense) - total_paid
+
     
 
 
