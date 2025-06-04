@@ -1,3 +1,4 @@
+
 {% load static %}
 {% load humanize %}
 {% load indian_format %}
@@ -7,14 +8,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
     <title>Daily Report</title>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Poppins', sans-serif;
-            margin: 30px;
             background: linear-gradient(135deg, #e0eafc, #cfdef3);
             color: #333;
+            padding: 0px!important;
+            margin: 0;
             cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
         }
 
@@ -24,13 +27,102 @@
             margin-bottom: 25px;
         }
 
-        {% comment %} .card {
-            background: #fff;
-            border-radius: 10px;
-            padding: 20px 25px;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-        } {% endcomment %}
+       .navbar {
+            background-color: #1e1e2f;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: gold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            z-index: 1000;
+        }
+
+        .nav-menu li a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu li a:hover {
+            color: gold;
+        }
+
+        .icon {
+            margin-right: 5px;
+        }
+
+       .hamburger {
+        display: none; /* will show only on mobile */
+        cursor: pointer;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 25px;
+        height: 20px;
+        z-index: 1001;
+}
+
+    .hamburger span {
+        display: block;
+        height: 3px;
+        background: white;
+        border-radius: 5px;
+        margin: 4px 0;
+        transition: all 0.4s ease;
+    }
+    /* Transform hamburger to X when active */
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                background-color: #1e1e2f;
+                position: absolute;
+                top: 110px;
+                right: 0;
+                left: 0;
+                justify-content: center;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+            }
+        }
+
 
 .card {
   padding: 1rem;
@@ -195,24 +287,7 @@
             margin-left: 10px;
         }
 
-        ul {
-            padding-left: 18px;
-            width: 10%;
-            list-style: none;
-            text-align: center;
-        }
-        ul li {
-            margin-bottom: 8px;
-            background-color: #007BFF;
-            padding: 8px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
-        }
-        ul li:hover {
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-            background-color: #0056b3;
-            transform: scale(1.05);
-        }
+       
         a{
             text-decoration: none;
             color: #ffffff;
@@ -248,7 +323,7 @@
        
         }
         .rupees {
-            text-align: right;
+            text-align: right!important;
             font-size: 16px;
             font-weight: 400;
             padding-right: .95px;
@@ -290,20 +365,7 @@
         margin-top: 20px;
     }
 
-    ul {
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        flex-wrap: wrap;
-        padding-left: 0;
-        margin-top: 20px;
-    }
-
-    ul li {
-        width: auto;
-        margin: 6px;
-    }
-
+    
     table th, table td {
         padding: 10px;
         font-size: 22px;
@@ -311,9 +373,7 @@
 }
 
 @media (max-width: 768px) {
-    body {
-        margin: 15px;
-    }
+    
 
     .card {
         padding: 15px 20px;
@@ -425,7 +485,6 @@
 
 @media (max-width: 480px) {
     body {
-        margin: 15px;
         font-size: 14px;
     }
     .main-table th, .main-table td {
@@ -476,79 +535,69 @@
     </style>
 </head>
 <body>
+    
+    <nav class="navbar">
+        <div class="logo"><img src="{% static 'images/logo.png' %}" alt="Logo" style="width: 80px; height: auto; margin-bottom: 20px;">EDB Billing</div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li><a href="{% url 'billing' %}"><span class="icon">📋</span> Billing</a></li>
+            <li><a href="{% url 'daily_expense' %}"><span class="icon">📋</span> Daily Expense</a></li>
+            <li><a href="{% url 'daily_statistics' %}"><span class="icon">📊</span> Statistics</a></li>
+            <li><a href="{% url 'logout' %}"><span class="icon">🚪</span> Logout</a></li>
+            <li><a href="{% url 'add_project' %}"><span class="icon">➕</span> Add Project</a></li>
+            <li><a href="{% url 'add_expense' %}"><span class="icon">💰</span> Add Budget</a></li>
+            <li><a href="{% url 'add_payment' %}"><span class="icon">💳</span> Add Payment</a></li>
+        </ul>
+        <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </nav>
 <div id="rotate-screen-message" class="rotate-message" style="display:none;">
   📱 For better viewing, please rotate your device to <strong>landscape</strong> mode.
 </div>
     <div class="header">
-        <img src="{% static 'images/logo.PNG' %}" alt="Logo" style="width: 100px; height: auto; margin-bottom: 20px;">
         <h1>Daily Expense Report > ></h1>
     </div>
-
-        <nav  class="nav-links">
-            <ul>
-                <a href="{% url 'billing' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Billing</li></a>
-                <a href="{% url 'daily_statistics' %}"><li><span><svg version="1.1" id="icons"  class="arrow" xmlns="http://www.w3.org/2000/svg" x="0" y="0" viewBox="0 0 128 128" style="enable-background:new 0 0 128 128" xml:space="preserve"><style>.st0,.st1{display:none;fill:#191919}.st1,.st3{fill-rule:evenodd;clip-rule:evenodd}.st3,.st4{display:inline;}</style><g id="row1"><path id="nav:2_3_" d="M64 1 17.9 127 64 99.8l46.1 27.2L64 1zm0 20.4 32.6 89.2L64 91.3V21.4z" /></g></svg></span>Statistics</li></a>
-            </ul>
-            
-        </nav>
     
 
     <div class="card">
         <form method="get" class="form-inline">
-            <label>Start Month:</label>
-            <select name="start_month">
-                <option value="">All</option>
-                {% for m in months %}
-                    <option value="{{ m }}" {% if selected_start_month == m %}selected{% endif %}>{{ m }}</option>
-                {% endfor %}
-            </select>
+            <label>Start Date:</label>
+ <input type="date" name="start_date" value="{{ start_date }}">
+  <label>End Date:</label>
+  <input type="date" name="end_date" value="{{ end_date }}">
 
-            <label>End Month:</label>
-            <select name="end_month">
-                <option value="">All</option>
-                {% for m in months %}
-                    <option value="{{ m }}" {% if selected_end_month == m %}selected{% endif %}>{{ m }}</option>
-                {% endfor %}
-            </select>
+  {% comment %} <label>Start Month:</label>
+  <select name="start_month">
+    <option value="">-----</option>
+    {% for m in months %}
+      <option value="{{ m }}" {% if m == selected_start_month|stringformat:"02d" %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select>
 
-            <label>Year:</label>
-            <select name="year">
-                <option value="">All</option>
-                {% for y in years %}
-                    <option value="{{ y }}" {% if selected_year == y %}selected{% endif %}>{{ y }}</option>
-                {% endfor %}
-            </select>
+  <label>End Month:</label>
+  <select name="end_month">
+    <option value="">-----</option>
+    {% for m in months %}
+      <option value="{{ m }}" {% if m == selected_end_month|stringformat:"02d" %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select>
 
+  <label>Year:</label>
+  <select name="year">
+    <option value="">--</option>
+    {% for y in years %}
+      <option value="{{ y }}" {% if y == selected_year|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select> {% endcomment %}
             <button type="submit">Filter</button>
         </form>
     </div>
 
-    {% comment %} <div class="card">
-        <h4>Add New Expense</h4>
-        <form method="post" class="form-inline">
-            {% csrf_token %}
-            <input type="hidden" name="add_expense" value="true" placeholder="Add Expense">
-
-            <label>Client:</label>
-            <select name="project" required>
-                <option value="">Select Client</option>
-                {% for project in projects %}
-                <option value="{{ project.id }}">{{ project.client_name }}</option>
-                {% endfor %}
-            </select>
-
-            <label>Description:</label>
-            <input type="text" name="description" placeholder="Description" required>
-
-            <label>Amount:</label>
-            <input type="number" step="0.01" name="amount" placeholder="Amount" required>
-
-            <label>Date:</label>
-            <input type="date" name="date" required>
-
-            <button type="submit">Add Expense</button>
-        </form>
-    </div> {% endcomment %}
+    
 
     <div class="card">
         <h4>Add Daily Spent Amount</h4>
@@ -560,7 +609,7 @@
             <select name="project" required>
                 <option value="">Select Client</option>
                 {% for project in projects %}
-                <option value="{{ project.id }}">{{ project.client_name }}</option>
+                <option value="{{ project.id }}">{{ project.name }} ({{ project.client_name }})</option>
                 {% endfor %}
             </select>
     
@@ -592,33 +641,34 @@
 
 {% if edit_form %}
 <div class="card">
-    <h4>Edit Expense</h4>
-    <form method="post" class="form-inline">
-        {% csrf_token %}
-        <input type="hidden" name="edit_expense_id" value="{{ edit_expense.id }}">
+  <h4>Edit Expense</h4>
+  <form method="post" class="form-inline">
+    {% csrf_token %}
+    <input type="hidden" name="edit_expense_id" value="{{ edit_expense.id }}">
 
-       <label>Client:</label>
-        <strong>{{ edit_form.instance.project.client_name }}</strong>
+    {{ edit_form.project }}  {# hidden input now #}
 
-        <label>Category:</label>
-        {{ edit_form.category }}
+    <label>Category:</label>
+    {{ edit_form.category.errors }}{{ edit_form.category }}
 
-        <label>Description:</label>
-        {{ edit_form.description }}
+    <label>Description:</label>
+    {{ edit_form.description.errors }}{{ edit_form.description }}
 
-        <label>Remark:</label>
-        {{ edit_form.remark }}
+    <label>Remark:</label>
+    {{ edit_form.remark.errors }}{{ edit_form.remark }}
 
-        <label>Amount:</label>
-        {{ edit_form.amount }}
+    <label>Amount:</label>
+    {{ edit_form.amount.errors }}{{ edit_form.amount }}
 
-        <label>Date:</label>
-        {{ edit_form.date }}
+    <label>Date:</label>
+    {{ edit_form.date.errors }}{{ edit_form.date }}
 
-        <button type="submit">Update Expense</button>
-    </form>
+    <button type="submit">Update Expense</button>
+  </form>
 </div>
 {% endif %}
+
+
 
 
 
@@ -676,7 +726,25 @@
       <span class="expense-value">₹{{ total_expenses_all_projects|floatformat:0|intcomma }}</span>
   </div>
 {% endif %}
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('nav-menu');
+            const hamburger = document.getElementById('hamburger');
 
+            menu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+    </script>
+<script>
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  dateInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      document.querySelector('select[name="start_month"]').value = '';
+      document.querySelector('select[name="end_month"]').value = '';
+      document.querySelector('select[name="year"]').value = '';
+    });
+  });
+</script>
 
 </body>
 </html>
