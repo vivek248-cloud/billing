@@ -4,7 +4,6 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
   <title>Login System</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
   <style>
@@ -245,17 +244,18 @@
   <img src="{% static 'images/logo.PNG' %}" alt="Company Logo">
 
   <h1 id="title">
-    Welcome to<br>The Elite Dream Builders<br>Billing System
+    Welcome to<br>The Elite Dream Builders
   </h1>
 
   <div class="btn-group" id="buttons">
-    <a href="{% url 'admin_login' %}"><button>🔐 Admin Login</button></a>
-    <a href="{% url 'client_login' %}"><button>👤 Client Login</button></a>
+    {% comment %} <a href="{% url 'admin_login' %}"><button>🔐 Admin Login</button></a> {% endcomment %}
+    <a href="{% url 'client_login' %}"><button>🧑‍💼Login</button></a>
   </div>
-
+  
   <div class="cursor-glow" id="cursorGlow"></div>
 
   <script src="{% static 'js/ledger.js' %}"></script>
 
 </body>
 </html>
+
