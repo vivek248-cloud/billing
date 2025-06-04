@@ -1,4 +1,3 @@
-
 {% load extra_filters %}
 {% load static %}
 {% load humanize %}
@@ -8,181 +7,212 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Invoice - {{ project.name }}</title>
+    <title>Invoice - {{ project.client_name }} ({{ invoice_date }})</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   <!-- Add this to <head> -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
 
-    <style>
+<style>
     body {
-        font-family: 'Segoe UI', 'Arial', sans-serif;
-        font-size: 13px;
-        color: #1a1a1a;
-        margin: 0;
-        background: #f4f5f7;
-        line-height: 1.6;
+        font-family: 'Lato', sans-serif;
+        background: #f9f9f9;
+        color: #222;
+        font-size: 14px;
     }
 
     .invoice-box {
-        max-width: 960px;
-        margin: 30px auto;
-        padding: 30px 35px;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0 0 25px rgba(0, 0, 0, 0.05);
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 8px;
+
     }
 
     .top-section {
-        text-align: center;
         margin-bottom: 30px;
     }
 
-    .top-section img {
-        height: 85px;
-        margin-bottom: 10px;
-    }
-
     .top-section h1 {
-        font-size: 24px;
-        margin: 5px 0 2px;
-        color: #2c3e50;
+        
+        font-size: 48px;
         font-weight: 700;
+        margin-bottom: 10px;
     }
 
     .top-section p {
+        font-size: 13px;
         margin: 2px 0;
-        font-size: 12px;
-        color: #555;
+    }
+
+    .invoice-meta {
+        float: right;
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    .invoice-meta h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 50px;
+        color: #444;
     }
 
     .section-title {
-        font-size: 14px;
-        font-weight: 600;
-        color: #2c3e50;
+        font-weight: bold;
+        font-size: 15px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
         margin-top: 30px;
-        margin-bottom: 10px;
-        border-bottom: 2px solid #e0e0e0;
-        padding-bottom: 4px;
     }
 
     table {
         width: 100%;
         border-collapse: collapse;
-        margin-bottom: 25px;
-        font-size: 12.5px;
+        margin-top: 10px;
     }
 
-    thead {
-        background-color: #f3f5f7;
-    }
-
-    th {
-        padding: 12px 10px;
-        text-align: center;
-        color: white!important;
-        font-weight: 600;
-        border: 1px solid #e0e0e0;
-    }
-
-    td {
-        padding: 10px;
-        text-align: center;
-        border: 1px solid #e6e6e6;
-        color: #333;
-    }
-
-    tbody tr:nth-child(even) {
-        background-color: #fafafa;
-    }
-
-    .total-row {
-        font-size: 14px;
-        font-weight: 600;
-        background-color: #f0f0f0;
-        color: #000;
-    }
-
-    .highlight-td {
-        background-color: #1f2937;
-        color: white!important;
-        font-weight: 600;
-    }
-
-    .notes {
-        font-size: 11.5px;
-        line-height: 1.7;
-        margin-top: 20px;
-        color: #444;
-    }
-
-    .notes ol {
-        padding-left: 18px;
-    }
-
-    .signature {
-        margin-top: 50px;
-        text-align: right;
+    th, td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e0e0e0;
         font-size: 13px;
     }
 
-    .signature p {
-        margin: 4px 0;
+    th {
+        background-color: #f0f0f0;
+        font-weight: 600;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    .total-row td {
+        font-weight: bold;
+        background: #f9f9f9;
+        border-top: 2px solid #999;
+    }
+
+    .qr-code {
+        background-color: #000;
+        width: 150px;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .qr-code img {
+        height: 120px;
+        display: block;
+        margin: auto;
     }
 
     .signature img {
         height: 60px;
-        margin-bottom: -10px;
     }
 
-    .rupees {
-        text-align: right;
+    .notes {
+        margin-top: 20px;
+        font-size: 13px;
+    }
+
+    .notes ol {
+        padding-left: 16px;
+    }
+
+    .payment-section {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .signature, .qr-sign {
+        margin-top: 20px;
+    }
+
+    .no-print {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .btn-print {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 10px 25px;
         font-size: 14px;
-        font-weight: 500;
-        padding-right: 4px;
+        border-radius: 4px;
     }
 
-    @media print {
-        body {
-            background: #fff;
-            margin: 0;
-        }
+    .btn-print:hover {
+        background-color: #555;
+    }
 
-        .invoice-box {
-            border: none;
-            box-shadow: none;
-            padding: 0;
-            margin: 0;
-        }
+   @media print {
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: 12pt;
+    }
 
-        .no-print {
-            display: none;
-        }
+    .invoice-box {
+        padding: 10px !important;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
     }
 
     @page {
-        size: A4;
-        margin: 15mm;
+        size: A4 portrait;
+        margin: 1cm;
     }
+
+    /* Remove any print-unfriendly elements */
+    .no-print {
+        display: none;
+    }
+}
+
 </style>
 
+
 </head>
+
 <body>
 <div class="invoice-box">
     <div class="top-section">
-        <img src="{{ logo_url }}" alt="Company Logo">
+        <div class="invoice-meta">
+            <h1>INVOICE</h1>
+            <p><strong>Invoice No:</strong> {{ invoice_number }}</p>
+            <p><strong>Date:</strong> {{ invoice_date }}</p>
+        </div>
+        <img src="{{ logo_url }}" alt="Company Logo" style="height: 180px; margin-bottom: 10px;">
         <h1>THE ELITE DREAM BUILDERS</h1>
         <p>NO.9, MSK BUILDING 1ST FLOOR, GANESHNAGAR, KATTUR, TRICHY-19</p>
         <p>GSTIN: 33AKTPH2053F1ZC | www.elitedreambuilders.in</p>
     </div>
 
     <p class="section-title">CLIENT INFORMATION</p>
-    <p><strong>Client Name:</strong> {{ project.client_name }}</p>
+    <p><strong>Client Name:</strong> <strong>{{ project.client_name }}</strong></p>
 
     <p class="section-title">PROJECT SUMMARY</p>
     <table>
         <thead>
         <tr class="highlight-td">
             <th>Description</th>
-            <th>Area (Sq.Ft)</th>
-            <th>Rate/Sq.Ft</th>
+            <th>Area</th>
+            <th>Unit</th>
+            <th>Rate/Unit</th>
             <th>Total</th>
         </tr>
         </thead>
@@ -191,14 +221,13 @@
             <tr>
                 <td>{{ expense.description }}</td>
                 <td class="rupees">{{ expense.area }}</td>
+                <td class="rupees">{{ expense.unit }}</td>
                 <td class="rupees">{{ expense.rate|indian_currency }}</td>
                 <td class="rupees">{{ expense.amount|indian_currency }}</td>
             </tr>
-        {% empty %}
-            <tr><td colspan="4">No expenses found for this project.</td></tr>
         {% endfor %}
         <tr class="total-row">
-            <td colspan="3">Total Expense</td>
+            <td colspan="4">Total Expense</td>
             <td class="rupees">{{ total_expense|indian_currency }}</td>
         </tr>
         </tbody>
@@ -226,18 +255,16 @@
                 <td class="rupees">{{ row.remaining_after_payment|indian_currency }}</td>
                 <td>{{ row.payment_mode|title }}</td>
             </tr>
-        {% empty %}
-            <tr><td colspan="6">No payments found.</td></tr>
         {% endfor %}
         </tbody>
         <tfoot>
         <tr class="total-row">
-            <td colspan="2" class="total-row">Total Received</td>
-            <td colspan="4" class="total-row rupees">{{ total_received|indian_currency }}</td>
+            <td colspan="2">Total Received</td>
+            <td colspan="4" class="rupees">{{ total_received|indian_currency }}</td>
         </tr>
         <tr class="total-row">
-            <td colspan="2" class="total-row">Yet to Receive</td>
-            <td colspan="4" class="total-row rupees">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
+            <td colspan="2">Yet to Receive</td>
+            <td colspan="4" class="rupees">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
         </tr>
         </tfoot>
     </table>
@@ -248,19 +275,52 @@
         <ol>
             {% for expense in expenses %}
                 {% if expense.note %}
-                <li><strong>{{ expense.description }}:</strong> {{ expense.note }}</li>
+                    <li><strong>{{ expense.description }}:</strong> {{ expense.note }}</li>
                 {% endif %}
             {% endfor %}
         </ol>
     </div>
     {% endif %}
 
-    <div class="signature">
+    <div class="payment-section d-flex justify-content-between flex-wrap">
+    
+
+    
+    <div class="qr-sign" style="text-align: left; flex: 2; min-width: 250px;">
+        
+        <div class="qr-code" style="display: inline-block;">
+            <img src="{% static 'images/EliteQR.jpg' %}" alt="UPI QR Code">
+        </div>
+    </div>
+    <div class="signature" style="margin-top: 20px; text-align: right; flex: 1; min-width: 200px;">
         <p>For: <strong>THE ELITE DREAM BUILDERS</strong></p>
-        <br>
-        <img src="{% static 'images/sign.png' %}" alt="E-signature" style="height: 60px; margin-bottom: -10px;">
-        <p style="margin-top: 0;">Authorized Signatory</p>
+        <img src="{% static 'images/sign.png' %}" alt="E-signature">
+        <p>Authorized Signatory</p>
     </div>
 </div>
+
+
+<div class="text-center no-print my-4">
+    <button class="btn btn-success" onclick="window.print()">Print / Download</button>
+</div>
+<div class="text-center mt-4 no-print">
+    <a href="{% url 'client_details' project.id %}" class="btn btn-secondary" self>Back to Project</a>
+    
+</div>
+
+<script>
+function downloadPDF() {
+    const element = document.querySelector('.invoice-box');
+    const opt = {
+        margin: 0.5,
+        filename: 'Invoice_{{ project.name }}.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    html2pdf().set(opt).from(element).save();
+}
+</script>
 </body>
 </html>
