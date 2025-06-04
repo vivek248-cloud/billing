@@ -2,7 +2,6 @@
 
 import os
 from pathlib import Path
-import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -17,9 +16,8 @@ SECRET_KEY = 'django-insecure-nyo_fa03512tqw8lj2i=p)i9^bs+qg*%lxwm-ib-%)8u#18c@_
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = False
-
-ALLOWED_HOSTS = ['*', 'billing-r8ie.onrender.com','edbbilling.com'] # Later for production: ['yourdomain.com', 'www.yourdomain.com']
+DEBUG = True
+ALLOWED_HOSTS = ['*']  # Later for production: ['yourdomain.com', 'www.yourdomain.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -88,23 +86,17 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'ledger_systems',
-#         'USER': 'root',
-#         'PASSWORD': 'Admin123',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://root:F0HBo1lrN5WznE8CbqETd1eQQY9EMb0f@dpg-d0srf63e5dus73bi00ig-a.oregon-postgres.render.com/billing_ehp8',
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'ledger_systems',
+        'USER': 'root',
+        'PASSWORD': 'Admin123',
+        'HOST': 'localhost',
+        'PORT': '3306',
+    }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -161,9 +153,9 @@ JAZZMIN_SETTINGS = {
     "site_header": "The Elite Dream Builders",
     "site_brand": "Elite Admin",
     "welcome_sign": "Welcome to The Elite Dream Builders Admin",
-    "site_logo": "images/logo.png",  # path relative to STATICFILES_DIRS
+    "site_logo": "images/logo.PNG",  # path relative to STATICFILES_DIRS
     "site_logo_classes": "img-circle",  # optional: add Bootstrap classes
-    "site_icon": "images/logo.png",     # favicon
+    "site_icon": "images/logo.PNG",     # favicon
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
