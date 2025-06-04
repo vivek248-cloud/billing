@@ -131,7 +131,7 @@
 
       <div class="input-group password-container">
         <i class="fa fa-lock"></i>
-        <input type="password" name="password" id="passwordField"
+        <input type="tel" name="password" id="passwordField"
           placeholder="Password" value="{{ request.COOKIES.saved_password|default:'' }}" required>
         <span class="toggle-password" onclick="togglePassword()">
           <i id="eyeIcon" class="fa-solid fa-eye"></i>
