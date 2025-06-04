@@ -90,7 +90,7 @@ from django.shortcuts import redirect
 def client_login(request):
     error = ""
     if request.method == 'POST':
-        uname = request.POST['username']
+        uname = request.POST['username'].lower()
         pwd = request.POST['password']
 
         try:
