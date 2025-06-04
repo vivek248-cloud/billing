@@ -15,7 +15,11 @@
 
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      background: url("{% static 'images/Front2.jpg' %}");
+      background-size: cover;
+      background-position: center;
+      width:100%;
+      position: relative;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
@@ -23,29 +27,32 @@
       justify-content: center;
       padding: 20px;
       overflow: hidden;
-     cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
-     perspective: 1000px;
+      cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
     }
-    .tilt-effect {
-      transition: transform 0.2s ease;
-      transform-style: preserve-3d;
+
+    /* Dark overlay */
+    body::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.23);
+      z-index: 0;
     }
-     img {
-      height: 150px;
+
+    img {
+      height: 140px;
       margin-bottom: 20px;
-    }
-    h1, .btn-group {
-      transition: transform 0.1s ease-out;
-      will-change: transform;
+      position: relative;
+      z-index: 2;
     }
 
     h1 {
       font-size: 2.5rem;
       font-weight: 600;
       margin-bottom: 40px;
-      color: #1f2937;
+      color: #ffffff;
       text-align: center;
-      line-height: 1.4;
       z-index: 2;
     }
 
@@ -68,7 +75,7 @@
       padding: 14px 20px;
       border: none;
       border-radius: 10px;
-      background: linear-gradient(to right, #4f46e5, #3b82f6);
+      background: linear-gradient(to right, #6366f1, #3b82f6);
       color: white;
       font-size: 1rem;
       font-weight: 500;
@@ -79,183 +86,23 @@
 
     .btn-group button:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
     }
-    .background-circles {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    overflow: hidden;
-    z-index: -1;
-  }
 
-.circle {
-  position: absolute;
-  border-radius: 10%;
-  background: radial-gradient(circle, rgba(116, 116, 251, 0.3), rgba(37, 99, 232, 0.39));
-  box-shadow: 0 0 25px rgba(120, 144, 255, 0.15);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  animation: float 20s ease-in-out infinite;
-  opacity: 0.7;
-  z-index: -1;
-  pointer-events: none;
-  transition: transform 0.3s ease;
-}
+    
 
-
-/* Float animation */
-@keyframes float {
-  0% { transform: translateY(0) translateX(0) scale(1); }
-  50% { transform: translateY(-20px) translateX(20px) scale(1.05); }
-  100% { transform: translateY(0) translateX(0) scale(1); }
-}
-
-/* Individual circles */
-.circle:nth-child(1) {
-  width: 120px;
-  height: 120px;
-  top: 10%;
-  left: 15%;
-  animation-duration: 4s;
-}
-
-.circle:nth-child(2) {
-  width: 180px;
-  height: 180px;
-  top: 20%;
-  left: 75%;
-  animation-duration: 2s;
-}
-
-.circle:nth-child(3) {
-  width: 100px;
-  height: 100px;
-  top: 70%;
-  left: 50%;
-  animation-duration: 3s;
-}
-
-.circle:nth-child(4) {
-  width: 140px;
-  height: 140px;
-  top: 80%;
-  left: 80%;
-  animation-duration: 2s;
-}
-
-.circle:nth-child(5) {
-  width: 90px;
-  height: 90px;
-  top: 5%;
-  left: 85%;
-  animation-duration: 5s;
-}
-
-.circle:nth-child(6) {
-  width: 110px;
-  height: 110px;
-  top: 20%;
-  left: 35%;
-  animation-duration: 2s;
-}
-
-.circle:nth-child(7) {
-  width: 80px;
-  height: 80px;
-  top: 60%;
-  left: 20%;
-  animation-duration: 4s;
-}
-
-.circle:nth-child(8) {
-  width: 100px;
-  height: 100px;
-  top: 90%;
-  left: 10%;
-  animation-duration: 3s;
-}
-
-.circle:nth-child(9) {
-  width: 90px;
-  height: 90px;
-  top: 45%;
-  left: 60%;
-  animation-duration: 3s;
-}
-
-.circle:nth-child(10) {
-  width: 110px;
-  height: 110px;
-  top: 50%;
-  left: 25%;
-  animation-duration: 2s;
-}
-
-.circle:nth-child(11) {
-  width: 130px;
-  height: 130px;
-  top: 40%;
-  left: 70%;
-  animation-duration: 4s;
-}
-
-
-
-
-    /* Glowing circle */
-    @media (max-width: 480px) {
-      h1 {
-        font-size: 1.8rem;
-        margin-bottom: 30px;
-      }
-
-      .btn-group {
-        max-width: 100%;
-      }
-
-      .btn-group button {
-        font-size: 0.95rem;
-      }
-    }
+   
   </style>
 </head>
-<body id="title">
-
-  <div class="cursor-glow" id="cursorGlow"></div>
-<div class="background-circles">
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
-  <div class="circle"></div>
- 
-
-</div>
+<body>
 
   <img src="{% static 'images/logo.PNG' %}" alt="Company Logo">
+  <h1>Welcome to<br>The Elite Dream Builders</h1>
 
-  <h1 id="title">
-    Welcome to<br>The Elite Dream Builders
-  </h1>
-
-  <div class="btn-group" id="buttons">
-    {% comment %} <a href="{% url 'admin_login' %}"><button>🔐 Admin Login</button></a> {% endcomment %}
-    <a href="{% url 'client_login' %}"><button>🧑‍💼Login</button></a>
+  <div class="btn-group">
+    <a href="{% url 'client_login' %}"><button>🧑‍💼 Login</button></a>
   </div>
-  
-  <div class="cursor-glow" id="cursorGlow"></div>
 
   <script src="{% static 'js/ledger.js' %}"></script>
-
 </body>
 </html>
-
