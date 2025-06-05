@@ -200,14 +200,20 @@ from django.urls import reverse
 # views.py
 from django.core import signing
 from django.http import Http404, HttpResponseRedirect
+from django.core.signing import TimestampSigner, BadSignature, SignatureExpired
 
 def open_signed_invoice(request):
     token = request.GET.get("token")
+    signer = TimestampSigner()
     try:
-        real_url = signing.loads(token)
+        # Optionally set expiry time (e.g. 1 day = 86400 seconds)
+        real_url = signer.unsign(token, max_age=86400)  # optional expiry
         return HttpResponseRedirect(real_url)
-    except signing.BadSignature:
-        raise Http404("Invalid or expired link.")
+    except SignatureExpired:
+        raise Http404("Link has expired.")
+    except BadSignature:
+        raise Http404("Invalid or tampered link.")
+
     
 
 def client_details(request, project_id):
@@ -222,20 +228,17 @@ def client_details(request, project_id):
     cumulative_paid = Decimal('0.00')
     cumulative_paid_before = Decimal('0.00')
     payment_rows = []
-
+    signer = TimestampSigner()
     for payment in payments:
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
 
         # ✅ Generate the signed token
         invoice_url = request.build_absolute_uri(payment.get_absolute_url())
-        signed_token = signing.dumps(invoice_url)
+        signed_token = signer.sign(invoice_url)
 
         # ✅ Create a full redirect URL
-        redirect_url = request.build_absolute_uri(
-            reverse('open_signed_invoice')
-        ) + f"?token={signed_token}"
-
+        redirect_url = request.build_absolute_uri(reverse('open_signed_invoice')) + f"?token={signed_token}"
         whatsapp_text = f"Here is your invoice: {redirect_url}"
 
         payment_rows.append({
