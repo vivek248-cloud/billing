@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django import template
+from django.urls import reverse
 
 
 register = template.Library()
@@ -118,6 +119,7 @@ class Payment(models.Model):
 
     def get_absolute_url(self):
         return reverse('payment_invoice', args=[str(self.id)])
+
 
 
 
