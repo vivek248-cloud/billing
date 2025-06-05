@@ -161,9 +161,9 @@ JAZZMIN_SETTINGS = {
     "site_header": "The Elite Dream Builders",
     "site_brand": "Elite Admin",
     "welcome_sign": "Welcome to The Elite Dream Builders Admin",
-    "site_logo": "images/logo.png",  # path relative to STATICFILES_DIRS
+    "site_logo": "images/logo.PNG",  # path relative to STATICFILES_DIRS
     "site_logo_classes": "img-circle",  # optional: add Bootstrap classes
-    "site_icon": "images/logo.png",     # favicon
+    "site_icon": "images/logo.PNG",     # favicon
     "show_sidebar": True,
     "navigation_expanded": True,
     "hide_apps": [],
