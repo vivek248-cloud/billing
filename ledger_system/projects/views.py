@@ -195,6 +195,20 @@ from django.shortcuts import get_object_or_404
 from decimal import Decimal
 from django.db.models import Sum
 from django.core import signing
+from django.urls import reverse
+
+# views.py
+from django.core import signing
+from django.http import Http404, HttpResponseRedirect
+
+def open_signed_invoice(request):
+    token = request.GET.get("token")
+    try:
+        real_url = signing.loads(token)
+        return HttpResponseRedirect(real_url)
+    except signing.BadSignature:
+        raise Http404("Invalid or expired link.")
+    
 
 def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
@@ -213,10 +227,16 @@ def client_details(request, project_id):
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
 
-        # ✅ Generate a signed URL for each payment
+        # ✅ Generate the signed token
         invoice_url = request.build_absolute_uri(payment.get_absolute_url())
-        signed_url = signing.dumps(invoice_url)
-        whatsapp_text = f"Here is your invoice: {signed_url}"
+        signed_token = signing.dumps(invoice_url)
+
+        # ✅ Create a full redirect URL
+        redirect_url = request.build_absolute_uri(
+            reverse('open_signed_invoice')
+        ) + f"?token={signed_token}"
+
+        whatsapp_text = f"Here is your invoice: {redirect_url}"
 
         payment_rows.append({
             'payment_obj': payment,
@@ -239,6 +259,7 @@ def client_details(request, project_id):
     }
 
     return render(request, 'projects/client_details.html', context)
+
 
 def payment_invoice(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
