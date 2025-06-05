@@ -116,7 +116,6 @@ class Payment(models.Model):
         total_paid = self.total_payment
         return (budget + total_expense) - total_paid
 
-    
     def get_absolute_url(self):
         return reverse('payment_invoice', args=[str(self.id)])
 
