@@ -19,7 +19,7 @@ SECRET_KEY = 'django-insecure-nyo_fa03512tqw8lj2i=p)i9^bs+qg*%lxwm-ib-%)8u#18c@_
 
 DEBUG = False
 
-ALLOWED_HOSTS = ['*', 'billing-r8ie.onrender.com','edbbilling.com'] # Later for production: ['yourdomain.com', 'www.yourdomain.com']
+ALLOWED_HOSTS = ['billing-r8ie.onrender.com','edbbilling.com'] # Later for production: ['yourdomain.com', 'www.yourdomain.com']
 
 # Application definition
 INSTALLED_APPS = [
@@ -54,13 +54,15 @@ MIDDLEWARE = [
 
 
 # Expire session after 10 minutes of inactivity
-SESSION_COOKIE_AGE = 600  # 10 minutes in seconds
+SESSION_COOKIE_AGE = 300  # 10 minutes in seconds
 
 # Reset the session timer on every request
 SESSION_SAVE_EVERY_REQUEST = True
 
 # Optional: Ensure session expires when browser closes
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+
+
 
 
 
@@ -170,7 +172,4 @@ JAZZMIN_SETTINGS = {
     "hide_models": [],
 }
 
-# Set session to expire after 5 minutes (300 seconds)
-SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
-SESSION_SAVE_EVERY_REQUEST = True
+
