@@ -212,13 +212,19 @@ def client_details(request, project_id):
     for payment in payments:
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
+        
+        # Build full URL to the payment invoice
+        invoice_url = request.build_absolute_uri(payment.get_absolute_url())
+        whatsapp_text = f"Here is your invoice: {invoice_url}"
+
         payment_rows.append({
             'payment_obj': payment,  # full object here
             'date': payment.date,
             'amount': amount,
             'payment_mode': payment.payment_mode,
             'cumulative_paid_before': cumulative_paid_before,
-            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid,
+            'whatsapp_text': whatsapp_text,   # add here
         })
         cumulative_paid_before = cumulative_paid
 
@@ -228,11 +234,11 @@ def client_details(request, project_id):
         'total_expense': total_expense,
         'remaining': remaining,
         'payment_rows': payment_rows,
-        'total_paid': cumulative_paid,  # ✅ Added here
+        'total_paid': cumulative_paid,
     }
 
     return render(request, 'projects/client_details.html', context)
-
+    
 def payment_invoice(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
     project = payment.project
