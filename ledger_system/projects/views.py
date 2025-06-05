@@ -117,7 +117,6 @@ def client_login(request):
 
 
 
-
 # client_dashboard
 
 def client_dashboard(request, phone):
@@ -240,7 +239,7 @@ def client_details(request, project_id):
     }
 
     return render(request, 'projects/client_details.html', context)
-    
+
 def payment_invoice(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
     project = payment.project
