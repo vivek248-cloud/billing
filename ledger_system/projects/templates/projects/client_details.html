@@ -110,6 +110,7 @@
           <th>Cumulative Before</th>
           <th>Remaining After</th>
           <th>Actions</th>
+          <th>Share via WhatsApp</th>
         </tr>
       </thead>
       <tbody>
@@ -125,7 +126,13 @@
             <a href="{% url 'payment_invoice' payment.payment_obj.id %}" target="_blank" class="btn btn-sm btn-outline-primary" style="background-color: #2563EB; color: white; text-align: center;">Invoice</a>
             <a href="{% url 'edit_payment' payment.payment_obj.id %}" class="btn btn-sm text-white" style="background: #2563eb;">Edit</a>
           </td>
-
+          <td>
+            <a href="https://wa.me/?text={{ payment.whatsapp_text|urlencode }}"
+              target="_blank"
+              class="btn btn-sm btn-success">
+              Share via WhatsApp
+            </a>
+          </td>
         </tr>
         {% endfor %}
         <tr style="background-color: #2563EB; color: white;">
