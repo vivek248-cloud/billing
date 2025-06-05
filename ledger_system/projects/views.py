@@ -195,6 +195,7 @@ from django.shortcuts import get_object_or_404
 
 from decimal import Decimal
 from django.db.models import Sum
+from django.core import signing
 
 def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
@@ -215,8 +216,11 @@ def client_details(request, project_id):
         
         # Build full URL to the payment invoice
         invoice_url = request.build_absolute_uri(payment.get_absolute_url())
-        whatsapp_text = f"Here is your invoice: {invoice_url}"
-
+        
+        # Create a signed token for the URL
+        signed_url = signing.dumps(invoice_url)
+        
+        whatsapp_text = f"Here is your invoice: {signed_url}"
         payment_rows.append({
             'payment_obj': payment,  # full object here
             'date': payment.date,
