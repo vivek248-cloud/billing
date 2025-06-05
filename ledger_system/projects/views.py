@@ -195,8 +195,6 @@ from django.shortcuts import get_object_or_404
 
 from decimal import Decimal
 from django.db.models import Sum
-from django.core import signing
-
 def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     expenses = Expense.objects.filter(project=project)
@@ -213,22 +211,13 @@ def client_details(request, project_id):
     for payment in payments:
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
-        
-        # Build full URL to the payment invoice
-        invoice_url = request.build_absolute_uri(payment.get_absolute_url())
-        
-        # Create a signed token for the URL
-        signed_url = signing.dumps(invoice_url)
-        
-        whatsapp_text = f"Here is your invoice: {signed_url}"
         payment_rows.append({
             'payment_obj': payment,  # full object here
             'date': payment.date,
             'amount': amount,
             'payment_mode': payment.payment_mode,
             'cumulative_paid_before': cumulative_paid_before,
-            'remaining_after_payment': (budget + total_expense) - cumulative_paid,
-            'whatsapp_text': whatsapp_text,   # add here
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
         })
         cumulative_paid_before = cumulative_paid
 
@@ -238,7 +227,7 @@ def client_details(request, project_id):
         'total_expense': total_expense,
         'remaining': remaining,
         'payment_rows': payment_rows,
-        'total_paid': cumulative_paid,
+        'total_paid': cumulative_paid,  # ✅ Added here
     }
 
     return render(request, 'projects/client_details.html', context)
