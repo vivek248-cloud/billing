@@ -51,4 +51,3 @@ urlpatterns = [
     path('daily-statistics/', views.daily_statistics, name='daily_statistics'),
 
 ]
-
