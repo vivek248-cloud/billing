@@ -20,6 +20,8 @@ urlpatterns = [
 
     path('client/<int:project_id>/', views.client_details, name='client_details'),
 
+    path('open-invoice/', views.open_signed_invoice, name='open_signed_invoice'),
+
     # Payment Invoice
     path('payment-invoice/<int:payment_id>/', views.payment_invoice, name='payment_invoice'),
 
@@ -51,3 +53,4 @@ urlpatterns = [
     path('daily-statistics/', views.daily_statistics, name='daily_statistics'),
 
 ]
+
