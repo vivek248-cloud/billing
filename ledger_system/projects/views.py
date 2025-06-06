@@ -206,12 +206,10 @@ def open_signed_invoice(request):
     token = request.GET.get("token")
     signer = TimestampSigner()
     try:
-        # Optionally set expiry time (e.g. 1 week = 604800  # 7 days = 7 * 24 * 60 * 60)
-        real_url = signer.unsign(token, max_age=604800)  # optional expiry
+        # No expiry time, valid indefinitely
+        real_url = signer.unsign(token)  # No max_age
         return HttpResponseRedirect(real_url)
-    except SignatureExpired:
-        raise Http404("Link has expired.")
-    except BadSignature:
+    except (SignatureExpired, BadSignature):
         raise Http404("Invalid or tampered link.")
 
     
