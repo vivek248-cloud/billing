@@ -52,5 +52,7 @@ urlpatterns = [
 
     path('daily-statistics/', views.daily_statistics, name='daily_statistics'),
 
+    path('project/<int:project_id>/upload/', views.upload_site_image, name='upload_site_image'),
+
 ]
 
