@@ -3,7 +3,7 @@ from urllib.parse import urlencode
 from django.db.models import Sum
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Project, Expense,Payment,DailyExpense,CustomProject
+from .models import*
 from datetime import datetime
 from django.http import HttpResponse
 from django.template.loader import get_template
@@ -130,8 +130,7 @@ def client_dashboard(request, phone):
 
     expenses = Expense.objects.filter(project=project)
     payments = Payment.objects.filter(project=project).order_by('date')
-     
-    print("Payments:", list(payments))
+    site_images = SiteImage.objects.filter(project=project).order_by('-uploaded_at')  # ✅
 
     total_expense = sum(exp.amount for exp in expenses)
     budget = project.budget or Decimal('0')
@@ -165,7 +164,8 @@ def client_dashboard(request, phone):
         'payment_rows': payment_rows,
         'total_paid': cumulative_paid,
         'remaining': remaining,
-        'remaining_after_payment': remaining_after_payment
+        'remaining_after_payment': remaining_after_payment,
+        'site_images': site_images  # ✅ pass to template
     }
 
     return render(request, 'projects/client_dashboard.html', context)
@@ -218,6 +218,7 @@ def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
     expenses = Expense.objects.filter(project=project)
     payments = Payment.objects.filter(project=project).order_by('date')
+    site_images = SiteImage.objects.filter(project=project)
 
     total_expense = sum(exp.amount for exp in expenses)
     budget = project.budget or Decimal('0')
@@ -257,9 +258,26 @@ def client_details(request, project_id):
         'remaining': remaining,
         'payment_rows': payment_rows,
         'total_paid': cumulative_paid,
+        'site_images': site_images,
     }
 
     return render(request, 'projects/client_details.html', context)
+
+
+from .forms import SiteImageForm
+
+def upload_site_image(request, project_id):
+    project = get_object_or_404(Project, id=project_id)
+    if request.method == 'POST':
+        form = SiteImageForm(request.POST, request.FILES)
+        if form.is_valid():
+            site_image = form.save(commit=False)
+            site_image.project = project
+            site_image.save()
+            return redirect('client_details', project_id=project.id)
+    else:
+        form = SiteImageForm()
+    return render(request, 'projects/upload_image.html', {'form': form, 'project': project})
 
 
 def payment_invoice(request, payment_id):
