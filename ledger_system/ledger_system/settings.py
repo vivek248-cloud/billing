@@ -23,10 +23,11 @@ ALLOWED_HOSTS = ['*', 'billing-r8ie.onrender.com','edbbilling.com'] # Later for 
 
 
 CLOUDINARY_STORAGE = {
-    'CLOUD_NAME': 'doczkiibv',              # your cloud name
-    'API_KEY': '369947811734381',         # from Cloudinary dashboard
-    'API_SECRET': 'KS00C8rAFi2_1zlM0706kgy8rXE'    # from Cloudinary dashboard
+    'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
+    'API_KEY': os.environ.get('CLOUDINARY_API_KEY'),
+    'API_SECRET': os.environ.get('CLOUDINARY_API_SECRET'),
 }
+
 
 DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
 
