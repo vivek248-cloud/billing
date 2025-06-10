@@ -54,3 +54,10 @@ class DailyExpenseForm(forms.ModelForm):
         if not self.is_bound and self.instance and self.instance.date:
             self.fields['date'].initial = self.instance.date.strftime('%Y-%m-%d')
 
+
+from .models import SiteImage
+
+class SiteImageForm(forms.ModelForm):
+    class Meta:
+        model = SiteImage
+        fields = ['image', 'description']
