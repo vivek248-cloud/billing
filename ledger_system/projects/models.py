@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django import template
 from django.urls import reverse
-
+from cloudinary.models import CloudinaryField
 
 register = template.Library()
 from decimal import Decimal
