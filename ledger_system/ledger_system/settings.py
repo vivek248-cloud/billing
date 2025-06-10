@@ -21,8 +21,20 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*', 'billing-r8ie.onrender.com','edbbilling.com'] # Later for production: ['yourdomain.com', 'www.yourdomain.com']
 
+
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': 'doczkiibv',              # your cloud name
+    'API_KEY': '369947811734381',         # from Cloudinary dashboard
+    'API_SECRET': 'KS00C8rAFi2_1zlM0706kgy8rXE'    # from Cloudinary dashboard
+}
+
+DEFAULT_FILE_STORAGE = 'cloudinary_storage.storage.MediaCloudinaryStorage'
+
 # Application definition
 INSTALLED_APPS = [
+    'cloudinary',
+    'cloudinary_storage',
+
     'jazzmin',  # for admin interface customization
     'django.contrib.admin',
     'django.contrib.auth',
