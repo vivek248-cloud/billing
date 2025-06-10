@@ -136,9 +136,9 @@ class DailyExpense(models.Model):
 
 
 
-    class SiteImage(models.Model):
+class SiteImage(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, related_name='site_images')
-    image = models.ImageField(upload_to='site_images/')
+    image = CloudinaryField('billing-site-img')
     description = models.TextField(blank=True, null=True)
     uploaded_at = models.DateTimeField(auto_now_add=True)
 
