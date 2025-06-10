@@ -52,3 +52,5 @@ whitenoise==6.9.0
 xhtml2pdf==0.2.17
 zopfli==0.2.3.post1
 psycopg2-binary>=2.9.7
+cloudinary==1.39.0
+django-cloudinary-storage==0.3.0
