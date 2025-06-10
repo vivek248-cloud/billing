@@ -2,10 +2,10 @@
 {% load static %}
 {% load indian_format %}
 
-
 <head>
   <title>Client Details - {{ project.client_name }}</title>
-  <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+    <!-- Swiper CSS -->
+
   <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
@@ -133,8 +133,8 @@
               class="btn btn-sm btn-success">
               Share via WhatsApp
             </a>
-
           </td>
+
 
 
         </tr>
@@ -155,4 +155,51 @@
     <a href="{% url 'invoice' project.id %}" target="_blank" class="btn btn-primary mb-4">Preview All Invoice</a>
   </div>
 </div>
+
+
+
+
+<h2>Upload Image for {{ project.client_name }}</h2>
+
+ <a href="{% url 'upload_site_image' project.id %}" class="btn btn-primary">Upload</a>
+
+
+<h4>Site Images</h4>
+<div class="swiper mySwiper">
+  <div class="swiper-wrapper">
+    {% for img in site_images %}
+      <div class="swiper-slide">
+        <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
+        <p>{{ img.description }}</p>
+      </div>
+    {% endfor %}
+  </div>
+
+  <!-- Optional controls -->
+  <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-pagination"></div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var swiper = new Swiper(".mySwiper", {
+      loop: true,
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+      slidesPerView: 1,
+      spaceBetween: 20,
+    });
+  });
+</script>
+
 {% endblock %}
