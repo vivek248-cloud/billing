@@ -1,0 +1,11 @@
+{% extends 'projects/base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Upload Image for {{ project.client_name }}</h2>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" class="btn btn-primary">Upload</button>
+</form>
+{% endblock %}
