@@ -47,13 +47,13 @@
 <div class="container-fluid px-2">
   <div class="mb-4">
     <h2>Client: {{ project.client_name }}</h2>
-    <p><strong>Budget:</strong> ₹{{ total_expense|indian_currency }}</p>
-    <p><strong>total Paid:</strong> ₹{{ total_paid|indian_currency }}</p>
+    <p><strong>Budget:</strong> {{ total_expense|indian_currency }}</p>
+    <p><strong>total Paid:</strong> {{ total_paid|indian_currency }}</p>
     <p><strong>Remaining Amount:</strong>
       {% if remaining < 0 %}
-        <strong><span class="text-danger">₹{{ project.remaining|indian_currency }}</span></strong>
+        <strong><span class="text-danger">{{ project.remaining|indian_currency }}</span></strong>
       {% else %}
-        ₹{{ remaining|indian_currency }}
+        {{ remaining|indian_currency }}
       {% endif %}
     </p>
   </div>
