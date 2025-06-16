@@ -100,8 +100,8 @@
           <td>{{ expense.description }}</td>
           <td>{{ expense.area }}</td>
           <td>{{ expense.unit }}</td>
-          <td>{{ expense.note|default:"-" }}</td>
           <td style="text-align: right;">{{ expense.rate }}</td>
+          <td>{{ expense.note|default:"-" }}</td>
           <td style="text-align: right;">{{ expense.amount|indian_currency }}</td>
           <td>
             <a href="{% url 'edit_expense' expense.id %}" class="btn btn-sm text-white" style="background: #2563eb;">Edit</a>
