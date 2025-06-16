@@ -140,10 +140,15 @@
         <ul class="nav-menu" id="nav-menu">
             <li><a href="{% url 'billing' %}"><span class="icon">📋</span> Billing</a></li>
             <li><a href="{% url 'daily_expense' %}"><span class="icon">📋</span> Daily Expense</a></li>
-            <li><a href="{% url 'logout' %}"><span class="icon">🚪</span> Logout</a></li>
+            
             <li><a href="{% url 'add_project' %}"><span class="icon">➕</span> Add Project</a></li>
             <li><a href="{% url 'add_expense' %}"><span class="icon">💰</span> Add Budget</a></li>
             <li><a href="{% url 'add_payment' %}"><span class="icon">💳</span> Add Payment</a></li>
+          <li>
+                <a href="{% url 'logout' %}" style="color: white; background-color:  #3b82f6; padding: 6px 12px; border-radius: 5px;">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </li>
         </ul>
         <div class="hamburger" onclick="toggleMenu()" id="hamburger">
             <span></span>
