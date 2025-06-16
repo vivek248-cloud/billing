@@ -5,16 +5,25 @@ register = template.Library()
 @register.filter
 def indian_currency(value):
     """
-    Converts a number to Indian currency format (e.g., ₹44,00,000)
+    Converts a float to Indian currency format (e.g., ₹44,00,000.50)
     """
     try:
         value = float(value)
-    except:
+    except (ValueError, TypeError):
         return value
 
-    value = int(value)
-    s = str(value)[::-1]
-    result = s[:3]
-    for i in range(3, len(s), 2):
-        result += ',' + s[i:i+2]
-    return '' + result[::-1]
+    # Split integer and decimal parts
+    integer_part = int(value)
+    decimal_part = f"{value:.2f}".split(".")[1]
+
+    s = str(integer_part)[::-1]
+    groups = [s[:3]]
+    s = s[3:]
+
+    while s:
+        groups.append(s[:2])
+        s = s[2:]
+
+    formatted = ",".join(groups)[::-1]
+    return f"₹{formatted}.{decimal_part}"
+
