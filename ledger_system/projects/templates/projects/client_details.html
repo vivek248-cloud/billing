@@ -102,7 +102,7 @@
           <td>{{ expense.unit }}</td>
           <td>{{ expense.note|default:"-" }}</td>
           <td style="text-align: right;">{{ expense.rate }}</td>
-          <td style="text-align: right;">₹{{ expense.amount|indian_currency }}</td>
+          <td style="text-align: right;">{{ expense.amount|indian_currency }}</td>
           <td>
             <a href="{% url 'edit_expense' expense.id %}" class="btn btn-sm text-white" style="background: #2563eb;">Edit</a>
             <a href="{% url 'delete_expense' expense.id %}" class="btn btn-sm btn-danger"
@@ -161,9 +161,9 @@
           <td>{{ forloop.counter }}</td>
           <td>{{ payment.date|date:"d-m-Y" }}</td>
           <td>{{ payment.payment_mode }}</td>
-          <td style="text-align: right;">₹{{ payment.amount|indian_currency }}</td>
-          <td style="text-align: right;">₹{{ payment.cumulative_paid_before|indian_currency }}</td>
-          <td style="text-align: right;">₹{{ payment.remaining_after_payment|indian_currency }}</td>
+          <td style="text-align: right;">{{ payment.amount|indian_currency }}</td>
+          <td style="text-align: right;">{{ payment.cumulative_paid_before|indian_currency }}</td>
+          <td style="text-align: right;">{{ payment.remaining_after_payment|indian_currency }}</td>
           <td>
             <a href="{% url 'payment_invoice' payment.payment_obj.id %}" target="_blank" class="btn btn-sm btn-outline-primary" style="background-color: #2563EB; color: white; text-align: center;">Invoice</a>
             <a href="{% url 'edit_payment' payment.payment_obj.id %}" class="btn btn-sm text-white" style="background: #2563eb;">Edit</a>
@@ -183,7 +183,7 @@
         
         <tr style="background-color: #2563EB; color: white;">
           <td colspan="6" style="font-weight: bold;">Total:</td>
-          <td colspan="2" style="text-align: right; font-weight: bold;">₹{{ total_paid|indian_currency }}</td>
+          <td colspan="2" style="text-align: right; font-weight: bold;">{{ total_paid|indian_currency }}</td>
         </tr>
       </tbody>
     </table>
