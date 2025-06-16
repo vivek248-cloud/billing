@@ -353,11 +353,11 @@ from io import BytesIO
 from django.core.files.uploadedfile import InMemoryUploadedFile
 import sys
 
-def compress_image(file, quality=40):
+def compress_image(file, quality=30):
     image_temp = Image.open(file)
     image_temp = image_temp.convert('RGB')  # ensure compatibility (for PNG, etc.)
     output_io = BytesIO()
-    image_temp.save(output_io, format='JPEG', quality=quality)
+    image_temp.save(output_io, format='JPEG', quality=quality, optimize=True)
     output_io.seek(0)
     return InMemoryUploadedFile(
         output_io, 'ImageField', file.name, 'image/jpeg', sys.getsizeof(output_io), None
@@ -370,7 +370,7 @@ def upload_site_image(request, project_id):
         form = SiteImageForm(request.POST, request.FILES)
         if form.is_valid():
             image_file = request.FILES['image']
-            compressed_image = compress_image(image_file, quality=40)  # Reduce size
+            compressed_image = compress_image(image_file, quality=30)  # Reduce size
             
             site_image = form.save(commit=False)
             site_image.image = compressed_image
