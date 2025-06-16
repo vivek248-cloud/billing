@@ -214,29 +214,108 @@ def open_signed_invoice(request):
 
     
 
+# def client_details(request, project_id):
+#     project = get_object_or_404(Project, id=project_id)
+#     expenses = Expense.objects.filter(project=project)
+#     payments = Payment.objects.filter(project=project).order_by('date')
+#     site_images = SiteImage.objects.filter(project=project)
+
+#     total_expense = sum(exp.amount for exp in expenses)
+#     budget = project.budget or Decimal('0')
+#     remaining = budget - total_expense
+
+#     cumulative_paid = Decimal('0.00')
+#     cumulative_paid_before = Decimal('0.00')
+#     payment_rows = []
+#     signer = TimestampSigner()
+#     for payment in payments:
+#         amount = Decimal(str(payment.amount))
+#         cumulative_paid += amount
+
+#         # ✅ Generate the signed token
+#         invoice_url = request.build_absolute_uri(payment.get_absolute_url())
+#         signed_token = signer.sign(invoice_url)
+
+#         # ✅ Create a full redirect URL
+#         redirect_url = request.build_absolute_uri(reverse('open_signed_invoice')) + f"?token={signed_token}"
+#         whatsapp_text = f"Here is your invoice: {redirect_url}"
+
+#         payment_rows.append({
+#             'payment_obj': payment,
+#             'date': payment.date,
+#             'amount': amount,
+#             'whatsapp_text': whatsapp_text,
+#             'payment_mode': payment.payment_mode,
+#             'cumulative_paid_before': cumulative_paid_before,
+#             'remaining_after_payment': (budget + total_expense) - cumulative_paid
+#         })
+#         cumulative_paid_before = cumulative_paid
+
+#     context = {
+#         'project': project,
+#         'expenses': expenses,
+#         'total_expense': total_expense,
+#         'remaining': remaining,
+#         'payment_rows': payment_rows,
+#         'total_paid': cumulative_paid,
+#         'site_images': site_images,
+#     }
+
+#     return render(request, 'projects/client_details.html', context)
+
+from decimal import Decimal
+from django.shortcuts import render, get_object_or_404
+from django.urls import reverse
+from django.core.signing import TimestampSigner
+from django.utils.dateparse import parse_date
+
+from .models import Project, Expense, Payment, SiteImage
+
 def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
+
+    # ------- EXPENSE FILTERS -------
     expenses = Expense.objects.filter(project=project)
-    payments = Payment.objects.filter(project=project).order_by('date')
-    site_images = SiteImage.objects.filter(project=project)
+    desc = request.GET.get('desc')
+    from_date = parse_date(request.GET.get('from_date') or '')
+    to_date = parse_date(request.GET.get('to_date') or '')
+
+    if desc:
+        expenses = expenses.filter(description__icontains=desc)
+    if from_date:
+        expenses = expenses.filter(date__gte=from_date)
+    if to_date:
+        expenses = expenses.filter(date__lte=to_date)
 
     total_expense = sum(exp.amount for exp in expenses)
     budget = project.budget or Decimal('0')
     remaining = budget - total_expense
 
+    # ------- PAYMENT FILTERS -------
+    payments = Payment.objects.filter(project=project).order_by('date')
+    payment_mode = request.GET.get('payment_mode')
+    pay_from = parse_date(request.GET.get('pay_from') or '')
+    pay_to = parse_date(request.GET.get('pay_to') or '')
+
+    if payment_mode:
+        payments = payments.filter(payment_mode=payment_mode)
+    if pay_from:
+        payments = payments.filter(date__gte=pay_from)
+    if pay_to:
+        payments = payments.filter(date__lte=pay_to)
+
+    # ------- PAYMENT ROWS -------
     cumulative_paid = Decimal('0.00')
     cumulative_paid_before = Decimal('0.00')
     payment_rows = []
     signer = TimestampSigner()
+
     for payment in payments:
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
 
-        # ✅ Generate the signed token
         invoice_url = request.build_absolute_uri(payment.get_absolute_url())
         signed_token = signer.sign(invoice_url)
-
-        # ✅ Create a full redirect URL
         redirect_url = request.build_absolute_uri(reverse('open_signed_invoice')) + f"?token={signed_token}"
         whatsapp_text = f"Here is your invoice: {redirect_url}"
 
@@ -250,6 +329,8 @@ def client_details(request, project_id):
             'remaining_after_payment': (budget + total_expense) - cumulative_paid
         })
         cumulative_paid_before = cumulative_paid
+
+    site_images = SiteImage.objects.filter(project=project)
 
     context = {
         'project': project,
@@ -761,100 +842,7 @@ def remove_daily_expense(request, expense_id):
 
 # daily_report
 @session_login_required
-# def daily_report(request):
-#     start_month = request.GET.get('start_month')
-#     end_month = request.GET.get('end_month')
-#     year = request.GET.get('year')
-#     edit_id = request.GET.get('edit')
 
-#     start_month = int(start_month) if start_month and start_month != 'None' else None
-#     end_month = int(end_month) if end_month and end_month != 'None' else None
-#     year = int(year) if year and year != 'None' else None
-
-#     filter_kwargs = {}
-#     if year:
-#         filter_kwargs['date__year'] = year
-#     if start_month and end_month:
-#         filter_kwargs['date__month__gte'] = start_month
-#         filter_kwargs['date__month__lte'] = end_month
-#     elif start_month:
-#         filter_kwargs['date__month'] = start_month
-#     elif end_month:
-#         filter_kwargs['date__month'] = end_month
-
-    
-#     if request.method == 'POST':
-#         if edit_id:
-#             try:
-#                 edit_expense = DailyExpense.objects.get(id=edit_id)
-#             except DailyExpense.DoesNotExist:
-#                 edit_expense = None
-                
-#         elif 'delete_expense_id' in request.POST:
-#             expense = get_object_or_404(DailyExpense, id=request.POST['delete_expense_id'])
-#             expense.delete()
-#             return redirect(request.get_full_path())
-#         elif 'add_daily_expense' in request.POST:
-#             form = DailyExpenseForm(request.POST)
-#             if form.is_valid():
-#                 form.save()
-#                 return redirect(request.get_full_path())
-
-#     projects_data = []
-#     total_expenses_all_projects = Decimal('0.00')
-
-#     for project in Project.objects.all():
-#         total_budget = project.expenses_set.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
-
-#         daily_expenses = DailyExpense.objects.filter(project=project, **filter_kwargs).order_by('date')
-
-#         running_total = Decimal('0.00')
-#         all_entries = []
-
-       
-        
-#         for dex in daily_expenses:
-#             running_total += dex.amount
-#             balance = total_budget - running_total
-
-#             all_entries.append({
-#                 'expense': dex,
-#                 'form': None,
-#                 'running_total': running_total,
-#                 'description': dex.description,
-#                 'remark': dex.remark,
-#                 'spend': dex.amount,
-#                 'date': dex.date,
-#                 'balance': balance,
-#                 'source': 'DailyExpense'
-#             })
-
-        
-#         total_spent = sum([entry['spend'] for entry in all_entries])
-#         total_expenses_all_projects += total_spent
-
-
-#         projects_data.append({
-#             'project': project,
-#             'daily_expenses': all_entries,
-#             'total_expenses_project': total_budget,
-#             'total_spent': total_spent
-#         })
-
-#     context = {
-#         'projects_data': projects_data,
-#         'selected_start_month': start_month,
-#         'selected_end_month': end_month,
-#         'selected_year': year,
-#         'months': [f"{i:02d}" for i in range(1, 13)],
-#         'years': [str(y) for y in range(datetime.now().year - 2, datetime.now().year + 2)],
-#         'total_expenses_all_projects': total_expenses_all_projects,
-#         'projects': Project.objects.all(),
-#         'edit_id': edit_id,
-
-#     }
-
-#     return render(request, 'projects/daily.html', context)
 
 def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
