@@ -1,7 +1,7 @@
 # Register your models here.
 
 from django.contrib import admin
-from .models import  Project, Expense,Payment,DailyExpense,CustomProject
+from .models import *
 
 
 admin.site.site_header = "The Elite Dream Builders Admin"
@@ -13,3 +13,4 @@ admin.site.register(Expense)
 admin.site.register(Payment)
 admin.site.register(DailyExpense)
 admin.site.register(CustomProject)
+admin.site.register(SiteImage)
