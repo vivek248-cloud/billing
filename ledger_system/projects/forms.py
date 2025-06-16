@@ -29,7 +29,15 @@ class ExpenseForm2(forms.ModelForm):
 class ExpenseForm(forms.ModelForm):
     class Meta:
         model = Expense
-        fields = [ 'description', 'area', 'unit', 'rate', 'amount', 'date']
+        fields = [ 'description', 'area', 'unit', 'rate', 'note', 'amount', 'date']
+        widgets = {
+            'description': forms.TextInput(attrs={'class': 'form-control'}),
+            'area': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'unit': forms.TextInput(attrs={'class': 'form-control'}),
+            'rate': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'note': forms.Textarea(attrs={'class': 'form-control', 'rows': 2}),  # optional if you want note in form
+            'date': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}),
+        }
 
 
 
