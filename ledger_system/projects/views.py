@@ -345,19 +345,41 @@ def client_details(request, project_id):
     return render(request, 'projects/client_details.html', context)
 
 
+from django.shortcuts import render, get_object_or_404, redirect
 from .forms import SiteImageForm
+from .models import Project
+from PIL import Image
+from io import BytesIO
+from django.core.files.uploadedfile import InMemoryUploadedFile
+import sys
+
+def compress_image(file, quality=40):
+    image_temp = Image.open(file)
+    image_temp = image_temp.convert('RGB')  # ensure compatibility (for PNG, etc.)
+    output_io = BytesIO()
+    image_temp.save(output_io, format='JPEG', quality=quality)
+    output_io.seek(0)
+    return InMemoryUploadedFile(
+        output_io, 'ImageField', file.name, 'image/jpeg', sys.getsizeof(output_io), None
+    )
 
 def upload_site_image(request, project_id):
     project = get_object_or_404(Project, id=project_id)
+    
     if request.method == 'POST':
         form = SiteImageForm(request.POST, request.FILES)
         if form.is_valid():
+            image_file = request.FILES['image']
+            compressed_image = compress_image(image_file, quality=40)  # Reduce size
+            
             site_image = form.save(commit=False)
+            site_image.image = compressed_image
             site_image.project = project
             site_image.save()
             return redirect('client_details', project_id=project.id)
     else:
         form = SiteImageForm()
+
     return render(request, 'projects/upload_image.html', {'form': form, 'project': project})
 
 
