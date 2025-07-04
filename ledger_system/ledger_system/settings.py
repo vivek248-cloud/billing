@@ -155,7 +155,7 @@ STATICFILES_DIRS = [
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Where collectstatic dumps files
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # For uploaded files
+MEDIA_ROOT = '/var/www/edb-media'
 
 
 # Whitenoise configuration for production static files serving
