@@ -209,10 +209,12 @@
 <div class="swiper mySwiper">
   <div class="swiper-wrapper">
     {% for img in site_images %}
-      <div class="swiper-slide">
-        <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
-        <p>{{ img.description }}</p>
-      </div>
+      {% if img.image %}
+        <div class="swiper-slide">
+          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
+          <p>{{ img.description }}</p>
+        </div>
+      {% endif %}
     {% endfor %}
   </div>
 
@@ -221,6 +223,7 @@
   <div class="swiper-button-prev"></div>
   <div class="swiper-pagination"></div>
 </div>
+
 
 
 <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
