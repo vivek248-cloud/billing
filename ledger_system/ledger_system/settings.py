@@ -21,6 +21,7 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['*', 'billing-r8ie.onrender.com','edbbilling.com'] # Later for production: ['yourdomain.com', 'www.yourdomain.com']
 
+ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling']
 
 CLOUDINARY_STORAGE = {
     'CLOUD_NAME': os.environ.get('CLOUDINARY_CLOUD_NAME'),
