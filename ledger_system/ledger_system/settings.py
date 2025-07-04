@@ -112,12 +112,16 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 #     }
 # }
 DATABASES = {
-    'default': dj_database_url.config(
-        default='postgresql://root:F0HBo1lrN5WznE8CbqETd1eQQY9EMb0f@dpg-d0srf63e5dus73bi00ig-a.oregon-postgres.render.com/billing_ehp8',
-        conn_max_age=600,
-        ssl_require=True
-    )
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'billingdb',
+        'USER': 'billinguser',
+        'PASSWORD': 'Admin123',
+        'HOST': '127.0.0.1',
+        'PORT': '5432',
+    }
 }
+
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
