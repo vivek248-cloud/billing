@@ -498,10 +498,17 @@
 <div class="swiper mySwiper">
   <div class="swiper-wrapper">
     {% for img in site_images %}
-      <div class="swiper-slide">
-        <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
-        <p>{{ img.description }}</p>
-      </div>
+      {% if img.image %}
+        <div class="swiper-slide">
+          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
+          <p>{{ img.description }}</p>
+        </div>
+      {% else %}
+        <div class="swiper-slide">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="No image uploaded" style="width: 100%; border-radius: 10px;">
+          <p>No image uploaded for this entry.</p>
+        </div>
+      {% endif %}
     {% endfor %}
   </div>
 
@@ -510,6 +517,7 @@
   <div class="swiper-button-prev"></div>
   <div class="swiper-pagination"></div>
 </div>
+
 
 
 <!-- Swiper JS -->
