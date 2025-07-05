@@ -160,10 +160,12 @@ MEDIA_ROOT = '/var/www/edb-media'
 
 
 # Whitenoise configuration for production static files serving
-if not DEBUG:
-    # STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
+# Always defined (for both DEBUG and non-DEBUG)
+STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 
+# Optional: override for production
+if not DEBUG:
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 # Security settings (good practice for production)
