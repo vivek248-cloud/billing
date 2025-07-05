@@ -2,7 +2,9 @@
 
 import os
 from pathlib import Path
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR == /root/edb/billing/ledger_system
+
+# BASE_DIR = Path(__file__).resolve().parent.parent
 import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'
