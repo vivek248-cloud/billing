@@ -134,8 +134,9 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    # os.path.join(BASE_DIR, 'static_assets'),
+    "/root/edb/billing/ledger_system/static_assets",
 ]
+
 
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Where collectstatic dumps files
