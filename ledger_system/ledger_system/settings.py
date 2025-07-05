@@ -24,8 +24,6 @@ ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling.com']
 
 
 
-if not DEBUG:
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
 STATICFILES_FINDERS = [
@@ -102,17 +100,7 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 
 # Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',
-#         'NAME': 'ledger_systems',
-#         'USER': 'root',
-#         'PASSWORD': 'Admin123',
-#         'HOST': 'localhost',
-#         'PORT': '3306',
-#     }
-# }
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
