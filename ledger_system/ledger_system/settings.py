@@ -145,10 +145,6 @@ STATICFILES_DIRS = [
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Where collectstatic dumps files
 
-MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/edb-media'
-
-
 # Whitenoise configuration for production static files serving
 # Always defined (for both DEBUG and non-DEBUG)
 STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
@@ -156,6 +152,12 @@ STATICFILES_STORAGE = 'django.contrib.staticfiles.storage.StaticFilesStorage'
 # Optional: override for production
 # if not DEBUG:
 #     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = '/var/www/edb-media'
+
+
 
 
 # Security settings (good practice for production)
