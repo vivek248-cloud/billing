@@ -133,9 +133,9 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    "/root/edb/billing/ledger_system/static_assets",
-]
+# STATICFILES_DIRS = [
+#     "/root/edb/billing/ledger_system/static_assets",
+# ]
 
 
 
