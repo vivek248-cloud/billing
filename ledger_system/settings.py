@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'billingdb',
         'USER': 'billinguser',# billinguser for production
         'PASSWORD': 'Admin123',
