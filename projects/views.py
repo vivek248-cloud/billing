@@ -375,6 +375,10 @@ def upload_site_image(request, project_id):
         if form.is_valid():
             site_image = form.save(commit=False)
             site_image.project = project
+
+            # 👇 This is critical to ensure image is written to disk
+            site_image.image = request.FILES['image']
+
             site_image.save()
             return redirect('client_details', project_id=project.id)
     else:
