@@ -99,7 +99,7 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL as the database backend
         'NAME': 'billingdb',
         'USER': 'billinguser',# billinguser for production
         'PASSWORD': 'Admin123',
@@ -156,9 +156,9 @@ if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
-
+import os
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/edb-media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 
