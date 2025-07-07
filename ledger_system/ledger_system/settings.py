@@ -2,19 +2,10 @@
 
 import os
 from pathlib import Path
-<<<<<<< HEAD
-import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
-# BASE_DIR = Path(__file__).resolve().parent.parent
-import dj_database_url
-
-# Build paths inside the project like this: BASE_DIR / 'subdir'
-
-
+# import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'
 
@@ -40,8 +31,6 @@ ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling.com']
 
 # Application definition
 INSTALLED_APPS = [
-    'cloudinary',
-    'cloudinary_storage',
 
     'jazzmin',  # for admin interface customization
     'django.contrib.admin',
@@ -60,7 +49,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+     'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoiseMiddleware for serving static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',  # SessionMiddleware should be here
     'projects.middleware.BlockUnauthorizedMiddleware',  # Your custom middleware should come after
     'django.middleware.common.CommonMiddleware',
@@ -110,12 +99,12 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.mysql',
         'NAME': 'billingdb',
-        'USER': 'billinguser',
+        'USER': 'billinguser',# billinguser for production
         'PASSWORD': 'Admin123',
         'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PORT': '5432',# 5432 is the default port for PostgreSQL
     }
 }
 
