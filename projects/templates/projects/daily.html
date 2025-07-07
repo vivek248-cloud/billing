@@ -1,0 +1,778 @@
+
+{% load static %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+    <title>Daily Report</title>
+    <meta property="og:title" content="Welcome to The Elite Dream Builders Billing">
+    <meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments.">
+    <meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG">
+    <meta property="og:url" content="https://edbbilling.com">
+    <meta name="twitter:card" content="summary_large_image">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+        <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "LocalBusiness",
+      "name": "The Elite Dream Builders",
+      "url": "https://www.edbbilling.com",
+      "logo": "https://www.edbbilling.com/static/images/logo.PNG",
+      "description": "Elite Dream Builders - View your projects, invoices, and payments online.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "IN"
+      }
+    }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #e0eafc, #cfdef3);
+            color: #333;
+            padding: 0px!important;
+            margin: 0;
+            cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
+        }
+
+        h2 {
+            text-align: center;
+            font-weight: 600;
+            margin-bottom: 25px;
+        }
+
+       .navbar {
+            background-color: #1e1e2f;
+            padding: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: white;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: gold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1rem;
+            margin: 0;
+            padding: 0;
+            z-index: 1000;
+        }
+
+        .nav-menu li a {
+            text-decoration: none;
+            color: white;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .nav-menu li a:hover {
+            color: gold;
+        }
+
+        .icon {
+            margin-right: 5px;
+        }
+
+       .hamburger {
+        display: none; /* will show only on mobile */
+        cursor: pointer;
+        flex-direction: column;
+        justify-content: space-between;
+        width: 25px;
+        height: 20px;
+        z-index: 1001;
+}
+
+    .hamburger span {
+        display: block;
+        height: 3px;
+        background: white;
+        border-radius: 5px;
+        margin: 4px 0;
+        transition: all 0.4s ease;
+    }
+    /* Transform hamburger to X when active */
+    .hamburger.active span:nth-child(1) {
+        transform: rotate(45deg) translate(5px, 5px);
+    }
+
+    .hamburger.active span:nth-child(2) {
+        opacity: 0;
+    }
+
+    .hamburger.active span:nth-child(3) {
+        transform: rotate(-45deg) translate(6px, -6px);
+    }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                background-color: #1e1e2f;
+                position: absolute;
+                top: 110px;
+                right: 0;
+                left: 0;
+                justify-content: center;
+                width: 100%;
+                padding: 1rem;
+            }
+
+            .nav-menu.active {
+                display: flex;
+            }
+
+            .hamburger {
+                display: block;
+            }
+        }
+
+
+.card {
+  padding: 1rem;
+  margin: 1rem 0;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-x: hidden; /* prevent overflow outside card */
+}
+
+.table-responsive {
+  width: 100%;
+  overflow-x: auto; /* allow horizontal scrolling on small screens */
+  -webkit-overflow-scrolling: touch; /* smooth scrolling on iOS */
+}
+
+.main-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 600px; /* prevent squishing on desktop */
+}
+
+.main-table th, .main-table td {
+  padding: 0.5rem 1rem;
+  border: 1px solid #ddd;
+  text-align: left;
+  white-space: nowrap; /* keep content in one line */
+}
+
+.main-table thead {
+  background-color: #f7f7f7;
+  font-weight: 600;
+}
+
+.total-row td {
+  background-color: #f0f0f0;
+  font-weight: 700;
+}
+
+/* Responsive text size for smaller devices */
+@media (max-width: 600px) {
+  .card h3 {
+    font-size: 1.2rem;
+  }
+  .card p {
+    font-size: 1rem;
+  }
+  .main-table th, .main-table td {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+
+
+@media (max-width: 600px) {
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .main-table {
+    min-width: 600px;
+  }
+
+  .main-table th, .main-table td {
+    padding: 0.3rem 0.5rem;
+    font-size: 0.9rem;
+  }
+}
+        .form-inline {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .form-inline label {
+            font-weight: 500;
+            margin-right: 5px;
+        }
+
+        .form-inline input,
+        .form-inline select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px 16px;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th, td {
+            padding: 12px 15px;
+            border: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #1f2937;
+            color: white;
+            font-weight: 500;
+        }
+
+        tr:nth-child(even) {
+            background-color: #d1f4fa;
+        }
+
+        tr:hover {
+            background-color: #f3f4f6;
+        }
+
+        .edit {
+            color: #3b82f6;
+            font-weight: bold;
+            text-decoration: none;
+            padding: 6px 10px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .edit:hover {
+            background-color: #e0edff;
+        }
+
+        .highlight-total-expense {
+            text-align: center;
+            font-size: 20px;
+            font-weight: 600;
+            color: #000;
+            background-color: #e5e7eb;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+            margin-top: 40px;
+            position:fixed;
+            bottom: 10px;
+            left:1.7%;
+        }
+
+        .expense-value {
+            color: red;
+            font-weight: 800;
+            font-size: 26px;
+            margin-left: 10px;
+        }
+
+       
+        a{
+            text-decoration: none;
+            color: #ffffff;
+            font-weight: bold;
+        }
+        .message {
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        .message.error {
+            color: red;
+        }
+
+        .message.success {
+            color: green;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        .total-row
+        {
+ 
+            font-size: 16px;
+            font-weight: bold;
+            background-color:rgb(199, 199, 199)!important;
+       
+        }
+        .rupees {
+            text-align: right!important;
+            font-size: 16px;
+            font-weight: 400;
+            padding-right: .95px;
+        }
+        .arrow {
+            width: 20px;
+            height: 20px;
+            fill:rgb(255, 255, 255);
+            transform:rotate(90deg);
+            text-align: center;
+            margin-right: 8px;
+            margin-top: 3px;
+            transition: transform 0.3s ease, fill 0.3s ease;
+        }
+        .nav-links li:hover .arrow ,.nav-links li:active .arrow {
+    transform:rotate(-90deg);
+    fill:#ffffff !important;
+    color:#ffffff !important;
+    }
+.remove-btn
+    {width:200px;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: 0.3s;
+        background-color: red!important;
+}
+
+         @media (max-width: 1024px) {
+    .form-inline {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .highlight-total-expense {
+        position: static;
+        margin-top: 20px;
+    }
+
+    
+    table th, table td {
+        padding: 10px;
+        font-size: 22px;
+    }
+}
+
+@media (max-width: 768px) {
+    
+
+    .card {
+        padding: 15px 20px;
+    }
+
+    .form-inline input,
+    .form-inline select {
+        width: 100%;
+    }
+
+    .highlight-total-expense {
+        font-size: 22px;
+        padding: 10px 15px;
+    }
+
+    .expense-value {
+        font-size: 22px;
+    }
+
+    .rupees {
+        font-size: 20px!important;
+        padding-right: 0;
+    }
+
+    .header img {
+        width: 80px;
+    }
+
+    ul {
+        width: 100%;
+    }
+
+    table, thead, tbody, th, td, tr {
+        display:flex;
+        flex-direction: column;
+        width: 100%;
+    }
+
+    thead {
+        display: block;
+    }
+
+    tr {
+        margin-bottom: 15px;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        background: #fff;
+    }
+
+    td {
+        padding: 10px;
+        text-align: left;
+        position: relative;
+        font-size: 20px!important;
+    }
+
+    td:before {
+        content: attr(data-label);
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+    .form-inline input,
+        .form-inline select {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 18px;
+        }
+        .main-table th, .main-table td {
+        padding: 8px;
+        font-size: 14px;
+        white-space: nowrap;
+        display: block;
+        width: 100%;
+    }
+    .main-table {
+        font-size: 14px;
+        display: block;
+        overflow-x: auto;
+    }
+}
+
+.rotate-message {
+  background: #fffae6;
+  color: #665500;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 600;
+  border: 1px solid #ffd700;
+  border-radius: 6px;
+  margin: 1rem 0;
+}
+
+/* Show only on small portrait devices */
+@media (max-width: 600px) and (orientation: portrait) {
+  #rotate-screen-message {
+    display: block !important;
+  }
+}
+
+/* Hide on landscape or larger screens */
+@media (orientation: landscape), (min-width: 601px) {
+  #rotate-screen-message {
+    display: none !important;
+  }
+}
+
+
+@media (max-width: 480px) {
+    body {
+        font-size: 14px;
+    }
+    .main-table th, .main-table td {
+        padding: 8px;
+        font-size: 14px;
+        white-space: nowrap;
+        display: block;
+        width: 100%;
+    }
+    .main-table {
+        font-size: 14px;
+        display: block;
+        overflow-x: auto;
+    }
+    h2 {
+        font-size: 18px;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .form-inline {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .form-inline label {
+        margin-right: 0;
+    }
+   
+    .form-inline input[type="text"],
+    .form-inline input[type="number"],
+    .form-inline input[type="date"],
+    .form-inline select {
+        width: 89%;
+    }
+
+    button {
+        width: 100%;
+        padding: 10px;
+        font-size: 14px;
+    }
+
+   
+}
+
+    </style>
+</head>
+<body>
+    
+    <nav class="navbar">
+        <div class="logo"><img src="{% static 'images/logo.PNG' %}" alt="Logo" style="width: 80px; height: auto; margin-bottom: 20px;">EDB Billing</div>
+        
+        <ul class="nav-menu" id="nav-menu">
+            <li><a href="{% url 'billing' %}"><span class="icon">📋</span> Billing</a></li>
+            <li><a href="{% url 'daily_expense' %}"><span class="icon">📋</span> Daily Expense</a></li>
+            <li><a href="{% url 'daily_statistics' %}"><span class="icon">📊</span> Statistics</a></li>
+            
+            <li><a href="{% url 'add_project' %}"><span class="icon">➕</span> Add Project</a></li>
+            <li><a href="{% url 'add_expense' %}"><span class="icon">💰</span> Add Budget</a></li>
+            <li><a href="{% url 'add_payment' %}"><span class="icon">💳</span> Add Payment</a></li>
+            <li>
+                <a href="{% url 'logout' %}" style="color: white; background-color:  #3b82f6; padding: 6px 12px; border-radius: 5px;">
+                    <span class="icon">🚪</span> Logout
+                </a>
+            </li>
+        </ul>
+        <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+            <span></span>
+            <span></span>
+            <span></span>
+        </div>
+
+    </nav>
+<div id="rotate-screen-message" class="rotate-message" style="display:none;">
+  📱 For better viewing, please rotate your device to <strong>landscape</strong> mode.
+</div>
+    <div class="header">
+        <h1>Daily Expense Report > ></h1>
+    </div>
+    
+
+    <div class="card">
+        <form method="get" class="form-inline">
+            <label>Start Date:</label>
+ <input type="date" name="start_date" value="{{ start_date }}">
+  <label>End Date:</label>
+  <input type="date" name="end_date" value="{{ end_date }}">
+
+  {% comment %} <label>Start Month:</label>
+  <select name="start_month">
+    <option value="">-----</option>
+    {% for m in months %}
+      <option value="{{ m }}" {% if m == selected_start_month|stringformat:"02d" %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select>
+
+  <label>End Month:</label>
+  <select name="end_month">
+    <option value="">-----</option>
+    {% for m in months %}
+      <option value="{{ m }}" {% if m == selected_end_month|stringformat:"02d" %}selected{% endif %}>{{ m }}</option>
+    {% endfor %}
+  </select>
+
+  <label>Year:</label>
+  <select name="year">
+    <option value="">--</option>
+    {% for y in years %}
+      <option value="{{ y }}" {% if y == selected_year|stringformat:"s" %}selected{% endif %}>{{ y }}</option>
+    {% endfor %}
+  </select> {% endcomment %}
+            <button type="submit">Filter</button>
+        </form>
+    </div>
+
+    
+
+    <div class="card">
+        <h4>Add Daily Spent Amount</h4>
+        <form method="post" class="form-inline">
+            {% csrf_token %}
+            <input type="hidden" name="add_daily_expense" value="true" >
+    
+            <label>Client:</label>
+            <select name="project" required>
+                <option value="">Select Client</option>
+                {% for project in projects %}
+                <option value="{{ project.id }}">{{ project.name }} ({{ project.client_name }})</option>
+                {% endfor %}
+            </select>
+    
+            <label>Category:</label>
+            <input type="text" name="category" value="{{ edit_expense.category }}" placeholder="e.g. Food, Medical" required>
+
+            <label>Description:</label>
+            <input type="text" name="description" value="{{ edit_expense.description }}" placeholder="Optional">
+
+            <label>Remarks:</label>
+            <input type="text" name="remark" value="{{ edit_expense.remark }}" placeholder="Optional">
+            <label>Amount:</label>
+            <input type="number" step="0.01" name="amount" value="{{ edit_expense.amount }}" placeholder="Amount" required>
+
+            <label>Date:</label>
+            <input type="date" name="date" value="{{ edit_expense.date|date:'Y-m-d' }}" placeholder="Date" required>
+
+            <button type="submit">Add Spending</button>
+        </form>
+    </div>
+    
+
+    {% if error_message %}
+        <div class="message error">{{ error_message }}</div>
+    {% endif %}
+    {% if success_message %}
+        <div class="message success">{{ success_message }}</div>
+    {% endif %}
+
+{% if edit_form %}
+<div class="card">
+  <h4>Edit Expense</h4>
+  <form method="post" class="form-inline">
+    {% csrf_token %}
+    <input type="hidden" name="edit_expense_id" value="{{ edit_expense.id }}">
+
+    {{ edit_form.project }}  {# hidden input now #}
+
+    <label>Category:</label>
+    {{ edit_form.category.errors }}{{ edit_form.category }}
+
+    <label>Description:</label>
+    {{ edit_form.description.errors }}{{ edit_form.description }}
+
+    <label>Remark:</label>
+    {{ edit_form.remark.errors }}{{ edit_form.remark }}
+
+    <label>Amount:</label>
+    {{ edit_form.amount.errors }}{{ edit_form.amount }}
+
+    <label>Date:</label>
+    {{ edit_form.date.errors }}{{ edit_form.date }}
+
+    <button type="submit">Update Expense</button>
+  </form>
+</div>
+{% endif %}
+
+
+
+
+
+    {% for data in projects_data %}
+    <div class="card">
+  <h3>{{ data.project.name }} <small>(Client: {{ data.project.client_name }})</small></h3>
+  <p><strong>Total Budget: ₹{{ data.total_expenses_project|floatformat:0|intcomma }}</strong></p>
+
+  <div class="table-responsive">
+    <table class="main-table">
+      <thead>
+        <tr>
+          <th>S.No</th>
+          <th>Date</th>
+          <th>Description</th>
+          <th>Spent</th>
+          <th>Balance</th>
+          <th>Remarks</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in data.daily_expenses %}
+        <tr>
+          <td>{{ forloop.counter }}</td>
+          <td>{{ row.expense.date|date:"d-m-Y" }}</td>
+          <td>{{ row.description }}</td>
+          <td class="rupees">₹{{ row.spend|floatformat:0|intcomma }}</td>
+          <td class="rupees">₹{{ row.balance|floatformat:0|intcomma }}</td>
+          <td>{{ row.remark }}</td>
+          <td>
+            <a href="?edit={{ row.expense.id }}&start_month={{ selected_start_month }}&end_month={{ selected_end_month }}&year={{ selected_year }}" class="edit">Edit</a>
+            <form method="post" style="display:inline;">
+              {% csrf_token %}
+              <input type="hidden" name="delete_expense_id" value="{{ row.expense.id }}">
+              <button type="submit" onclick="return confirm('Delete this daily expense?')" style="background-color:red;" class="remove-btn">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        <tr class="total-row">
+          <td colspan="5"><strong>Total Spent</strong></td>
+          <td colspan="2" class="rupees"><strong>₹{{ data.total_spent|floatformat:0|intcomma }}</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+    
+  {% endfor %}
+{% if total_expenses_all_projects %}
+  <div class="highlight-total-expense">
+      <span>Total Expense  {% if selected_start_month and selected_end_month %} month {{ selected_start_month }} to {{ selected_end_month }} : {% endif %}</span>
+      <span class="expense-value">₹{{ total_expenses_all_projects|floatformat:0|intcomma }}</span>
+  </div>
+{% endif %}
+    <script>
+        function toggleMenu() {
+            const menu = document.getElementById('nav-menu');
+            const hamburger = document.getElementById('hamburger');
+
+            menu.classList.toggle('active');
+            hamburger.classList.toggle('active');
+        }
+    </script>
+<script>
+  const dateInputs = document.querySelectorAll('input[type="date"]');
+  dateInputs.forEach(input => {
+    input.addEventListener('change', () => {
+      document.querySelector('select[name="start_month"]').value = '';
+      document.querySelector('select[name="end_month"]').value = '';
+      document.querySelector('select[name="year"]').value = '';
+    });
+  });
+</script>
+
+</body>
+</html>
+
+{% comment %}value : _domainconnect.gd.domaincontrol.com. {% endcomment %}
+{% comment %}name: _domainconnect {% endcomment %}

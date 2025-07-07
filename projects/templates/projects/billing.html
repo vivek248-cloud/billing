@@ -1,0 +1,234 @@
+
+{% extends 'projects/base.html' %}
+{% block title %}Billing{% endblock %}
+{% load static %}
+{% load extra_filters %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+    <title>Billing</title>
+  <meta name="description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments.">
+  <meta name="keywords" content="Elite Dream Builders, login, client login, project management, construction dashboard">
+  <meta name="author" content="The Elite Dream Builders">
+  <meta name="google-site-verification" content="68LnzYm0TJcA1eTKG1h7ySOYL0RviN56WFJNTtRZ9b4" />
+  <meta property="og:title" content="The Elite Dream Builders">
+  <meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments.">
+  <meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG">
+  <meta property="og:url" content="https://edbbilling.com">
+  <meta name="twitter:card" content="summary_large_image">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
+  
+ <script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "The Elite Dream Builders",
+  "url": "https://www.edbbilling.com",
+  "logo": "https://www.edbbilling.com/static/images/logo.PNG",
+  "description": "Elite Dream Builders - View your projects, invoices, and payments online.",
+  "address": {
+    "@type": "PostalAddress",
+    "addressCountry": "IN"
+  }
+}
+</script>
+
+    <style>
+        body {
+            cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
+            margin: 0!important;
+            padding: 0!important;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .nav-links ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+       
+        
+
+        .add_form_div {
+            display: flex;
+            justify-content: space-between;
+            gap: 20px;
+        }
+
+        .add-expense-form {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 48%;
+        }
+
+        
+
+
+        .main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .main-table th, .main-table td {
+            padding: 12px;
+            text-align: left;
+        }
+
+        .main-table th {
+           
+            color: white;
+        }
+
+        .right-align {
+            text-align: right;
+        }
+
+        .remove-btn {
+            background-color: red; 
+            color: white; 
+            border-radius: 5px; 
+            padding: 5px; 
+            cursor:pointer; 
+        }
+        .rotate-message {
+            background: #fffae6;
+            color: #665500;
+            padding: 1rem;
+            text-align: center;
+            font-weight: 600;
+            border: 1px solid #ffd700;  
+            border-radius: 6px;
+            margin: 1rem 0;
+        }
+
+/* Show only on small portrait devices */
+@media (max-width: 600px) and (orientation: portrait) {
+  #rotate-screen-message {
+    display: block !important;
+  }
+}
+
+/* Hide on landscape or larger screens */
+@media (orientation: landscape), (min-width: 601px) {
+  #rotate-screen-message {
+    display: none !important;
+  }
+}
+    </style>
+</head>
+<body>
+{% block content %}
+ <script>
+        function checkOrientation() {
+        const msg = document.getElementById('rotate-screen-message');
+        if(window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches) {
+            msg.style.display = 'block';
+        } else {
+            msg.style.display = 'none';
+        }
+        }
+
+        // Check on load
+        window.addEventListener('load', checkOrientation);
+
+        // Check on orientation change
+        window.addEventListener('orientationchange', checkOrientation);
+    </script>
+    <div id="rotate-screen-message" class="rotate-message" style="display:none;">
+            📱 For better viewing, please rotate your device to <strong>landscape</strong> mode.
+    </div>
+<div class="header">
+    
+   
+    
+</div>
+<!-- NAVBAR -->
+
+
+
+<!-- Add Expense Form -->
+
+
+
+
+{% if messages %}
+  <div class="alert-messages">
+    {% for message in messages %}
+      <div class="alert alert-success">{{ message }}</div>
+    {% endfor %}
+  </div>
+{% endif %}
+
+<table class="table table-bordered table-striped align-middle text-center main-table">
+    <thead class="table-dark">
+        <tr>
+            <th style="width: 5%;">S.No</th>
+            <th style="width: 10%;">Project ID</th>
+            <th style="width: 20%;">Client Name</th>
+            <th style="width: 20%;">Project Status</th>
+            <th style="width: 25%;">Total Budget</th>
+            <th style="width: 25%;">Total Paid</th>
+            <th style="width: 25%;">Yet to Receive</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for project in projects %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{project.id}}</td>
+            <td><a href="{% url 'client_details' project.id %}" class="text-decoration-none text-dark fw-bold">
+                {{ project.client_name }}</a>
+            </td>
+            <td>
+                <span class="status-dot {% if project.status == 'Not Started' %}not-started
+                    {% elif project.status == 'In Progress' %}in-progress
+                    {% elif project.status == 'Completed' %}completed
+                    {% elif project.status == 'On Hold' %}on-hold
+                    {% endif %}">
+                </span>
+                {{ project.status }}
+                <br>
+                <a href="{% url 'update_project_status' project.id %}" class="btn btn-sm btn-outline-secondary mt-1 btn-status-update">
+                    Update
+                </a>
+            </td>
+            <td class="right-align">{{ project|total_budget_with_expense|indian_currency }}</td>
+            <td class="right-align">
+                {% if project.payments.all %}
+                    {{ project.payments.all|total_payment|indian_currency }}
+                {% else %}
+                    ₹0
+                {% endif %}
+            <td class="right-align">
+                {% if project.remaining < 0 %}
+                    <span class="text-danger">{{ project.remaining|indian_currency }}</span>
+                {% else %}
+                    {{ project.remaining|indian_currency }}
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
+
+   
+
+
+
+</body>
+</html>

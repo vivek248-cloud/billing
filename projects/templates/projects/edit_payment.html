@@ -1,0 +1,35 @@
+{% extends 'projects/base.html' %}
+{% block content %}
+
+<h2>Edit Payment</h2>
+
+<form method="post">
+    {% csrf_token %}
+
+    <label>Project:</label>
+    <select name="project" required>
+        {% for project in projects %}
+            <option value="{{ project.id }}" {% if payment.project.id == project.id %}selected{% endif %}>
+                {{ project.client_name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <label>Amount:</label>
+    <input type="number" name="amount" value="{{ payment.amount }}" step="0.01" required>
+
+    <label>Payment Mode:</label>
+    <select name="payment_mode" required>
+        <option value="Cash" {% if payment.payment_method == 'Cash' %}selected{% endif %}>Cash</option>
+        <option value="Bank Transfer" {% if payment.payment_method == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
+        <option value="Cheque" {% if payment.payment_method == 'Cheque' %}selected{% endif %}>Cheque</option>
+    </select>
+
+    <button type="submit">Update Payment</button>
+</form>
+
+{% endblock %}
+
+
+
+
