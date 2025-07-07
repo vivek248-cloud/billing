@@ -49,7 +49,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+     'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoiseMiddleware for serving static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',  # SessionMiddleware should be here
     'projects.middleware.BlockUnauthorizedMiddleware',  # Your custom middleware should come after
     'django.middleware.common.CommonMiddleware',
