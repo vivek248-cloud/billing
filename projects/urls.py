@@ -14,6 +14,9 @@ urlpatterns = [
     # client dashboard
     path('client/dashboard/<str:phone>/', views.client_dashboard, name='client_dashboard'),
 
+    path('client/dashboard/<str:phone>/siteprocess/', views.siteprocess, name='siteprocess'),
+
+    path('client/dashboard/<str:phone>/siteimage/', views.siteimage, name='siteimage'),
 
     # update project status
     path('project/<int:project_id>/update-status/', views.update_project_status, name='update_project_status'),
@@ -40,6 +43,7 @@ urlpatterns = [
     path('delete-payment/<int:payment_id>/', views.delete_payment, name='delete_payment'),
     # path('add-payment/<int:project_id>/', views.add_payment, name='add_payment'),
     path('add_payment/', views.add_payment, name='add_payment'),
+
 
 
     path('projects/<int:project_id>/add-expense/', views.add_expense, name='add_expense'),

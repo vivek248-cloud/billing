@@ -325,37 +325,51 @@
   </ul>
 </nav>
 
-<div class="dashboard">
-  <h2>Welcome,  {{ project.client_name|title }}</h2>
-
-  <!-- Project Progress -->
-  <div class="section-title">Project Progress</div>
-  <div class="milestone-wrapper">
-    <div class="milestone-step {% if project.status in 'Not Started,In Progress,Completed,On Hold' %}active{% endif %}">
-      <div class="circle">1</div>
-      <span>Not Started</span>
-    </div>
-    <div class="line {% if project.status in 'In Progress,Completed,On Hold' %}active{% endif %}"></div>
-
-    <div class="milestone-step {% if project.status in 'In Progress,Completed,On Hold' %}active{% endif %}">
-      <div class="circle">2</div>
-      <span>In Progress</span>
-    </div>
-    <div class="line {% if project.status in 'Completed,On Hold' %}active{% endif %}"></div>
-
-    <div class="milestone-step {% if project.status in 'Completed,On Hold' %}active{% endif %}">
-      <div class="circle">3</div>
-      <span>Completed</span>
-    </div>
-    <div class="line {% if project.status == 'On Hold' %}active{% endif %}"></div>
-
-    <div class="milestone-step {% if project.status == 'On Hold' %}active{% endif %}">
-      <div class="circle">4</div>
-      <span>On Hold</span>
-    </div>
+<h3>Site Progress Images</h3>
+<div class="swiper mySwiper">
+  <div class="swiper-wrapper">
+    {% for img in site_images %}
+      {% if img.image %}
+        <div class="swiper-slide">
+          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
+          <p>{{ img.description }}</p>
+        </div>
+      {% else %}
+        <div class="swiper-slide">
+          <img src="{% static 'images/placeholder.jpg' %}" alt="No image uploaded" style="width: 100%; border-radius: 10px;">
+          <p>No image uploaded for this entry.</p>
+        </div>
+      {% endif %}
+    {% endfor %}
   </div>
 
- 
+  <!-- Optional controls -->
+  <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div>
+  <div class="swiper-pagination"></div>
+</div>
 
+
+
+<!-- Swiper JS -->
+  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    var swiper = new Swiper(".mySwiper", {
+      loop: true,
+      navigation: {
+        nextEl: ".swiper-button-next",
+        prevEl: ".swiper-button-prev",
+      },
+      pagination: {
+        el: ".swiper-pagination",
+        clickable: true,
+      },
+      slidesPerView: 1,
+      spaceBetween: 20,
+    });
+  });
+</script>
 </body>
 </html>

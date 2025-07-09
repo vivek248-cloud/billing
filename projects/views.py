@@ -170,7 +170,109 @@ def client_dashboard(request, phone):
 
     return render(request, 'projects/client_dashboard.html', context)
 
+def siteimage(request, phone):
+    project = Project.objects.filter(phone=phone).first()
 
+    if not project:
+        return HttpResponseForbidden("Project not found.")
+    
+    if request.session.get('client_project_id') != project.id:
+        return HttpResponseForbidden("Access denied.")
+
+    expenses = Expense.objects.filter(project=project)
+    payments = Payment.objects.filter(project=project).order_by('date')
+    site_images = SiteImage.objects.filter(project=project).order_by('-uploaded_at')  # ✅
+
+    total_expense = sum(exp.amount for exp in expenses)
+    budget = project.budget or Decimal('0')
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+
+    for payment in payments:
+        amount = Decimal(str(payment.amount))
+        cumulative_paid += amount
+        payment_rows.append({
+            'payment_obj': payment,
+            'id': payment.id,
+            'date': payment.date,
+            'amount': amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+        })
+        cumulative_paid_before = cumulative_paid
+
+    remaining = budget - total_expense
+    remaining_after_payment = remaining - cumulative_paid
+
+    context = {
+        'project': project,
+        'phone': phone,
+        'client_name': project.client_name,
+        'expenses': expenses,
+        'payment_rows': payment_rows,
+        'total_paid': cumulative_paid,
+        'remaining': remaining,
+        'remaining_after_payment': remaining_after_payment,
+        'site_images': site_images  # ✅ pass to template
+    }
+
+    return render(request, 'projects/siteimage.html', context)
+
+
+
+def siteprocess(request, phone):
+    project = Project.objects.filter(phone=phone).first()
+
+    if not project:
+        return HttpResponseForbidden("Project not found.")
+    
+    if request.session.get('client_project_id') != project.id:
+        return HttpResponseForbidden("Access denied.")
+
+    expenses = Expense.objects.filter(project=project)
+    payments = Payment.objects.filter(project=project).order_by('date')
+    site_images = SiteImage.objects.filter(project=project).order_by('-uploaded_at')  # ✅
+
+    total_expense = sum(exp.amount for exp in expenses)
+    budget = project.budget or Decimal('0')
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+
+    for payment in payments:
+        amount = Decimal(str(payment.amount))
+        cumulative_paid += amount
+        payment_rows.append({
+            'payment_obj': payment,
+            'id': payment.id,
+            'date': payment.date,
+            'amount': amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+        })
+        cumulative_paid_before = cumulative_paid
+
+    remaining = budget - total_expense
+    remaining_after_payment = remaining - cumulative_paid
+
+    context = {
+        'project': project,
+        'phone': phone,
+        'client_name': project.client_name,
+        'expenses': expenses,
+        'payment_rows': payment_rows,
+        'total_paid': cumulative_paid,
+        'remaining': remaining,
+        'remaining_after_payment': remaining_after_payment,
+        'site_images': site_images  # ✅ pass to template
+    }
+
+    return render(request, 'projects/siteprocess.html', context)
 
 
 # logout_view
