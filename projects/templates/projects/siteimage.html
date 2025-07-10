@@ -325,6 +325,23 @@
   </ul>
 </nav>
 
+<form method="get" class="mb-4">
+  <div class="row g-2">
+    <div class="col-md-4">
+      <label for="img_from" class="form-label">From Date</label>
+      <input type="date" name="img_from" id="img_from" value="{{ img_from }}" class="form-control">
+    </div>
+    <div class="col-md-4">
+      <label for="img_to" class="form-label">To Date</label>
+      <input type="date" name="img_to" id="img_to" value="{{ img_to }}" class="form-control">
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+      <button type="submit" class="btn btn-primary w-100">Filter</button>
+    </div>
+  </div>
+</form>
+
+
 <h3>Site Progress Images</h3>
 <div class="swiper mySwiper">
   <div class="swiper-wrapper">
@@ -332,7 +349,8 @@
       {% if img.image %}
         <div class="swiper-slide">
           <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
-          <p>{{ img.description }}</p>
+          <p class="text-muted" style="font-size: 0.9rem;">📅 Uploaded on {{ img.uploaded_at|date:"d M Y, h:i A" }}</p>
+          <p class="mt-2 mb-0"><strong>Description:</strong> {{ img.description }}</p>
         </div>
       {% else %}
         <div class="swiper-slide">

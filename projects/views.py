@@ -170,18 +170,19 @@ def client_dashboard(request, phone):
 
     return render(request, 'projects/client_dashboard.html', context)
 
+from django.utils.dateparse import parse_date
+
 def siteimage(request, phone):
     project = Project.objects.filter(phone=phone).first()
-
     if not project:
         return HttpResponseForbidden("Project not found.")
     
     if request.session.get('client_project_id') != project.id:
         return HttpResponseForbidden("Access denied.")
 
+    # Expense and Payment logic (same as before)
     expenses = Expense.objects.filter(project=project)
     payments = Payment.objects.filter(project=project).order_by('date')
-    site_images = SiteImage.objects.filter(project=project).order_by('-uploaded_at')  # ✅
 
     total_expense = sum(exp.amount for exp in expenses)
     budget = project.budget or Decimal('0')
@@ -207,6 +208,18 @@ def siteimage(request, phone):
     remaining = budget - total_expense
     remaining_after_payment = remaining - cumulative_paid
 
+    # ✅ Site Image Filters
+    from_date = parse_date(request.GET.get('img_from') or '')
+    to_date = parse_date(request.GET.get('img_to') or '')
+    site_images = SiteImage.objects.filter(project=project)
+
+    if from_date:
+        site_images = site_images.filter(uploaded_at__date__gte=from_date)
+    if to_date:
+        site_images = site_images.filter(uploaded_at__date__lte=to_date)
+
+    site_images = site_images.order_by('-uploaded_at')
+
     context = {
         'project': project,
         'phone': phone,
@@ -216,10 +229,13 @@ def siteimage(request, phone):
         'total_paid': cumulative_paid,
         'remaining': remaining,
         'remaining_after_payment': remaining_after_payment,
-        'site_images': site_images  # ✅ pass to template
+        'site_images': site_images,
+        'img_from': request.GET.get('img_from', ''),
+        'img_to': request.GET.get('img_to', ''),
     }
 
     return render(request, 'projects/siteimage.html', context)
+
 
 
 
