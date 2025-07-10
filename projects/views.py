@@ -373,6 +373,8 @@ from django.utils.dateparse import parse_date
 
 from .models import Project, Expense, Payment, SiteImage
 
+from datetime import datetime
+
 def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
@@ -432,7 +434,15 @@ def client_details(request, project_id):
         })
         cumulative_paid_before = cumulative_paid
 
+    # ------- SITE IMAGES FILTER -------
     site_images = SiteImage.objects.filter(project=project)
+    image_from = request.GET.get('image_from')
+    image_to = request.GET.get('image_to')
+
+    if image_from:
+        site_images = site_images.filter(uploaded_at__date__gte=image_from)
+    if image_to:
+        site_images = site_images.filter(uploaded_at__date__lte=image_to)
 
     context = {
         'project': project,
@@ -442,9 +452,12 @@ def client_details(request, project_id):
         'payment_rows': payment_rows,
         'total_paid': cumulative_paid,
         'site_images': site_images,
+        'image_from': image_from,
+        'image_to': image_to,
     }
 
     return render(request, 'projects/client_details.html', context)
+
 
 
 from django.shortcuts import render, get_object_or_404, redirect
