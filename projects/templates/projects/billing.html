@@ -177,7 +177,7 @@
     <thead class="table-dark">
         <tr>
             <th style="width: 5%;">S.No</th>
-            <th style="width: 10%;">Project ID</th>
+            <th style="width: 10%;">Project Name</th>
             <th style="width: 20%;">Client Name</th>
             <th style="width: 20%;">Project Status</th>
             <th style="width: 25%;">Total Budget</th>
@@ -189,7 +189,7 @@
         {% for project in projects %}
         <tr>
             <td>{{ forloop.counter }}</td>
-            <td>{{project.id}}</td>
+            <td>{{project.name}}</td>
             <td><a href="{% url 'client_details' project.id %}" class="text-decoration-none text-dark fw-bold">
                 {{ project.client_name }}</a>
             </td>
