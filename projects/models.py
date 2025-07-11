@@ -36,7 +36,7 @@ class Project(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='Not Started')  # ✅ new
 
     def __str__(self):
-        return self.name
+        return self.client_name
 
     @property
     def total_expenses(self):
@@ -98,7 +98,7 @@ class Payment(models.Model):
     )
 
     def __str__(self):
-        return f"{self.project.name} - {self.date} - {self.amount}"
+        return f"{self.project.client_name} - {self.date} - {self.amount}"
 
    
 
