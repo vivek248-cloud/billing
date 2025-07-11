@@ -353,7 +353,7 @@
     {% for img in site_images %}
       {% if img.image %}
         <div class="swiper-slide">
-          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
+          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%;height:100%; border-radius: 10px;">
           <p class="text-muted" style="font-size: 0.9rem;">📅 Uploaded on {{ img.uploaded_at|date:"d M Y, h:i A" }}</p>
           <p class="mt-2 mb-0"><strong>Description:</strong> {{ img.description }}</p>
         </div>
