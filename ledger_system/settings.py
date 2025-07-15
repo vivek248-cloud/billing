@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',  # For human-friendly formatting of numbers and dates
-    
+    'django.contrib.sitemaps',
     
     # Your apps
     'projects',
