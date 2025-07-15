@@ -1,0 +1,16 @@
+[2025-07-07 10:04:25 +0000] [70843] [INFO] Starting gunicorn 23.0.0
+[2025-07-07 10:04:25 +0000] [70843] [INFO] Listening at: unix:/run/gunicorn.sock (70843)
+[2025-07-07 10:04:25 +0000] [70843] [INFO] Using worker: sync
+[2025-07-07 10:04:25 +0000] [70844] [INFO] Booting worker with pid: 70844
+[2025-07-07 10:06:04 +0000] [70966] [INFO] Starting gunicorn 23.0.0
+[2025-07-07 10:06:04 +0000] [70966] [INFO] Listening at: unix:/run/gunicorn.sock (70966)
+[2025-07-07 10:06:04 +0000] [70966] [INFO] Using worker: sync
+[2025-07-07 10:06:04 +0000] [70967] [INFO] Booting worker with pid: 70967
+[2025-07-07 13:43:48 +0000] [70843] [ERROR] Worker (pid:70844) was sent SIGHUP!
+[2025-07-07 13:43:48 +0000] [70966] [ERROR] Worker (pid:70967) was sent SIGHUP!
+[2025-07-07 13:43:48 +0000] [70966] [INFO] Handling signal: hup
+[2025-07-07 13:43:48 +0000] [70843] [INFO] Handling signal: hup
+[2025-07-07 13:43:48 +0000] [70966] [INFO] Hang up: Master
+[2025-07-07 13:43:48 +0000] [70843] [INFO] Hang up: Master
+[2025-07-07 13:43:48 +0000] [74732] [INFO] Booting worker with pid: 74732
+[2025-07-07 13:43:49 +0000] [74733] [INFO] Booting worker with pid: 74733
