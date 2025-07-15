@@ -8,7 +8,7 @@ class BlockUnauthorizedMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        allowed_paths = ['', '/admin-login/', '/client/login/']
+        allowed_paths = ['/home/', '/admin-login/', '/client/login/']
         path = request.path_info
 
         if (
@@ -24,7 +24,7 @@ class BlockUnauthorizedMiddleware:
 
         if not request.session.get('admin_logged_in') and not request.session.get('user_logged_in'):
             if path not in allowed_paths:
-                return redirect('')
+                return redirect('/home/')
 
         elif path in ['/admin-login/', '/client/login/']:
             return redirect('/billing/')
