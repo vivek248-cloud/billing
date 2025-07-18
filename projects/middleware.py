@@ -8,7 +8,7 @@ class BlockUnauthorizedMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        allowed_paths = ['/home/', '/admin-login/', '/client/login/']
+        allowed_paths = ['/home/', '/admin-login/', '/client/login/', '/sitemap.xml']
         path = request.path_info
 
         if (
