@@ -1259,6 +1259,17 @@ def update_project_status(request, project_id):
 
 
 
+
+# views.py
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import StaticViewSitemap
+
+def custom_sitemap_view(request):
+    response = sitemap(request, sitemaps={'static': StaticViewSitemap()})
+    response['X-Robots-Tag'] = 'index, follow'  # ✅ Allow indexing
+    return response
+
+
 # Custom error handlers
 
 

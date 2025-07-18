@@ -58,5 +58,7 @@ urlpatterns = [
 
     path('project/<int:project_id>/upload/', views.upload_site_image, name='upload_site_image'),
 
+    path("sitemap.xml", views.custom_sitemap_view, name="sitemap"),
+
 ]
 
