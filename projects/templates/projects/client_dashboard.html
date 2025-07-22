@@ -330,6 +330,12 @@
 
   <!-- Project Progress -->
   <div class="section-title">Project Progress</div>
+  {% if project.status == "Completed" %}
+<div class="congrats-container" id="congratsMessage" data-aos="zoom-in">
+  🎉 Congratulations! Your project has been successfully completed. 🏗️✨
+</div>
+{% endif %}
+
   <div class="milestone-wrapper">
     <div class="milestone-step {% if project.status in 'Not Started,In Progress,Completed,On Hold' %}active{% endif %}">
       <div class="circle">1</div>
@@ -356,6 +362,19 @@
   </div>
 
  
+{% if project.status == "Completed" %}
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<script>
+  // Confetti burst on load
+  window.addEventListener('load', () => {
+    confetti({
+      particleCount: 150,
+      spread: 70,
+      origin: { y: 0.6 }
+    });
+  });
+</script>
+{% endif %}
 
 </body>
 </html>
