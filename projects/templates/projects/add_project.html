@@ -21,12 +21,16 @@
       <label for="phone">Client Phone</label>
       <input type="tel" name="phone" id="phone" class="form-control" required>
     </div>
-    <button type="submit" class="btn btn-success">Add Project</button>
+    <button type="submit" class="btn btn-success mt-2">Add Project</button>
   </form>
-  {% for project in projects %}
-  <ul>
-    <li style="text-decoration:none; list-style:none;">{{ forloop.counter }}. {{ project.name }} - {{ project.client_name }} ({{ project.phone }})</li>
-  </ul>
-  {% endfor %}
+  
+  <div class="scroll-container">
+    <ul>
+      {% for project in projects %}
+        <li>{{ forloop.counter }}. {{ project.name }} - {{ project.client_name }} ({{ project.phone }})</li>
+      {% endfor %}
+    </ul>
+  </div>
+
 </div>
 {% endblock %}
