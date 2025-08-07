@@ -441,9 +441,9 @@
       <tr><td colspan="7">No payments found.</td></tr>
       {% endfor %}
 
-      <tr style="background-color: #10b981; color: white;border:4px double #000000ff; border-radius:10px;">
+      <tr style="border:4px double #000000ff; border-radius:10px;">
         <td colspan="4" style="font-weight: bold;">Total:</td>
-        <td colspan="3" style="text-align: right; font-weight: bold;">{{ total_paid|indian_currency }}</td>
+        <td colspan="3" style="text-align: right; font-weight: bold;background-color:#10b981;color:white;">{{ total_paid|indian_currency }}</td>
       </tr>
     </tbody>
   </table>
