@@ -330,23 +330,23 @@
   <div class="section-title">Project Summary</div>
   <table>
     <tbody style="border:4px double #000000ff; border-radius:10px;">
-      <tr class="project-info" style="border:4px double #000000ff; background-color: #adc3ffff;color: white;">
+      <tr class="project-info" style="border:4px double #000000ff; background-color: #adc3ffff;color: black;">
         <td>Name</td>
         <td class="value"><strong>{{ project.client_name|upper }}</strong></td>
       </tr>
-      <tr class="project-info" style="border:4px double #000000ff; background-color: #adc3ffff;color: white;">
+      <tr class="project-info" style="border:4px double #000000ff; background-color: #adc3ffff;color: black;">
         <td>Phone</td>
         <td class="value"><strong>{{ project.phone }}</strong></td>
       </tr>
-      <tr>
+      <tr class="project-info" style="border:4px double #000000ff;">
         <td>Total Budget</td>
         <td class="value">{{ project.total_expenses|indian_currency }}</td>
       </tr>
-      <tr>
+      <tr class="project-info" style="border:4px double #000000ff;">
         <td>Amount Paid</td>
         <td class="value">{{ project.payments.all|total_payment|indian_currency }}</td>
       </tr>
-      <tr>
+      <tr class="project-info" style="border:4px double #000000ff;">
         <td>Remaining Amount</td>
         <td class="value">{{ project.remaining|indian_currency }}</td>
       </tr>
@@ -397,13 +397,13 @@
 <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
   <table class="table table-striped table-bordered" style="min-width: 600px;">
     <thead>
-      <tr  style="background-color: #2563EB; color: white;">
-        <th>S.No</th>
-        <th>Date</th>
-        <th>Payment Mode</th>
-        <th>Amount Paid</th>
-        <th>Cumulative Before</th>
-        <th>Remaining After</th>
+      <tr>
+        <th   style="background-color: #2563EB; color: white;">S.No</th>
+        <th style="background-color: #2563EB; color: white;">Date</th>
+        <th style="background-color: #2563EB; color: white;">Payment Mode</th>
+        <th style="background-color: #2563EB; color: white;">Amount Paid</th>
+        <th style="background-color: #2563EB; color: white;">Cumulative Before</th>
+        <th style="background-color: #2563EB; color: white;">Remaining After</th>
         <th>Actions</th>
       </tr>
     </thead>
