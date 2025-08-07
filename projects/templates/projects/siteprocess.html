@@ -330,13 +330,13 @@
   <div class="section-title">Project Summary</div>
   <table>
     <tbody style="border:4px double #000000ff; border-radius:10px;">
-      <tr class="project-info" style="border:4px double #000000ff; background-color: #1D4ED8;color: white;">
+      <tr class="project-info" style="border:4px double #000000ff; background-color: #adc3ffff;color: white;">
         <td>Name</td>
-        <td class="value">{{ project.client_name|upper }}</td>
+        <td class="value"><strong>{{ project.client_name|upper }}</strong></td>
       </tr>
-      <tr class="project-info" style="border:4px double #000000ff; background-color: #1D4ED8;color: white;">
+      <tr class="project-info" style="border:4px double #000000ff; background-color: #adc3ffff;color: white;">
         <td>Phone</td>
-        <td class="value">{{ project.phone }}</td>
+        <td class="value"><strong>{{ project.phone }}</strong></td>
       </tr>
       <tr>
         <td>Total Budget</td>
@@ -396,8 +396,8 @@
 
 <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
   <table class="table table-striped table-bordered" style="min-width: 600px;">
-    <thead style="background-color: #2563EB; color: white;">
-      <tr>
+    <thead>
+      <tr  style="background-color: #2563EB; color: white;">
         <th>S.No</th>
         <th>Date</th>
         <th>Payment Mode</th>
