@@ -330,11 +330,11 @@
   <div class="section-title">Project Summary</div>
   <table>
     <tbody style="border:4px double #000000ff; border-radius:10px;">
-      <tr class="project-info" style="border:4px double #000000ff;">
+      <tr class="project-info" style="border:4px double #000000ff; background-color: #1D4ED8;color: white;">
         <td>Name</td>
         <td class="value">{{ project.client_name|upper }}</td>
       </tr>
-      <tr class="project-info">
+      <tr class="project-info" style="border:4px double #000000ff; background-color: #1D4ED8;color: white;">
         <td>Phone</td>
         <td class="value">{{ project.phone }}</td>
       </tr>
@@ -396,7 +396,7 @@
 
 <div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
   <table class="table table-striped table-bordered" style="min-width: 600px;">
-    <thead>
+    <thead style="background-color: #2563EB; color: white;">
       <tr>
         <th>S.No</th>
         <th>Date</th>
@@ -443,7 +443,7 @@
 
       <tr style="background-color: #10b981; color: white;border:4px double #000000ff; border-radius:10px;">
         <td colspan="4" style="font-weight: bold;">Total:</td>
-        <td colspan="3" style="text-align: right; font-weight: bold;">₹{{ total_paid|indian_currency }}</td>
+        <td colspan="3" style="text-align: right; font-weight: bold;">{{ total_paid|indian_currency }}</td>
       </tr>
     </tbody>
   </table>
