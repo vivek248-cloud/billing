@@ -61,6 +61,35 @@ MIDDLEWARE = [
 
 
 
+JAZZMIN_SETTINGS = {
+    "site_title": "Elite Dream Admin",
+    "site_header": "The Elite Dream Builders Admin",
+    "site_brand": "Elite Dream Builders",
+    "welcome_sign": "Welcome to The Elite Dream Builders Dashboard",
+    "copyright": "Elite Dream Builders",
+    
+    "icons": {
+        # Your app models
+        "projects.Project": "fas fa-project-diagram",
+        "projects.Expense": "fas fa-file-invoice-dollar",
+        "projects.Payment": "fas fa-money-bill-wave",
+        "projects.DailyExpense": "fas fa-calendar-day",
+        "projects.CustomProject": "fas fa-folder-plus",
+        "projects.SiteImage": "fas fa-image",
+
+        # Built-in auth models
+        "auth.User": "fas fa-user",
+        "auth.Group": "fas fa-users-cog",
+    },
+
+    "topmenu_links": [
+        {"name": "Home", "url": "/", "permissions": ["auth.view_user"]},
+    ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+}
+
 
 # Expire session after 10 minutes of inactivity
 SESSION_COOKIE_AGE = 600  # 10 minutes in seconds
