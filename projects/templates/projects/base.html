@@ -36,7 +36,7 @@
 <!-- CSS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="{% static 'css/ledger.css' %}" />
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css">
 <!-- Structured Data for SEO -->
 <script type="application/ld+json">
 {
@@ -60,97 +60,204 @@
             width:100vw;
             overflow-x: hidden;
         }
-        .navbar {
-            background-color: #1e1e2f;
-            padding: 1rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            color: white;
-        }
+       /* Navbar Base */
+.navbar {
+    background: rgba(30, 30, 50, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 1.2rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: gold;
-        }
+.navbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 1.6rem;
+    font-weight: 800;
+    color: #ffd700; /* Gold */
+    text-decoration: none;
+}
 
-        .nav-menu {
-            display: flex;
-            list-style: none;
-            gap: 1rem;
-            margin: 0;
-            padding: 0;
-            z-index: 1000;
-        }
+.brand-logo {
+    width: 58px;
+    height: 58px;
+    border-radius: 12px;
+    object-fit: contain;
+}
 
-        .nav-menu li a {
-            text-decoration: none;
-            color: white;
-            font-weight: 500;
-            transition: color 0.3s ease;
-        }
+.brand-text {
+    background: linear-gradient(to right, #ffd700, #ffed4e);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.5px;
+}
 
-        .nav-menu li a:hover {
-            color: gold;
-        }
+/* Navigation Menu */
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0;
+}
 
-        .icon {
-            margin-right: 5px;
-        }
+.nav-link {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 0.75rem 1.2rem;
+    color: #e2e8f0;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 1rem;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    position: relative;
+}
 
-       .hamburger {
-    display: none; /* will show only on mobile */
+.nav-link i {
+    font-size: 1.1rem;
+    transition: transform 0.3s ease;
+}
+
+.nav-link:hover {
+    color: #ffffff;
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
+}
+
+.nav-link:hover i {
+    transform: scale(1.2);
+}
+
+/* Active / Current Page Highlight */
+.nav-link.active {
+    background: rgba(59, 130, 246, 0.2);
+    color: #60a5fa;
+    border-left: 4px solid #3b82f6;
+}
+
+/* Logout Button */
+.logout-link {
+    background: linear-gradient(to right, #3b82f6, #2563eb) !important;
+    color: white !important;
+    font-weight: 600;
+}
+
+.logout-link:hover {
+    background: linear-gradient(to right, #2563eb, #1d4ed8) !important;
+    box-shadow: 0 4px 15px rgba(59, 130, 246, 0.4);
+}
+
+/* Hamburger Menu */
+.hamburger {
+    display: none;
     cursor: pointer;
     flex-direction: column;
-    justify-content: space-between;
-    width: 25px;
-    height: 20px;
+    gap: 5px;
+    width: 30px;
+    height: 22px;
     z-index: 1001;
 }
 
-    .hamburger span {
-        display: block;
-        height: 3px;
-        background: white;
-        border-radius: 5px;
-        margin: 4px 0;
+.hamburger span {
+    display: block;
+    height: 3px;
+    background: #ffffff;
+    border-radius: 3px;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.hamburger.active span:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.hamburger.active span:nth-child(2) {
+    opacity: 0;
+    transform: translateX(20px);
+}
+
+.hamburger.active span:nth-child(3) {
+    transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Main Content Offset */
+.main-content {
+    margin-top: 2rem;
+    padding: 0 1rem;
+}
+
+/* Responsive Design */
+@media (max-width: 992px) {
+    .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: 0;
+        width: 100%;
+        height: calc(100vh - 30px);
+        background: rgba(30, 30, 50, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        align-items: center;
+        justify-content: flex-start;
+        padding-top: 0.95rem;
+        transform: translateY(-120%);
+        opacity: 0;
+        visibility: hidden;
         transition: all 0.4s ease;
     }
-    /* Transform hamburger to X when active */
-    .hamburger.active span:nth-child(1) {
-        transform: rotate(45deg) translate(5px, 5px);
+
+    .nav-menu.active {
+        transform: translateY(0);
+        opacity: 1;
+        visibility: visible;
     }
 
-    .hamburger.active span:nth-child(2) {
-        opacity: 0;
+    .nav-link {
+        width: 80%;
+        justify-content: center;
+        padding: 1.2rem;
+        font-size: 1.1rem;
+        border-radius: 16px;
     }
 
-    .hamburger.active span:nth-child(3) {
-        transform: rotate(-45deg) translate(6px, -6px);
+    .hamburger {
+        display: flex;
     }
 
-        @media (max-width: 768px) {
-            .nav-menu {
-                display: none;
-                flex-direction: column;
-                background-color: #1e1e2f;
-                position: absolute;
-                top: 110px;
-                right: 0;
-                width: 100%;
-                padding: 1rem;
-            }
+    .navbar {
+        padding: 1rem 1.5rem;
+    }
 
-            .nav-menu.active {
-                display: flex;
-            }
+    .brand-text {
+        font-size: 1.4rem;
+    }
+}
 
-            .hamburger {
-                display: block;
-            }
-        }
+@media (max-width: 576px) {
+    .navbar-brand {
+        gap: 10px;
+    }
 
+    .brand-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .brand-text {
+        font-size: 1.3rem;
+    }
+}
 .scroll-container {
   max-height: 300px; /* Set height as needed */
   overflow-y: auto;
@@ -180,7 +287,692 @@
 }
 
 
-    </style>
+.summary-card {
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border-radius: 18px;
+  padding: 20px 22px;
+  height: 100%;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+    overflow: hidden;
+}
+
+.summary-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.18);
+}
+
+.summary-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 4px;
+  width: 100%;
+  border-radius: 18px 18px 0 0;
+  background: var(--accent-main);
+}
+
+/* Accent themes */
+.summary-active {
+  --accent-main: #2563eb;
+}
+
+.summary-completed {
+  --accent-main: #16a34a;
+}
+
+/* Header */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.header-icon {
+  font-size: 1.3rem;
+  color: var(--accent-main);
+}
+
+.card-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+
+.header-spin {
+  font-size: 1.1rem;
+  color: var(--accent-main);
+  opacity: 0.45;
+}
+
+/* Stats */
+.stat-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(203, 213, 225, 0.6);
+}
+
+.stat-item:last-child {
+  border-bottom: none;
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.stat-value {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #020617;
+}
+
+/* Amount colors */
+.amount-budget {
+  color: #2563eb;
+}
+
+.amount-paid {
+  color: #16a34a;
+}
+
+/* Highlight (Yet to Receive) */
+.highlight {
+  margin-top: 8px;
+  padding: 12px 14px !important;
+  border-radius: 12px;
+  background: rgba(239, 68, 68, 0.1);
+  border-left: 4px solid #dc2626;
+}
+
+.highlight .stat-label {
+  color: #7f1d1d;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.highlight .stat-value {
+  font-size: 1.3rem !important;
+  color: #b91c1c;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .summary-card {
+    padding: 18px;
+  }
+
+  .card-title {
+    font-size: 1.05rem;
+  }
+
+  .stat-value {
+    font-size: 1rem;
+  }
+
+  .highlight .stat-value {
+    font-size: 1.2rem !important;
+  }
+}
+
+.project-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  background: rgba(255, 255, 255, 0.73);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px;
+  overflow: hidden;
+  
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  margin-bottom: 2rem;
+  font-size: 1rem;
+}
+
+.project-table thead {
+  background: linear-gradient(to bottom, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+  color: #ffffff;
+}
+
+.project-table th {
+  padding: 1.5rem 1rem;
+  text-align: center;
+  font-weight: 700;
+  font-size: 1.05rem;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  border-right: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.project-table th:last-child {
+  border-right: none;
+}
+
+.project-table tbody tr {
+  transition: all 0.3s ease;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+
+
+.project-table td {
+  padding: 1.4rem 1rem;
+  text-align: center;
+  border-bottom: 1px dashed rgba(226, 232, 240, 0.88);
+  border-right: 1px dashed rgba(226, 232, 240, 1);
+  color: #1e293b;
+  font-weight: 500;
+}
+
+.project-table td:last-child {
+  border-right: none;
+}
+
+.project-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+/* Optional: Softer vertical lines in header for consistency */
+.project-table thead th {
+  border-right: 1px dashed rgba(255, 255, 255, 0.2);
+}
+
+/* Column-specific styles */
+.sno {
+  font-weight: 700;
+  color: #475569;
+}
+
+.project-name {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.client-link {
+  color: #000000ff;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+
+
+/* Status Badge */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.5rem 1rem;
+  border-radius: 50px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  text-transform: capitalize;
+  background: rgba(0, 0, 0, 0);
+  color: #000000ff;
+}
+
+.status-badge::before {
+  content: '';
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+
+.status-not-started { background: #6b7280; }   /* Gray */
+.status-not-started::before { background: #9ca3af; }
+
+  /* Blue */
+.status-in-progress::before { background: #0073ffff; }
+
+     /* Green */
+.status-completed::before { background: #17ff6cff; }
+
+    /* Amber */
+.status-on-hold::before { background: #fbbf24; }
+
+.status-default { background: #64748b; }
+
+/* Update Button */
+.btn-update-status {
+  display: block;
+  width: fit-content;
+  margin-top: 0.75rem;
+  padding: 0.45rem 1rem;
+  background: transparent;
+  color: #000000ff;
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: 50px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  justify-self: center;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+}
+
+.btn-update-status:hover {
+  background: #000000ff;
+  color: #fff;
+  transform: translateY(-2px);
+}
+
+/* Amount Columns */
+.amount {
+  font-weight: 800;
+  font-size: 1.15rem;
+}
+
+.budget {
+color: #2563ebff!important;
+  font-weight: 900;
+  font-size: 1.2rem;
+}
+
+.paid {
+color: #16a34aff!important;
+  font-weight: 900;
+  font-size: 1.2rem;
+}
+
+.remaining {
+    color: #ff0000ff!important;
+    font-weight: 900;
+    font-size: 1.2rem;
+}
+
+.remaining.negative {
+  background: linear-gradient(to right, #ef4444, #ff0000ff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* Responsive */
+@media (max-width: 992px) {
+  .project-table th,
+  .project-table td {
+    padding: 1rem 0.8rem;
+    font-size: 0.95rem;
+  }
+  .amount { font-size: 1.05rem; }
+}
+
+@media (max-width: 768px) {
+  .project-table {
+    border-radius: 18px;
+  }
+  .project-table th,
+  .project-table td {
+    padding: 0.9rem 0.6rem;
+    font-size: 0.9rem;
+  }
+  .status-badge { font-size: 0.85rem; padding: 0.4rem 0.9rem; }
+  .btn-update-status { padding: 0.4rem 1rem; font-size: 0.8rem; }
+}
+
+
+
+
+/* New Premium Glassmorphic Style Dashboard */
+.dashboard-wrapper {
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 50%, #bae6fd 100%);
+  min-height: 100vh;
+  padding: 1rem 0;
+  border-radius: 20px;
+}
+
+.dashboard-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Filter Bar */
+.filter-bar {
+  margin-bottom: 2rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: blur(15px);
+  padding: 1rem;
+  border-radius: 20px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+/* Section Headers */
+.section-header {
+  text-align: center;
+  margin: 2.5rem 0 1.5rem;
+}
+
+.section-header h4 {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: #0c4a6e;
+}
+
+/* KPI Grids */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.financial {
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+}
+
+/* KPI Cards - Glassmorphic with Icons */
+.kpi-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 24px;
+  padding: 2rem;
+  box-shadow: 0 12px 35px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  transition: all 0.4s ease;
+}
+
+.kpi-card:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+}
+
+.kpi-icon {
+  font-size: 2.8rem;
+  color: var(--accent);
+  opacity: 0.9;
+}
+
+.kpi-content h6 {
+  font-size: 1rem;
+  color: #64748b;
+  margin: 0 0 0.5rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.kpi-content h3 {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #1e293b;
+  margin: 0;
+}
+
+.kpi-card.large .kpi-icon { font-size: 3.2rem; }
+.kpi-card.large .kpi-content h3 { font-size: 1.8rem; }
+
+/* Accent Colors */
+.neutral { --accent: #64748b; }
+.success { --accent: #22c55e; }
+.warning { --accent: #f59e0b; }
+.danger { --accent: #ef4444; }
+
+/* Charts */
+.charts-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 2rem;
+}
+
+.chart-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  border-radius: 28px;
+  padding: 2rem;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.12);
+  border: 1px solid rgba(255,255,255,0.3);
+  text-align: center;
+}
+
+.chart-header h5 {
+  font-size: 1.4rem;
+  color: #1e293b;
+  margin-bottom: 1.5rem;
+  font-weight: 600;
+}
+
+canvas {
+  max-height: 300px;
+  margin: 0 auto;
+}
+
+.chart-legend {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+  color: #475569;
+}
+
+.legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+/* Desktop Enhancements */
+@media (min-width: 768px) {
+  .charts-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  canvas {
+    max-height: 350px;
+  }
+
+  .kpi-grid {
+    gap: 2rem;
+  }
+}
+
+/* Filter Bar Container */
+.filter-bar {
+  margin: 1.5rem 0 2.5rem;
+}
+
+.filter-group {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 1.2rem 1.5rem;
+  border-radius: 20px;
+
+}
+
+/* Custom Select Styling */
+.select-wrapper {
+  position: relative;
+  min-width: 180px;
+}
+
+.custom-select {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 100%;
+  padding: 0.9rem 2.8rem 0.9rem 1.2rem;
+  background: rgba(255, 255, 255, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  border-radius: 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #1e293b;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+.custom-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: rgba(255, 255, 255, 0.6);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.custom-select:hover {
+  background: rgba(255, 255, 255, 0.5);
+  transform: translateY(-2px);
+}
+
+/* Select Icon */
+.select-icon {
+  position: absolute;
+  top: 50%;
+  right: 1rem;
+  transform: translateY(-50%);
+  font-size: 1.1rem;
+  color: #64748b;
+  pointer-events: none;
+  transition: color 0.3s ease;
+}
+
+.select-wrapper:focus-within .select-icon {
+  color: #3b82f6;
+}
+
+/* Apply Button - Primary */
+.btn-apply {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  height:50px;
+  padding: 0.9rem 1.8rem;
+  background: linear-gradient(to right, #3b82f6, #2563eb);
+  color: white;
+  font-weight: 600;
+  font-size: 1rem;
+  border: none;
+  border-radius: 18px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.3);
+}
+
+.btn-apply:hover {
+  background: linear-gradient(to right, #2563eb, #1d4ed8);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 25px rgba(59, 130, 246, 0.4);
+}
+
+.btn-apply:active {
+  transform: translateY(-1px);
+}
+
+.btn-apply i {
+  font-size: 1.1rem;
+}
+
+/* Reset Button - Outline Style */
+.btn-reset {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.9rem 1.6rem;
+  background: transparent;
+  color: #64748b;
+  font-weight: 600;
+  font-size: 1rem;
+  text-decoration: none;
+  border: 2px solid rgba(100, 116, 139, 0.4);
+  border-radius: 14px;
+  transition: all 0.3s ease;
+  backdrop-filter: blur(10px);
+}
+
+.btn-reset:hover {
+  background: rgba(100, 116, 139, 0.1);
+  color: #1e293b;
+  border-color: #64748b;
+  transform: translateY(-3px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filter-group {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 1rem;
+  }
+
+  .select-wrapper {
+    min-width: auto;
+  }
+
+  .btn-apply,
+  .btn-reset {
+    justify-content: center;
+    width: 100%;
+  }
+
+  .btn-apply span,
+  .btn-reset span {
+    display: inline;
+  }
+}
+
+@media (max-width: 480px) {
+  .filter-group {
+    gap: 0.8rem;
+  }
+
+  .custom-select {
+    padding: 0.8rem 2.5rem 0.8rem 1rem;
+    font-size: 0.95rem;
+  }
+
+  .btn-apply,
+  .btn-reset {
+    padding: 0.8rem 1.4rem;
+    font-size: 0.95rem;
+  }
+}
+
+</style>
 
 
   
@@ -205,44 +997,66 @@
 <body>
 
     <nav class="navbar">
-        <div class="logo"><img src="{% static 'images/logo.PNG' %}" alt="Logo" style="width: 80px; height: auto; margin-bottom: 20px;">EDB Billing</div>
-        
-        <ul class="nav-menu" id="nav-menu">
-            <li><a href="{% url 'billing' %}"><span class="icon">📋</span> Billing</a></li>
-            <li><a href="{% url 'daily_expense' %}"><span class="icon">📋</span> Daily Expense</a></li>
-            
-            <li><a href="{% url 'add_project' %}"><span class="icon">➕</span> Add Project</a></li>
-            <li><a href="{% url 'add_expense' %}"><span class="icon">💰</span> Add Budget</a></li>
-            <li><a href="{% url 'add_payment' %}"><span class="icon">💳</span> Add Payment</a></li>
-          <li>
-                <a href="{% url 'logout' %}" style="color: white; background-color:  #3b82f6; padding: 6px 12px; border-radius: 5px;">
-                    <span class="icon">🚪</span> Logout
-                </a>
-            </li>
-        </ul>
-        <div class="hamburger" onclick="toggleMenu()" id="hamburger">
-            <span></span>
-            <span></span>
-            <span></span>
-        </div>
-
-    </nav>
-
-    <div class="container mt-4">
-        {% block content %}
-        {% endblock %}
+    <div class="navbar-brand">
+        <img src="{% static 'images/logo.PNG' %}" alt="EDB Billing Logo" class="brand-logo">
+        <span class="brand-text">EDB BILLING</span>
     </div>
 
-    <script>
-        function toggleMenu() {
-            const menu = document.getElementById('nav-menu');
-            const hamburger = document.getElementById('hamburger');
+    <ul class="nav-menu" id="nav-menu">
+        <li><a href="{% url 'billing' %}" class="nav-link">
+            <i class="fas fa-file-invoice-dollar"></i> Dashboard
+        </a></li>
+        <li><a href="{% url 'analysis_dashboard' %}" class="nav-link">
+            <i class="fas fa-file-invoice-dollar"></i> Analysis
+        </a></li>
+        <li><a href="{% url 'daily_expense' %}" class="nav-link">
+            <i class="fas fa-receipt"></i> Daily Expense
+        </a></li>
+        <li><a href="{% url 'add_project' %}" class="nav-link">
+            <i class="fas fa-plus-circle"></i> Add Project
+        </a></li>
+        <li><a href="{% url 'add_expense' %}" class="nav-link">
+            <i class="fas fa-wallet"></i> Add Expense
+        </a></li>
+        <li><a href="{% url 'add_payment' %}" class="nav-link">
+            <i class="fas fa-credit-card"></i> Add Payment
+        </a></li>
+        <li><a href="{% url 'logout' %}" class="nav-link logout-link">
+            <i class="bi bi-box-arrow-in-left"></i> Logout
+        </a></li>
+    </ul>
 
-            menu.classList.toggle('active');
-            hamburger.classList.toggle('active');
-        }
-    </script>
+    <div class="hamburger" id="hamburger" onclick="toggleMenu()">
+        <span></span>
+        <span></span>
+        <span></span>
+    </div>
+</nav>
 
+
+
+<div class="main-content">
+    {% block content %}
+    {% endblock %}
+</div>
+
+<script>
+    function toggleMenu() {
+        const menu = document.getElementById('nav-menu');
+        const hamburger = document.getElementById('hamburger');
+        menu.classList.toggle('active');
+        hamburger.classList.toggle('active');
+    }
+
+    // Close mobile menu when clicking a link
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (window.innerWidth <= 992) {
+                toggleMenu();
+            }
+        });
+    });
+</script>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>

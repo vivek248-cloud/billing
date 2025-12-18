@@ -56,6 +56,11 @@ urlpatterns = [
 
     path('daily-statistics/', views.daily_statistics, name='daily_statistics'),
 
+
+    # projects/urls.py
+    path('analysis/', views.analysis_dashboard, name='analysis_dashboard'),
+
+
     path('project/<int:project_id>/upload/', views.upload_site_image, name='upload_site_image'),
 
     path("sitemap.xml", views.custom_sitemap_view, name="sitemap"),

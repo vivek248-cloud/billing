@@ -30,7 +30,7 @@
     {% if selected_project_id %}
     <div class="mt-3 mb-3">
       <p><strong>Total Amount Paid:</strong> ₹{{ total_paid }}</p>
-      <p><strong>Amount Yet to Receive:</strong> ₹
+      <p><strong>Amount Yet to Receive:</strong> 
         {% if selected_project.remaining < 0 %}
           <span class="text-danger">{{ selected_project.remaining|indian_currency }}</span>
         {% else %}
@@ -70,7 +70,7 @@
       {% for payment in payments %}
       <tr>
         <td class="border border-gray-300 px-4 py-2">{{ forloop.counter }}</td>
-        <td class="border border-gray-300 px-4 py-2">₹{{ payment.amount|indian_currency }}</td>
+        <td class="border border-gray-300 px-4 py-2">{{ payment.amount|indian_currency }}</td>
         <td class="border border-gray-300 px-4 py-2">{{ payment.payment_mode }}</td>
         <td class="border border-gray-300 px-4 py-2">{{ payment.date|date:"d M Y" }}</td>
         <td class="border border-gray-300 px-4 py-2">

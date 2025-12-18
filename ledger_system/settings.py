@@ -133,7 +133,7 @@ DATABASES = {
         'USER': 'billinguser',# billinguser for production
         'PASSWORD': 'Admin123',
         'HOST': '127.0.0.1',
-        'PORT': '5432',# 5432 is the default port for PostgreSQL
+        'PORT': '5432',# 5432 is the default port for PostgreSQL 3306 for MySQL
     }
 }
 

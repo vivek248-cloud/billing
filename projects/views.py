@@ -44,6 +44,10 @@ from datetime import datetime
 from .models import Project, Expense, DailyExpense
 from .forms import ExpenseForm, DailyExpenseForm
 
+
+
+
+
 # home
 def home(request):
     return render(request, 'projects/index.html')
@@ -54,7 +58,7 @@ def home(request):
 # admin_login
 def admin_login(request):
     if request.session.get('admin_logged_in'):
-        return redirect('/dashboard/')
+        return redirect('/billing/')
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -298,15 +302,28 @@ def logout_view(request):
 
 
 
-from django.contrib.auth.decorators import login_required
+from django.db.models import Case, When, Value, IntegerField
 
-# billing
 @session_login_required
 def project_billing(request):
-    projects = Project.objects.all()
     if not request.session.get('admin_logged_in'):
         return redirect('/admin_login/')
-    return render(request, 'projects/billing.html', {'projects': projects})
+
+    projects = (
+        Project.objects
+        .annotate(
+            completed_order=Case(
+                When(status='Completed', then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        )
+        .order_by('completed_order', '-id')  # ✅ logic here
+    )
+
+    return render(request, 'projects/billing.html', {
+        'projects': projects
+    })
 
 from django.shortcuts import get_object_or_404
 
@@ -1254,6 +1271,128 @@ def update_project_status(request, project_id):
             return redirect('billing')
 
     return render(request, 'projects/update_status.html', {'project': project})
+
+
+
+
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth
+from decimal import Decimal
+import calendar
+
+@session_login_required
+def analysis_dashboard(request):
+    if not request.session.get('admin_logged_in'):
+        return redirect('/admin_login/')
+
+    # 🔹 BASE QUERYSETS
+    all_projects = Project.objects.all()
+    payments = Payment.objects.all()
+
+    # 🔹 GET FILTERS
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+
+    filter_applied = bool(month or year)
+
+    # 🔹 APPLY PAYMENT FILTERS
+    if month:
+        payments = payments.filter(date__month=int(month))
+    if year:
+        payments = payments.filter(date__year=int(year))
+
+    # 🔹 PROJECTS USED FOR FINANCIALS
+    if filter_applied:
+        project_ids = payments.values_list('project_id', flat=True).distinct()
+        projects = Project.objects.filter(id__in=project_ids)
+    else:
+        projects = all_projects
+
+    # 🔹 KPI COUNTS
+    total_projects = projects.count()
+    completed_projects = projects.filter(status='Completed').count()
+    ongoing_projects = projects.exclude(status='Completed').count()
+
+    # 🔹 TOTAL PAID (SAFE DECIMAL)
+    total_paid = Decimal(
+        str(payments.aggregate(total=Sum('amount'))['total'] or 0)
+    )
+
+    total_budget = Decimal('0.00')
+    total_remaining = Decimal('0.00')
+
+    # 🔹 FINANCIAL TOTALS
+    for project in projects:
+        expenses = Decimal(
+            str(project.expenses_set.aggregate(
+                total=Sum('amount')
+            )['total'] or 0)
+        )
+
+        budget = Decimal(str(project.budget)) + expenses
+
+        paid = Decimal(
+            str(payments.filter(project=project).aggregate(
+                total=Sum('amount')
+            )['total'] or 0)
+        )
+
+        total_budget += budget
+        total_remaining += (budget - paid)
+
+    # 🔹 STATUS PIE CHART
+    status_chart = projects.values('status').annotate(
+        count=Count('id')
+    )
+
+    # 🔹 MONTHLY PAYMENTS CHART
+    monthly_payments = (
+        payments
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    monthly_payments = [
+        {
+            'month': m['month'].strftime('%Y-%m'),
+            'total': float(m['total'] or 0)
+        }
+        for m in monthly_payments
+    ]
+
+
+    # 🔹 MONTH DROPDOWN (Jan 1, Feb 2...)
+    months = [
+        {'value': i, 'label': f"{calendar.month_abbr[i]} ({i})"}
+        for i in range(1, 13)
+    ]
+
+    # 🔹 YEAR DROPDOWN
+    years = Payment.objects.dates('date', 'year')
+
+    context = {
+        # KPI
+        'total_projects': total_projects,
+        'completed_projects': completed_projects,
+        'ongoing_projects': ongoing_projects,
+        'total_budget': total_budget,
+        'total_paid': total_paid,
+        'total_remaining': total_remaining,
+
+        # Charts
+        'status_chart': list(status_chart),
+        'monthly_payments': list(monthly_payments),
+
+        # Filters
+        'months': months,
+        'years': [y.year for y in years],
+    }
+
+    return render(request, 'projects/analysis.html', context)
+
+
 
 
 
