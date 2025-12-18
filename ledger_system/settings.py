@@ -128,12 +128,12 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',  # Use PostgreSQL as the database backend
+        'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL as the database backend
         'NAME': 'billingdb',
-        'USER': 'root',# billinguser for production
+        'USER': 'billinguser',# billinguser for production
         'PASSWORD': 'Admin123',
         'HOST': '127.0.0.1',
-        'PORT': '3306',# 5432 is the default port for PostgreSQL 3306 for MySQL
+        'PORT': '5432',# 5432 is the default port for PostgreSQL 3306 for MySQL
     }
 }
 
