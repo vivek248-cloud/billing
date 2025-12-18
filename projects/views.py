@@ -1395,7 +1395,13 @@ def analysis_dashboard(request):
 
 
 
+# custom session exprired page
 
+def session_expired(request):
+    """
+    Shown when session is invalid / expired
+    """
+    return render(request, 'projects/session_expired.html')
 
 
 

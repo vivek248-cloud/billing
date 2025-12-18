@@ -63,6 +63,7 @@ class BlockUnauthorizedMiddleware:
                 '/home/',
                 '/admin-login/',
                 '/client/login/',
+                '/session-expired/',
                 '/sitemap.xml',
             ]
 
@@ -81,12 +82,13 @@ class BlockUnauthorizedMiddleware:
             # ✅ If session expired or invalid, flush it
             if not request.session.session_key:
                 request.session.flush()
-                return redirect('/home/')
+                return redirect('session_expired')
 
             # ✅ Redirect unauthenticated users
             if not request.session.get('admin_logged_in') and not request.session.get('user_logged_in'):
                 request.session.flush()
-                return redirect('/home/')
+                return redirect('session_expired')
+
 
             # ✅ Prevent logged-in users from accessing login pages again
             if path in ['/admin-login/', '/client/login/']:
@@ -97,4 +99,4 @@ class BlockUnauthorizedMiddleware:
         except Exception as e:
             print("⚠️ Middleware error:", e)
             request.session.flush()
-            return HttpResponseBadRequest("Session expired or invalid. Please log in again.")
+            return redirect('session_expired')

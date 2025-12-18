@@ -60,6 +60,8 @@ urlpatterns = [
     # projects/urls.py
     path('analysis/', views.analysis_dashboard, name='analysis_dashboard'),
 
+    path('session-expired/', views.session_expired, name='session_expired'),
+
 
     path('project/<int:project_id>/upload/', views.upload_site_image, name='upload_site_image'),
 

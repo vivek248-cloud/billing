@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Session Expired</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background: linear-gradient(135deg, #e0f2fe, #f0f9ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: "Inter", sans-serif;
+    }
+
+    .expired-card {
+      background: white;
+      padding: 3rem 2.5rem;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+      text-align: center;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    .expired-icon {
+      font-size: 4rem;
+      color: #ef4444;
+      margin-bottom: 1rem;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.8rem;
+      color: #0f172a;
+    }
+
+    p {
+      margin-top: 0.8rem;
+      color: #475569;
+      font-size: 1rem;
+    }
+
+    .countdown {
+      margin-top: 1.5rem;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2563eb;
+    }
+
+    .btn-home {
+      margin-top: 2rem;
+      display: inline-block;
+      padding: 12px 24px;
+      background: #2563eb;
+      color: white;
+      text-decoration: none;
+      border-radius: 10px;
+      font-weight: 600;
+    }
+
+    .btn-home:hover {
+      background: #1d4ed8;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="expired-card">
+    <div class="expired-icon">⏳</div>
+
+    <h2>Session Expired</h2>
+
+    <p>
+      Your session has expired or the login is invalid.<br>
+      Please log in again to continue.
+    </p>
+
+    <div class="countdown">
+      Redirecting to Home in <span id="timer">5</span> seconds
+    </div>
+
+    <a href="/home/" class="btn-home">Go to Home Now</a>
+  </div>
+
+  <script>
+    let seconds = 5;
+    const timerEl = document.getElementById("timer");
+
+    const countdown = setInterval(() => {
+      seconds--;
+      timerEl.textContent = seconds;
+
+      if (seconds <= 0) {
+        clearInterval(countdown);
+        window.location.href = "/home/";
+      }
+    }, 1000);
+  </script>
+
+</body>
+</html>
