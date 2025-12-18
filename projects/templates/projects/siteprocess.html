@@ -833,6 +833,27 @@
 </nav>
  
  
+
+<script>
+  const toggle = document.getElementById('navbarToggle');
+  const menu = document.getElementById('navMenu');
+
+  toggle.addEventListener('click', () => {
+    menu.classList.toggle('active');
+    toggle.classList.toggle('active');
+  });
+
+  // Close menu when clicking a link on mobile
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        menu.classList.remove('active');
+        toggle.classList.remove('active');
+      }
+    });
+  });
+</script>
+
  <!-- Enhanced Project Summary Section -->
 <section class="summary-section">
   <h4 class="section-title">Project Summary</h4>

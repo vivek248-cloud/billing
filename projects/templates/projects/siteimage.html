@@ -743,6 +743,28 @@
   </ul>
 </nav>
 
+
+<script>
+  const toggle = document.getElementById('navbarToggle');
+  const menu = document.getElementById('navMenu');
+
+  toggle.addEventListener('click', () => {
+    menu.classList.toggle('active');
+    toggle.classList.toggle('active');
+  });
+
+  // Close menu when clicking a link on mobile
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        menu.classList.remove('active');
+        toggle.classList.remove('active');
+      }
+    });
+  });
+</script>
+
+
 <form method="get" class="border rounded p-3 mb-4 bg-light shadow-sm">
   <div class="row g-3 align-items-end">
     <div class="col-md-4">
