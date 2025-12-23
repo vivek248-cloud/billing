@@ -67,6 +67,11 @@ class BlockUnauthorizedMiddleware:
                 '/sitemap.xml',
             ]
 
+
+            # ✅ Allow Google Search Console verification files
+            if path.startswith('/google') and path.endswith('.html'):
+                return self.get_response(request)
+
             # ✅ Allow static/media/public routes
             if (
                 path.startswith('/static/') or
