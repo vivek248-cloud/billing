@@ -4,6 +4,12 @@
 {% load static %}
 {% load extra_filters %}
 {% load billing_tags %}
+{% billing_summary projects "In Progress" as ongoing %}
+{% billing_summary projects "Completed" as completed %}
+{% billing_summary projects "On Hold" as hold %}
+{% billing_summary projects "Not Started" as not_started %}
+
+
 {% load humanize %}
 {% load indian_format %}
 
@@ -187,74 +193,147 @@
 <!-- Add Expense Form -->
 
 
+{% billing_summary projects "In Progress" as ongoing %}
+{% billing_summary projects "Completed" as completed %}
+{% billing_summary projects "On Hold" as hold %}
+{% billing_summary projects "Not Started" as not_started %}
 
 <div class="row g-4 mb-5">
 
-  {% billing_summary projects as active %}
-  <div class="col-md-6">
+  <!-- Ongoing -->
+  <div class="col-md-3">
     <div class="summary-card summary-active">
-      <div class="card-header">
-        <div class="header-content">
-          <i class="fas fa-layer-group header-icon"></i>
-          <h5 class="card-title">Ongoing Projects</h5>
-        </div>
-        <i class="fas fa-clock header-spin"></i>
-      </div>
+      <h3>Ongoing</h3>
 
-      <div class="stat-grid">
-        <div class="stat-item">
+        <div class="stat-item ">
           <span class="stat-label">Total Projects</span>
-          <span class="stat-value">{{ active.count }}</span>
+          <span class="stat-value">
+            {{ ongoing.count }}
+          </span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Total Budget</span>
-          <span class="stat-value amount-budget">{{ active.budget|indian_currency }}</span>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ ongoing.budget|indian_currency }}
+          </span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Total Paid</span>
-          <span class="stat-value amount-paid">{{ active.paid|indian_currency }}</span>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ ongoing.paid|indian_currency }}
+          </span>
         </div>
+          <!-- Highlight -->
         <div class="stat-item highlight">
           <span class="stat-label">Yet to Receive</span>
-          <span class="stat-value">{{ active.remaining|indian_currency }}</span>
+          <span class="stat-value">
+            {{ ongoing.remaining|indian_currency }}
+          </span>
         </div>
-      </div>
+
     </div>
   </div>
 
-  {% billing_summary projects "Completed" as completed %}
-  <div class="col-md-6">
+  <!-- Completed -->
+  <div class="col-md-3">
     <div class="summary-card summary-completed">
-      <div class="card-header">
-        <div class="header-content">
-          <i class="fas fa-check-circle header-icon"></i>
-          <h5 class="card-title">Completed Projects</h5>
-        </div>
-        <i class="fas fa-award header-spin"></i>
-      </div>
-
-      <div class="stat-grid">
-        <div class="stat-item">
+      <h3>Completed</h3>
+        <div class="stat-item ">
           <span class="stat-label">Total Projects</span>
-          <span class="stat-value">{{ completed.count }}</span>
+          <span class="stat-value">
+            {{ completed.count }}
+          </span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Total Budget</span>
-          <span class="stat-value amount-budget">{{ completed.budget|indian_currency }}</span>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ completed.budget|indian_currency }}
+          </span>
         </div>
-        <div class="stat-item">
-          <span class="stat-label">Total Paid</span>
-          <span class="stat-value amount-paid">{{ completed.paid|indian_currency }}</span>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ completed.paid|indian_currency }}
+          </span>
         </div>
+        <!-- Highlight -->
         <div class="stat-item highlight">
           <span class="stat-label">Yet to Receive</span>
-          <span class="stat-value">{{ completed.remaining|indian_currency }}</span>
+          <span class="stat-value">
+            {{ completed.remaining|indian_currency }}
+          </span>
         </div>
-      </div>
+
+    </div>
+  </div>
+
+  <!-- On Hold -->
+  <div class="col-md-3">
+    <div class="summary-card summary-hold">
+      <h3>On Hold</h3>
+        <div class="stat-item ">
+          <span class="stat-label">Total Projects</span>
+          <span class="stat-value">
+            {{ hold.count }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ hold.budget|indian_currency }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ hold.paid|indian_currency }}
+          </span>
+        </div>
+          <!-- Highlight -->
+        <div class="stat-item highlight">
+          <span class="stat-label">Yet to Receive</span>
+          <span class="stat-value">
+            {{ hold.remaining|indian_currency }}
+          </span>
+        </div>
+    </div>
+  </div>
+
+  <!-- Not Started -->
+  <div class="col-md-3">
+    <div class="summary-card summary-not-started">
+      <h3>Yet to Started</h3>
+        <div class="stat-item ">
+          <span class="stat-label">Total Projects</span>
+          <span class="stat-value">
+            {{ not_started.count }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ not_started.budget|indian_currency }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ not_started.paid|indian_currency }}
+          </span>
+        </div>
+        <!-- Highlight -->
+        <div class="stat-item highlight">
+          <span class="stat-label">Yet to Receive</span>
+          <span class="stat-value">
+            {{ not_started.remaining|indian_currency }}
+          </span>
+        </div>
     </div>
   </div>
 
 </div>
+
+
 
 <!-- Alerts -->
 

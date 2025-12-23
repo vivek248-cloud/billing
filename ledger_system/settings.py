@@ -124,7 +124,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 
-# Database
+# production database
 
 DATABASES = {
     'default': {
@@ -137,6 +137,19 @@ DATABASES = {
     }
 }
 
+
+# development database 
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',  # Use mysql as the database backend
+#         'NAME': 'billingdb',
+#         'USER': 'root',# billinguser for production
+#         'PASSWORD': 'Admin123',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',# 3306 is the default port for 3306 for MySQL
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
