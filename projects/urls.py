@@ -34,7 +34,10 @@ urlpatterns = [
 
     path('billing/', views.project_billing, name='billing'),
     path('add-expense/', views.add_expense, name='add_expense'),
+    
     path('add_project/', views.add_project, name='add_project'),
+    path('projects/<int:pk>/edit/', views.edit_project, name='edit_project'),
+
     path('remove_expense/<int:expense_id>/', views.remove_expense, name='remove_expense'),
     path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
     path('invoice/<int:project_id>/', views.invoice_view, name='invoice'),

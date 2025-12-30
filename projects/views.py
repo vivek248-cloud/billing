@@ -1,4 +1,5 @@
 from urllib.parse import urlencode
+from django.utils import timezone
 
 from django.db.models import Sum
 from decimal import Decimal
@@ -302,13 +303,40 @@ def logout_view(request):
 
 
 
+# from django.db.models import Case, When, Value, IntegerField
+
+# @session_login_required
+# def project_billing(request):
+#     if not request.session.get('admin_logged_in'):
+#         return redirect('/admin_login/')
+
+#     projects = (
+#         Project.objects
+#         .annotate(
+#             completed_order=Case(
+#                 When(status='Completed', then=Value(1)),
+#                 default=Value(0),
+#                 output_field=IntegerField()
+#             )
+#         )
+#         .order_by('completed_order', '-id')  # ✅ logic here
+#     )
+
+#     return render(request, 'projects/billing.html', {
+#         'projects': projects
+#     })
+
+
 from django.db.models import Case, When, Value, IntegerField
+from django.utils.timesince import timesince
+from .models import *
 
 @session_login_required
 def project_billing(request):
     if not request.session.get('admin_logged_in'):
         return redirect('/admin_login/')
 
+    # Projects (completed last)
     projects = (
         Project.objects
         .annotate(
@@ -318,12 +346,51 @@ def project_billing(request):
                 output_field=IntegerField()
             )
         )
-        .order_by('completed_order', '-id')  # ✅ logic here
+        .order_by('completed_order', '-id')
     )
 
+    today = timezone.localdate()
+
+    activities = []
+
+    # 💰 Recent Payments
+    recent_payments = Payment.objects.select_related('project').order_by('-date')[:5]
+    for pay in recent_payments:
+        activities.append({
+            'icon': 'bi-currency-rupee',
+            'color': 'success',
+            'title': 'Payment Received',
+            'desc': f'{pay.project.name} – ₹{pay.amount}',
+            'time': 'Today' if pay.date == today else pay.date.strftime('%d %b %Y'),
+            'sort_time': pay.date
+        })
+
+    # 🧾 Recent Expenses
+    recent_expenses = Expense.objects.select_related('project').order_by('-date')[:5]
+    for exp in recent_expenses:
+        activities.append({
+            'icon': 'bi-receipt',
+            'color': 'warning',
+            'title': 'Expense Added',
+            'desc': f'{exp.project.name} – ₹{exp.amount}',
+            'time': 'Today' if exp.date == today else exp.date.strftime('%d %b %Y'),
+            'sort_time': exp.date
+        })
+
+    # Sort latest first
+    activities = sorted(
+        activities,
+        key=lambda x: x['sort_time'],
+        reverse=True
+    )[:5]
     return render(request, 'projects/billing.html', {
-        'projects': projects
+        'projects': projects,
+        'activities': activities
     })
+
+
+
+
 
 from django.shortcuts import get_object_or_404
 
@@ -591,6 +658,9 @@ def payment_invoice(request, payment_id):
     return render(request, 'projects/payment_invoice.html', context)
 
 
+
+
+
 # add_project
 def add_project(request):
     projects = Project.objects.all().order_by('id')
@@ -632,6 +702,46 @@ def add_project(request):
                     error = f"Error creating project: {str(e)}"
 
     return render(request, 'projects/add_project.html', {'error': error, 'projects': projects})
+
+
+# edit_project
+
+def edit_project(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    error = None
+
+    if request.method == 'POST':
+        name = request.POST.get('name').strip()
+        client_name = request.POST.get('client_name')
+        phone = request.POST.get('phone').strip()
+        budget = request.POST.get('budget', '0.00')
+        estimated_cost = request.POST.get('estimated_cost', '0.00')
+        status = request.POST.get('status')
+
+        # Duplicate checks (exclude current project)
+        if Project.objects.filter(name=name).exclude(id=pk).exists():
+            error = f"A project with name '{name}' already exists."
+        elif Project.objects.filter(phone=phone).exclude(id=pk).exists():
+            error = f"A project with phone '{phone}' already exists."
+        else:
+            try:
+                project.name = name
+                project.client_name = client_name
+                project.phone = phone
+                project.budget = Decimal(budget)
+                project.estimated_cost = Decimal(estimated_cost)
+                project.status = status
+                project.save()
+
+                return redirect('billing')
+            except Exception as e:
+                error = str(e)
+
+    return render(request, 'projects/edit_project.html', {
+        'project': project,
+        'error': error,
+        'statuses': Project.STATUS_CHOICES
+    })
 
 
 

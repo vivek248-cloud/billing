@@ -27,19 +27,31 @@
   <h3 class="section-heading mt-4">Existing Projects</h3> {# Added custom class for heading #}
  
   <div class="scroll-container project-list-card"> {# Added custom class for card style #}
-    <ul class="project-list"> {# Added custom class for list #}
-      {% for project in projects %}
-        <li class="project-list-item">
-          <span class="project-number">{{ forloop.counter }}.</span> 
-          <span class="project-details">
-            <span class="project-name">{{ project.name }}</span> - 
-            <span class="client-info">{{ project.client_name }} ({{ project.phone }})</span>
-          </span>
-        </li>
-      {% empty %}
-        <li class="no-projects-message">No projects added yet.</li> {# Added message if no projects #}
-      {% endfor %}
-    </ul>
+    <ul class="project-list">
+  {% for project in projects %}
+    <li class="project-list-item d-flex align-items-center justify-content-between">
+      
+      <div>
+        <span class="project-number">{{ forloop.counter }}.</span>
+        <span class="project-details">
+          <span class="project-name">{{ project.name }}</span> –
+          <span class="client-info">{{ project.client_name }} ({{ project.phone }})</span>
+        </span>
+      </div>
+
+      <!-- Edit Icon -->
+      <a href="{% url 'edit_project' project.id %}"
+         class="edit-project-btn"
+         title="Edit Project">
+        <i class="bi bi-pencil-square"></i>
+      </a>
+
+    </li>
+  {% empty %}
+    <li class="no-projects-message">No projects added yet.</li>
+  {% endfor %}
+</ul>
+
   </div>
 
 </div>
