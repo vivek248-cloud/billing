@@ -20,7 +20,7 @@ SECRET_KEY = 'django-insecure-nyo_fa03512tqw8lj2i=p)i9^bs+qg*%lxwm-ib-%)8u#18c@_
 
 # SECURITY WARNING: don't run with debug turned on in production!
 
-DEBUG = False
+DEBUG = True
 
 
 ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling.com','*']
@@ -126,30 +126,30 @@ WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 # production database
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL as the database backend
-        'NAME': 'billingdb',
-        'USER': 'billinguser',# billinguser for production
-        'PASSWORD': 'Admin123',
-        'HOST': '127.0.0.1',
-        'PORT': '5432',# 5432 is the default port for PostgreSQL 3306 for MySQL
-    }
-}
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL as the database backend
+#         'NAME': 'billingdb',
+#         'USER': 'billinguser',# billinguser for production
+#         'PASSWORD': 'Admin123',
+#         'HOST': '127.0.0.1',
+#         'PORT': '5432',# 5432 is the default port for PostgreSQL 3306 for MySQL
+#     }
+# }
 
 
 # development database 
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.mysql',  # Use mysql as the database backend
-#         'NAME': 'billingdb',
-#         'USER': 'root',# billinguser for production
-#         'PASSWORD': 'Admin123',
-#         'HOST': '127.0.0.1',
-#         'PORT': '3306',# 3306 is the default port for 3306 for MySQL
-#     }
-# }
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.mysql',  # Use mysql as the database backend
+        'NAME': 'billingdb',
+        'USER': 'root',# billinguser for production
+        'PASSWORD': 'Admin123',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',# 3306 is the default port for 3306 for MySQL
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators

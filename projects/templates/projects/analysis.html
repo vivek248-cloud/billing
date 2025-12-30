@@ -8,45 +8,45 @@
 
 {% block content %}
 
-<form method="get" class="filter-bar">
-  <div class="filter-group">
-    <div class="select-wrapper">
-      <select name="month" class="custom-select">
-        <option value="">All Months</option>
-        {% for m in months %}
-          <option value="{{ m.value }}" {% if request.GET.month == m.value|stringformat:"s" %}selected{% endif %}>
-            {{ m.label }}
-          </option>
-        {% endfor %}
-      </select>
-      <i class="fas fa-calendar-alt select-icon"></i>
-    </div>
 
-    <div class="select-wrapper">
-      <select name="year" class="custom-select">
-        <option value="">All Years</option>
-        {% for y in years %}
-          <option value="{{ y }}" {% if request.GET.year == y|stringformat:"s" %}selected{% endif %}>
-            {{ y }}
-          </option>
-        {% endfor %}
-      </select>
-      <i class="fas fa-calendar-year select-icon"></i>
-    </div>
-
-    <button type="submit" class="btn-apply">
-      <i class="fas fa-filter"></i> Apply
-    </button>
-
-    <a href="{% url 'analysis_dashboard' %}" class="btn-reset">
-      <i class="fas fa-redo-alt"></i> Reset
-    </a>
-  </div>
-</form>
 
 <div class="dashboard-wrapper">
   <div class="dashboard-container">
+    <form method="get" class="filter-bar">
+      <div class="filter-group">
+        <div class="select-wrapper">
+          <select name="month" class="custom-select">
+            <option value="">All Months</option>
+            {% for m in months %}
+              <option value="{{ m.value }}" {% if request.GET.month == m.value|stringformat:"s" %}selected{% endif %}>
+                {{ m.label }}
+              </option>
+            {% endfor %}
+          </select>
+          <i class="fas fa-calendar-alt select-icon"></i>
+        </div>
 
+        <div class="select-wrapper">
+          <select name="year" class="custom-select">
+            <option value="">All Years</option>
+            {% for y in years %}
+              <option value="{{ y }}" {% if request.GET.year == y|stringformat:"s" %}selected{% endif %}>
+                {{ y }}
+              </option>
+            {% endfor %}
+          </select>
+          <i class="fas fa-calendar-year select-icon"></i>
+        </div>
+
+        <button type="submit" class="btn-apply">
+          <i class="fas fa-filter"></i> Apply
+        </button>
+
+        <a href="{% url 'analysis_dashboard' %}" class="btn-reset">
+          <i class="fas fa-redo-alt"></i> Reset
+        </a>
+      </div>
+    </form>
     <section class="section-grid">
       <div class="section-header">
         <h4>Project Overview</h4>
