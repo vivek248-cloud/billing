@@ -1556,6 +1556,9 @@ def superuser_required(view_func):
     return decorated_view_func
 
 
+import re
+from datetime import datetime
+
 @superuser_required
 def settings_page(request):
 
@@ -1567,20 +1570,29 @@ def settings_page(request):
         files = sorted(os.listdir(BACKUP_DIR), reverse=True)
 
         for file in files:
+            if not file.endswith(".gz"):
+                continue
+
             file_path = os.path.join(BACKUP_DIR, file)
             stat = os.stat(file_path)
 
             file_size = stat.st_size
             total_size += file_size
 
-            created_time = datetime.fromtimestamp(stat.st_mtime)
+            # ✅ Extract datetime from filename
+            match = re.search(r'(\d{4}-\d{2}-\d{2}_\d{2}-\d{2})', file)
+
+            if match:
+                created_time = datetime.strptime(match.group(1), "%Y-%m-%d_%H-%M")
+            else:
+                created_time = datetime.fromtimestamp(stat.st_mtime)
 
             if not latest_backup_time or created_time > latest_backup_time:
                 latest_backup_time = created_time
 
             files_data.append({
                 "name": file,
-                "size": round(file_size / 1024, 2),  # KB
+                "size": round(file_size / 1024, 2),
                 "date": created_time.strftime("%d %b %Y %I:%M %p")
             })
 
@@ -1591,9 +1603,6 @@ def settings_page(request):
             backup_status = "warning"
     else:
         backup_status = "danger"
-        
-    print("BACKUP_DIR:", BACKUP_DIR)
-    print("FILES FOUND:", os.listdir(BACKUP_DIR))
 
     context = {
         "admin_user": request.user,
