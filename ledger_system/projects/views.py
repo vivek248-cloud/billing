@@ -1591,6 +1591,9 @@ def settings_page(request):
             backup_status = "warning"
     else:
         backup_status = "danger"
+        
+    print("BACKUP_DIR:", BACKUP_DIR)
+    print("FILES FOUND:", os.listdir(BACKUP_DIR))
 
     context = {
         "admin_user": request.user,
