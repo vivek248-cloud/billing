@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+
+# Virtual Environment
+venv/
+
+# Django
+media/
+staticfiles/
+
+# Logs
+*.log
+nohup.out
+
+# Backup files
+*.sql
+*.gz
+
+# OS
+.DS_Store

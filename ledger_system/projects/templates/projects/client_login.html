@@ -5,7 +5,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+   <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+  <link rel="icon" href="{% static 'images/favicon-512x512.jpg' %}" type="image/jpeg">
   <title>Client Login</title>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
    <meta property="og:title" content="Welcome to The Elite Dream Builders Billing">
@@ -168,7 +169,7 @@
 
       {% if error %}
         <div class="error">{{ error }}
-          <p>Note: If you are a client, use your phone number as password.</p>
+          <p>Note: If you are a client, use your phone number as password. and use Mr. / Mrs. before your name eg:( Mr.admin )</p>
         </div>
       {% endif %}
 

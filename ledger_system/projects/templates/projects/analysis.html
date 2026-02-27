@@ -1,0 +1,219 @@
+{% extends 'projects/base.html' %}
+{% block title %}Billing Dashboard{% endblock %}
+{% load static %}
+{% load extra_filters %}
+{% load billing_tags %}
+{% load humanize %}
+{% load indian_format %}
+
+{% block content %}
+
+
+
+<div class="dashboard-wrapper">
+  <div class="dashboard-container">
+    <form method="get" class="filter-bar">
+      <div class="filter-group">
+        <div class="select-wrapper">
+          <select name="month" class="custom-select">
+            <option value="">All Months</option>
+            {% for m in months %}
+              <option value="{{ m.value }}" {% if request.GET.month == m.value|stringformat:"s" %}selected{% endif %}>
+                {{ m.label }}
+              </option>
+            {% endfor %}
+          </select>
+          <i class="fas fa-calendar-alt select-icon"></i>
+        </div>
+
+        <div class="select-wrapper">
+          <select name="year" class="custom-select">
+            <option value="">All Years</option>
+            {% for y in years %}
+              <option value="{{ y }}" {% if request.GET.year == y|stringformat:"s" %}selected{% endif %}>
+                {{ y }}
+              </option>
+            {% endfor %}
+          </select>
+          <i class="fas fa-calendar-year select-icon"></i>
+        </div>
+
+        <button type="submit" class="btn-apply">
+          <i class="fas fa-filter"></i> Apply
+        </button>
+
+        <a href="{% url 'analysis_dashboard' %}" class="btn-reset">
+          <i class="fas fa-redo-alt"></i> Reset
+        </a>
+      </div>
+    </form>
+    <section class="section-grid">
+      <div class="section-header">
+        <h4>Project Overview</h4>
+      </div>
+      <div class="kpi-grid">
+        <div class="kpi-card neutral">
+          <i class="kpi-icon fas fa-project-diagram"></i>
+          <div class="kpi-content">
+            <h6>Total Projects</h6>
+            <h3>{{ total_projects }}</h3>
+          </div>
+        </div>
+
+        <div class="kpi-card success">
+          <i class="kpi-icon fas fa-check-square"></i>
+          <div class="kpi-content">
+            <h6>Completed</h6>
+            <h3>{{ completed_projects }}</h3>
+          </div>
+        </div>
+
+        <div class="kpi-card warning">
+          <i class="kpi-icon fas fa-tasks"></i>
+          <div class="kpi-content">
+            <h6>Ongoing</h6>
+            <h3>{{ ongoing_projects }}</h3>
+          </div>
+        </div>
+
+        <div class="kpi-card danger">
+          <i class="kpi-icon fas fa-indian-rupee-sign"></i>
+          <div class="kpi-content">
+            <h6>Yet to Receive</h6>
+            <h3>{{ total_remaining|indian_currency }}</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-grid">
+      <div class="section-header">
+        <h4>Financial Summary</h4>
+      </div>
+      <div class="kpi-grid financial">
+        <div class="kpi-card neutral large">
+          <i class="kpi-icon fas fa-file-invoice-dollar"></i>
+          <div class="kpi-content">
+            <h6>Total Budget</h6>
+            <h3>{{ total_budget|indian_currency }}</h3>
+          </div>
+        </div>
+
+        <div class="kpi-card success large">
+          <i class="kpi-icon fas fa-wallet"></i>
+          <div class="kpi-content">
+            <h6>Total Paid</h6>
+            <h3>{{ total_paid|indian_currency }}</h3>
+          </div>
+        </div>
+
+        <div class="kpi-card danger large">
+          <i class="kpi-icon fas fa-balance-scale"></i>
+          <div class="kpi-content">
+            <h6>Remaining Balance</h6>
+            <h3 class="{% if total_remaining < 0 %}negative{% endif %}">{{ total_remaining|indian_currency }}</h3>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="charts-section">
+      <div class="section-header">
+        <h4>Analytics</h4>
+      </div>
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h5>Project Status Distribution</h5>
+          </div>
+          <canvas id="statusChart"></canvas>
+          <div class="chart-legend">
+            {% for item in status_chart %}
+              <div class="legend-item">
+                <span class="legend-dot" style="background-color: {% cycle '#f59e0b' '#3b82f6' '#22c55e' '#ef4444' %}"></span>
+                {{ item.status }} ({{ item.count }})
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h5>Monthly Payments Trend</h5>
+          </div>
+          <canvas id="paymentChart"></canvas>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  const statusCtx = document.getElementById('statusChart').getContext('2d');
+  const statusData = {{ status_chart|safe }};
+  const statusLabels = statusData.map(s => s.status);
+  const statusCounts = statusData.map(s => s.count);
+
+  new Chart(statusCtx, {
+    type: 'doughnut',
+    data: {
+      labels: statusLabels,
+      datasets: [{
+        data: statusCounts,
+        backgroundColor: ['#f59e0b', '#3b82f6', '#22c55e', '#ef4444'],
+        borderColor: '#ffffff',
+        borderWidth: 5,
+        hoverBorderWidth: 8,
+        hoverOffset: 15
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      cutout: '68%',
+      plugins: { legend: { display: false } }
+    }
+  });
+
+  const paymentCtx = document.getElementById('paymentChart').getContext('2d');
+const monthlyData = {{ monthly_payments|safe }};
+
+const labels = monthlyData.map(m =>
+  new Date(m.month + '-01').toLocaleDateString('en-US', {
+    month: 'short',
+    year: 'numeric'
+  })
+);
+
+const totals = monthlyData.map(m => m.total);
+
+new Chart(paymentCtx, {
+  type: 'bar',
+  data: {
+    labels: labels,
+    datasets: [{
+      label: 'Payments',
+      data: totals,
+      backgroundColor: 'rgba(59,130,246,0.7)',
+      borderColor: '#3b82f6',
+      borderWidth: 1,
+      borderRadius: 10
+    }]
+  },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { grid: { display: false } },
+      y: { beginAtZero: true }
+    }
+  }
+});
+
+</script>
+
+{% endblock %}

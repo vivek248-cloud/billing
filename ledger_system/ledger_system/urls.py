@@ -16,21 +16,29 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.conf.urls.static import static
 from django.conf import settings
-from django.conf.urls import handler404, handler500
-from projects import views  # Replace with your actual app name
+from django.conf.urls.static import static
+from django.contrib.sitemaps.views import sitemap
+from projects import views  # your app
+from projects.sitemaps import StaticViewSitemap  # your sitemap file
 
+# Custom error handlers
 handler404 = 'projects.views.custom_404'
 handler500 = 'projects.views.custom_500'
+
+# Sitemap dictionary
+sitemaps = {
+    'static': StaticViewSitemap,
+}
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('projects.urls')),
-] 
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),#for seo
+]
 
+# Static and media files
 if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

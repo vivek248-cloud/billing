@@ -2,31 +2,57 @@
 
 {% block content %}
 <div class="container mt-4">
-  <h2>Add Project</h2>
+  <h2 class="page-title">Add New Project</h2> {# Added custom class for heading #}
   {% if error %}
   <div class="alert alert-danger">{{ error }}</div>
 {% endif %}
 
-  <form method="post">
+  <form method="post" class="project-form"> {# Added custom class for form #}
     {% csrf_token %}
     <div class="form-group">
       <label for="name">Project Name</label>
-      <input type="text" name="name" id="name" class="form-control" required>
+      <input type="text" name="name" id="name" class="form-control" placeholder="e.g., Beach House Renovation" required>
     </div>
     <div class="form-group">
       <label for="client_name">Client Name</label>
-      <input type="text" name="client_name" id="client_name" class="form-control" required>
+      <input type="text" name="client_name" id="client_name" class="form-control" placeholder="e.g., Jane Doe" required>
     </div>
     <div class="form-group">
       <label for="phone">Client Phone</label>
-      <input type="tel" name="phone" id="phone" class="form-control" required>
+      <input type="tel" name="phone" id="phone" class="form-control" placeholder="e.g., +91 98765 43210" required>
     </div>
-    <button type="submit" class="btn btn-success">Add Project</button>
+    <button type="submit" class="btn btn-primary mt-2">Add Project</button> {# Changed btn-success to btn-primary for consistency #}
   </form>
+
+  <h3 class="section-heading mt-4">Existing Projects</h3> {# Added custom class for heading #}
+ 
+  <div class="scroll-container project-list-card"> {# Added custom class for card style #}
+    <ul class="project-list">
   {% for project in projects %}
-  <ul>
-    <li style="text-decoration:none; list-style:none;">{{ forloop.counter }}. {{ project.name }} - {{ project.client_name }} ({{ project.phone }})</li>
-  </ul>
+    <li class="project-list-item d-flex align-items-center justify-content-between">
+      
+      <div>
+        <span class="project-number">{{ forloop.counter }}.</span>
+        <span class="project-details">
+          <span class="project-name">{{ project.name }}</span> –
+          <span class="client-info">{{ project.client_name }} ({{ project.phone }})</span>
+        </span>
+      </div>
+
+      <!-- Edit Icon -->
+      <a href="{% url 'edit_project' project.id %}"
+         class="edit-project-btn"
+         title="Edit Project">
+        <i class="bi bi-pencil-square"></i>
+      </a>
+
+    </li>
+  {% empty %}
+    <li class="no-projects-message">No projects added yet.</li>
   {% endfor %}
+</ul>
+
+  </div>
+
 </div>
 {% endblock %}

@@ -1,35 +1,67 @@
 {% extends 'projects/base.html' %}
+{% load indian_format %}
 {% block content %}
 
-<h2>Edit Payment</h2>
+<div class="payment-wrapper">
 
-<form method="post">
-    {% csrf_token %}
+  <div class="payment-card">
 
-    <label>Project:</label>
-    <select name="project" required>
-        {% for project in projects %}
-            <option value="{{ project.id }}" {% if payment.project.id == project.id %}selected{% endif %}>
-                {{ project.client_name }}
+    <!-- Header -->
+    <div class="payment-header">
+      <h3>Edit Payment</h3>
+      <p>Update payment details for the selected project</p>
+    </div>
+
+    <!-- Edit Payment Form -->
+    <form method="post" class="payment-form">
+      {% csrf_token %}
+
+      <div class="form-group">
+        <label>Project</label>
+        <select name="project" required>
+          {% for project in projects %}
+            <option value="{{ project.id }}"
+              {% if payment.project.id == project.id %}selected{% endif %}>
+              {{ project.client_name }}
             </option>
-        {% endfor %}
-    </select>
+          {% endfor %}
+        </select>
+      </div>
 
-    <label>Amount:</label>
-    <input type="number" name="amount" value="{{ payment.amount }}" step="0.01" required>
+      <div class="form-grid">
+        <div class="form-group">
+          <label>Amount (₹)</label>
+          <input
+            type="number"
+            name="amount"
+            step="0.01"
+            required
+            value="{{ payment.amount }}">
+        </div>
 
-    <label>Payment Mode:</label>
-    <select name="payment_mode" required>
-        <option value="Cash" {% if payment.payment_method == 'Cash' %}selected{% endif %}>Cash</option>
-        <option value="Bank Transfer" {% if payment.payment_method == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
-        <option value="Cheque" {% if payment.payment_method == 'Cheque' %}selected{% endif %}>Cheque</option>
-    </select>
+        <div class="form-group">
+          <label>Payment Mode</label>
+          <select name="payment_mode" required>
+            <option value="Cash" {% if payment.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
+            <option value="Bank Transfer" {% if payment.payment_mode == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
+            <option value="Cheque" {% if payment.payment_mode == 'Cheque' %}selected{% endif %}>Cheque</option>
+          </select>
+        </div>
+      </div>
 
-    <button type="submit">Update Payment</button>
-</form>
+      <div class="form-actions">
+        <a href="{% url 'add_payment' %}" class="btn-cancel">
+          <i class="bi bi-arrow-left"></i> Cancel
+        </a>
+
+        <button type="submit" class="btn-save">
+          <i class="bi bi-check-circle"></i> Update Payment
+        </button>
+      </div>
+
+    </form>
+
+  </div>
+</div>
 
 {% endblock %}
-
-
-
-

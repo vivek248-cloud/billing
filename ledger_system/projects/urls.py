@@ -14,6 +14,9 @@ urlpatterns = [
     # client dashboard
     path('client/dashboard/<str:phone>/', views.client_dashboard, name='client_dashboard'),
 
+    path('client/dashboard/<str:phone>/siteprocess/', views.siteprocess, name='siteprocess'),
+
+    path('client/dashboard/<str:phone>/siteimage/', views.siteimage, name='siteimage'),
 
     # update project status
     path('project/<int:project_id>/update-status/', views.update_project_status, name='update_project_status'),
@@ -31,7 +34,10 @@ urlpatterns = [
 
     path('billing/', views.project_billing, name='billing'),
     path('add-expense/', views.add_expense, name='add_expense'),
+    
     path('add_project/', views.add_project, name='add_project'),
+    path('projects/<int:pk>/edit/', views.edit_project, name='edit_project'),
+
     path('remove_expense/<int:expense_id>/', views.remove_expense, name='remove_expense'),
     path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
     path('invoice/<int:project_id>/', views.invoice_view, name='invoice'),
@@ -40,6 +46,7 @@ urlpatterns = [
     path('delete-payment/<int:payment_id>/', views.delete_payment, name='delete_payment'),
     # path('add-payment/<int:project_id>/', views.add_payment, name='add_payment'),
     path('add_payment/', views.add_payment, name='add_payment'),
+
 
 
     path('projects/<int:project_id>/add-expense/', views.add_expense, name='add_expense'),
@@ -52,7 +59,16 @@ urlpatterns = [
 
     path('daily-statistics/', views.daily_statistics, name='daily_statistics'),
 
+
+    # projects/urls.py
+    path('analysis/', views.analysis_dashboard, name='analysis_dashboard'),
+
+    path('session-expired/', views.session_expired, name='session_expired'),
+
+
     path('project/<int:project_id>/upload/', views.upload_site_image, name='upload_site_image'),
+
+    path("sitemap.xml", views.custom_sitemap_view, name="sitemap"),
 
 ]
 

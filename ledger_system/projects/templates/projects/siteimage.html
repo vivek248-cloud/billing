@@ -1,0 +1,850 @@
+{% load extra_filters %}
+{% load static %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
+  <title>Client Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Swiper CSS -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+  <style>
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
+      margin: 0;
+      overflow-X: hidden!important;
+    }
+
+    
+
+    h2 {
+      text-align: center;
+      color: #1f2937;
+      margin-bottom: 30px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 16px;
+      margin-bottom: 30px;
+    }
+
+    th, td {
+      text-align: left;
+      padding: 12px 15px;
+    }
+
+    th {
+      background-color: #10b981;
+      color: white;
+    }
+
+    tr:nth-child(even) {
+      background-color: #f9fafb;
+    }
+
+    tr:hover {
+      background-color: #e6f4f1;
+    }
+
+    .value {
+      font-weight: 500;
+      color: #374151;
+    }
+
+    .footer-note {
+      text-align: center;
+      margin-top: 20px;
+      font-size: 14px;
+      color: #6b7280;
+    }
+
+    .section-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #111827;
+      margin-top: 20px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #10b981;
+      padding-bottom: 5px;
+    }
+
+    .milestone-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 30px 0;
+    }
+
+    .milestone-step {
+      text-align: center;
+      flex: 1;
+      position: relative;
+    }
+
+    .milestone-step .circle {
+      height: 35px;
+      width: 35px;
+      border-radius: 50%;
+      background-color: #d1d5db;
+      display: inline-block;
+      line-height: 35px;
+      font-weight: bold;
+      color: white;
+      margin-bottom: 8px;
+      transition: background-color 0.3s ease;
+    }
+
+    .milestone-step.active .circle {
+      background-color:#2563eb;
+    }
+
+    .milestone-step span {
+      font-size: 14px;
+      color: #4b5563;
+      font-weight: 500;
+    }
+
+    .line {
+      height: 4px;
+      background-color: #d1d5db;
+      flex: 0.5;
+      margin: 0 10px;
+      border-radius: 2px;
+      transition: background-color 0.3s ease;
+    }
+
+    .line.active {
+      background-color: #2563eb;
+    }
+
+
+.project-info {
+      font-weight: 600;
+      color: #374151;
+      border-radius: 6px;
+      transition: background-color 0.3s ease;
+    }
+    .expense-summary-card {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 24px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.07);
+  font-family: 'Poppins', sans-serif;
+}
+
+.expense-summary-card h2 {
+  text-align: center;
+  margin-bottom: 16px;
+  color: #1e3a8a;
+}
+
+.expense-count {
+  font-weight: bold;
+  color: #2563eb;
+  margin-bottom: 16px;
+}
+
+.expense-list {
+  margin-bottom: 20px;
+}
+
+.expense-item {
+  display: flex;
+  justify-content: space-between;
+  background: #f9fafb;
+  padding: 10px 14px;
+  border-radius: 8px;
+  margin-bottom: 8px;
+  border-left: 4px solid #2563eb;
+  transition: transform 0.2s ease;
+}
+
+.expense-item:hover {
+  transform: scale(1.02);
+  background: #eef2ff;
+}
+
+.expense-date {
+  font-size: 12px;
+  color: #6b7280;
+  margin-right: 12px;
+  flex-shrink: 0;
+  width: 90px;
+}
+
+.expense-detail {
+  display: flex;
+  justify-content: space-between;
+  flex-grow: 1;
+}
+
+.expense-description {
+  font-weight: 500;
+  color: #111827;
+}
+
+.expense-amount {
+  font-weight: bold;
+  color: #10b981;
+}
+
+.expense-total {
+  border-top: 1px solid #e5e7eb;
+  padding-top: 12px;
+  text-align: right;
+  font-size: 16px;
+  font-weight: bold;
+  color: #111827;
+}
+
+.no-expense,
+.no-project {
+  text-align: center;
+  color: #9ca3af;
+  font-style: italic;
+  margin-top: 20px;
+}
+
+.btn-download-invoice {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background-color: #2563EB; /* Tailwind's blue-600 */
+  color: white;
+  font-weight: 600;
+  padding: 10px 18px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: 0 3px 6px rgb(37 99 235 / 0.3);
+  user-select: none;
+}
+
+.btn-download-invoice:hover,
+.btn-download-invoice:focus {
+  background-color: #1E40AF; /* Tailwind's blue-800 */
+  box-shadow: 0 6px 12px rgb(30 64 175 / 0.5);
+  outline: none;
+  cursor: pointer;
+}
+
+.btn-download-invoice .icon {
+  width: 20px;
+  height: 20px;
+}
+
+ #projectChart {
+    animation: floatChart 4s ease-in-out infinite;
+  }
+
+  @keyframes floatChart {
+    0% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+    100% { transform: translateY(0); }
+  }
+    @media (max-width: 600px) {
+      .dashboard {
+        width: 80%;
+      }
+
+      table {
+        font-size: 14px;
+      }
+      body {
+        padding: 0px;
+      }
+    }
+      .swiper {
+    width: 100%;
+    height: auto;
+    padding: 1rem 0;
+  }
+
+  .swiper-slide img {
+    display: block;
+    width: 100%;
+    border-radius: 8px;
+  }
+
+
+  /* Modern Client Navbar - Clean & Mobile-Friendly */
+.client-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  color: white;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  object-fit: contain;
+  
+}
+
+.brand-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation Menu */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.7rem 1.2rem;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: rgba(59, 130, 246, 0.25);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.nav-link i {
+  font-size: 1.1rem;
+}
+
+/* Hamburger Toggle */
+.navbar-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.navbar-toggle span {
+  width: 28px;
+  height: 3px;
+  background: white;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.navbar-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.navbar-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .navbar-brand {
+    gap: 10px;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-text {
+    font-size: 1.4rem;
+  }
+
+  .navbar-toggle {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .nav-menu.active {
+    max-height: 300px;
+    padding: 1rem;
+  }
+
+  .nav-link {
+    justify-content: center;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .client-navbar {
+    padding: 0.8rem 1rem;
+  }
+
+  .brand-text {
+    font-size: 1.3rem;
+  }
+}
+
+
+.client-dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 2rem 1rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.welcome-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #1e293b;
+}
+
+.welcome-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+}
+
+.welcome-subtitle {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Congratulations Card */
+.congrats-section {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.congrats-card {
+  position: relative;
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.confetti-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #a78bfa 100%);
+  opacity: 0.1;
+}
+
+.congrats-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s infinite;
+}
+
+.congrats-card h3 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.congrats-card p {
+  font-size: 1.125rem;
+  color: #475569;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.congrats-footer {
+  font-size: 0.975rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Stepper Section */
+.stepper-section {
+  background: white;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  margin: 0 auto 2rem;
+  max-width: 600px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.stepper-container {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.stepper-progress-bar {
+  position: absolute;
+  top: 48px;
+  left: 10%;
+  width: 80%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  width: 0%; /* Will be updated via JS or inline style based on status */
+}
+
+.step {
+  flex: 1;
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-align: center;
+  z-index: 2;
+  margin-top:1.4rem;
+}
+
+.step-circle {
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 5px solid #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.step-icon {
+  font-size: 1.75rem;
+  color: #64748b;
+  transition: all 0.4s ease;
+}
+
+.check-icon {
+  position: absolute;
+  font-size: 2rem;
+  color: #10b981;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.step-label {
+  margin-top: 1rem;
+  font-size: 0.925rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Completed State */
+.step.completed .step-circle {
+  border-color: #10b981;
+  background: #10b981;
+}
+
+.step.completed .step-icon {
+  opacity: 0;
+}
+
+.step.completed .check-icon {
+  opacity: 1;
+  color: white;
+}
+
+/* Current State - Dynamic Color Heartbeat Pulse */
+.step.current .step-circle {
+  border-width: 6px;
+  background: #3b82f6; /* Base blue background */
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  animation: 
+    heartbeat-pulse 1.8s ease-in-out infinite,
+    color-shift 6s linear infinite;
+}
+
+.step.current .step-icon,
+.step.current .check-icon {
+  color: white;
+}
+
+.step.current .step-label {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+/* Heartbeat scale + glow pulse */
+@keyframes heartbeat-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  40% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 16px rgba(167, 139, 250, 0.4); /* Purple hint in middle */
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 24px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Dynamic color cycle on border and glow */
+@keyframes color-shift {
+  0% {
+    border-color: #3b82f6; /* Blue */
+  }
+  25% {
+    border-color: #a78bfa; /* Purple */
+  }
+  50% {
+    border-color: #ec4899; /* Pink */
+  }
+  75% {
+    border-color: #14b8a6; /* Teal */
+  }
+  100% {
+    border-color: #3b82f6; /* Back to blue */
+  }
+}
+.step.current .step-icon,
+.step.current .check-icon {
+  color: white;
+}
+
+.step.current .step-label {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+/* Animation */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .welcome-title { font-size: 1.875rem; }
+  .stepper-progress-bar { left: 8%; width: 84%; }
+  .step { min-width: 90px; }
+  .step-circle { width: 56px; height: 56px; }
+  .step-icon { font-size: 1.5rem; }
+}
+
+  </style>
+</head>
+<body>
+
+<nav class="client-navbar">
+  <div class="navbar-brand">
+    <img src="{% static 'images/logo.PNG' %}" alt="EDB Billing" class="brand-logo">
+    <span class="brand-text">EDB Billing</span>
+  </div>
+
+  <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <ul class="nav-menu" id="navMenu">
+    <li><a href="{% url 'client_dashboard' phone %}" class="nav-link">
+      <i class="fas fa-sign-out-alt"></i> Dashboard
+    </a></li>
+    <li><a href="{% url 'siteprocess' phone %}" class="nav-link">
+      <i class="fas fa-clipboard-check"></i> Site Progress
+    </a></li>
+    <li><a href="{% url 'siteimage' phone %}" class="nav-link">
+      <i class="fas fa-camera"></i> Site Images
+    </a></li>
+    <li><a href="{% url 'logout' %}" class="nav-link">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a></li>
+  </ul>
+</nav>
+
+
+<script>
+  const toggle = document.getElementById('navbarToggle');
+  const menu = document.getElementById('navMenu');
+
+  toggle.addEventListener('click', () => {
+    menu.classList.toggle('active');
+    toggle.classList.toggle('active');
+  });
+
+  // Close menu when clicking a link on mobile
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        menu.classList.remove('active');
+        toggle.classList.remove('active');
+      }
+    });
+  });
+</script>
+
+
+<form method="get" class="border rounded p-3 mb-4 bg-light shadow-sm">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label for="img_from" class="form-label fw-semibold">From Date</label>
+      <input type="date" name="img_from" id="img_from" value="{{ img_from }}" class="form-control border-primary shadow-sm">
+    </div>
+    <div class="col-md-4">
+      <label for="img_to" class="form-label fw-semibold">To Date</label>
+      <input type="date" name="img_to" id="img_to" value="{{ img_to }}" class="form-control border-primary shadow-sm">
+    </div>
+    <div class="col-md-4 d-grid">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="bi bi-funnel-fill me-1"></i> Filter
+      </button>
+    </div>
+  </div>
+</form>
+
+
+
+<h3>Site Progress Images</h3>
+<div class="swiper mySwiper">
+  <div class="swiper-wrapper">
+    {% for img in site_images %}
+      {% if img.image %}
+        <div class="swiper-slide">
+          <div class="image-card">
+            <img src="{{ img.image.url }}" alt="Site Image">
+            <div class="image-info">
+              <p class="upload-date">📅 Uploaded on {{ img.uploaded_at|date:"d M Y, h:i A" }}</p>
+              <p class="description"><strong>Description:</strong> {{ img.description }}</p>
+            </div>
+          </div>
+        </div>
+      {% endif %}
+    {% endfor %}
+  </div>
+
+  <!-- Navigation buttons -->
+  <div class="swiper-button-next"></div>
+  <div class="swiper-button-prev"></div>
+
+  <!-- Pagination -->
+  <div class="swiper-pagination"></div>
+</div>
+
+
+
+
+<!-- Swiper JS -->
+<!-- Swiper JS (include in your <head> or before </body>) -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+<script>
+  const swiper = new Swiper(".mySwiper", {
+    loop: true,
+    spaceBetween: 20,
+    slidesPerView: 1,
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+    },
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+    breakpoints: {
+      640: {
+        slidesPerView: 1,
+      },
+      768: {
+        slidesPerView: 1,
+      },
+      1024: {
+        slidesPerView: 1,
+      },
+    }
+  });
+</script>
+
+</script>
+</body>
+</html>

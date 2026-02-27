@@ -1,12 +1,127 @@
 {% extends 'projects/base.html' %}
+
 {% block content %}
-<div class="container mt-4">
-  <h2>Edit Expense</h2>
-  <form method="post">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <button type="submit" class="btn btn-success">Update</button>
-    <a href="javascript:history.back()" class="btn btn-secondary">Cancel</a>
-  </form>
+
+<style>
+/* ---------- Wrapper ---------- */
+.edit-expense-wrapper {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 30px 20px;
+}
+
+/* ---------- Card ---------- */
+.edit-expense-card {
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
+  padding: 28px;
+}
+
+/* ---------- Header ---------- */
+.edit-expense-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.edit-expense-header h2 {
+  font-weight: 700;
+  color: #0f172a;
+  margin: 0;
+}
+
+/* ---------- Form ---------- */
+.edit-expense-form p {
+  margin-bottom: 16px;
+}
+
+.edit-expense-form label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 6px;
+}
+
+.edit-expense-form input,
+.edit-expense-form select,
+.edit-expense-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid #cbd5e1;
+  background: #f8fafc;
+  font-size: 14px;
+}
+
+.edit-expense-form input:focus,
+.edit-expense-form select:focus,
+.edit-expense-form textarea:focus {
+  outline: none;
+  border-color: #2563eb;
+  background: #ffffff;
+}
+
+/* ---------- Actions ---------- */
+.edit-expense-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.btn-update {
+  background: #16a34a;
+  color: #ffffff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+
+.btn-update:hover {
+  background: #15803d;
+}
+
+.btn-cancel {
+  background: #64748b;
+  color: #ffffff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  text-decoration: none;
+}
+
+.btn-cancel:hover {
+  background: #475569;
+}
+</style>
+
+<div class="edit-expense-wrapper">
+
+  <div class="edit-expense-card">
+
+    <div class="edit-expense-header">
+      <h2>Edit Expense</h2>
+    </div>
+
+    <form method="post" class="edit-expense-form">
+      {% csrf_token %}
+      {{ form.as_p }}
+
+      <div class="edit-expense-actions">
+        <a href="javascript:history.back()" class="btn-cancel">
+          Cancel
+        </a>
+        <button type="submit" class="btn-update">
+          Update Expense
+        </button>
+      </div>
+    </form>
+
+  </div>
+
 </div>
+
 {% endblock %}

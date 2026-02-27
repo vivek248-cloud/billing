@@ -3,6 +3,13 @@
 {% block title %}Billing{% endblock %}
 {% load static %}
 {% load extra_filters %}
+{% load billing_tags %}
+{% billing_summary projects "In Progress" as ongoing %}
+{% billing_summary projects "Completed" as completed %}
+{% billing_summary projects "On Hold" as hold %}
+{% billing_summary projects "Not Started" as not_started %}
+
+
 {% load humanize %}
 {% load indian_format %}
 
@@ -13,33 +20,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
     <title>Billing</title>
-  <meta name="description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments.">
-  <meta name="keywords" content="Elite Dream Builders, login, client login, project management, construction dashboard">
-  <meta name="author" content="The Elite Dream Builders">
-  <meta name="google-site-verification" content="68LnzYm0TJcA1eTKG1h7ySOYL0RviN56WFJNTtRZ9b4" />
-  <meta property="og:title" content="The Elite Dream Builders">
-  <meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments.">
-  <meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG">
-  <meta property="og:url" content="https://edbbilling.com">
-  <meta name="twitter:card" content="summary_large_image">
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
-  
- <script type="application/ld+json">
+  <link rel="canonical" href="https://www.edbbilling.com/" />
+
+
+<!-- SEO Meta Tags -->
+<meta name="description" content="Access your billing dashboard at edbbilling.com. Manage projects, invoices, and payments with Elite Dream Builders.">
+<meta name="keywords" content="Elite Dream Builders, login, client login, project management, construction dashboard">
+<meta name="author" content="The Elite Dream Builders">
+<meta name="google-site-verification" content="68LnzYm0TJcA1eTKG1h7ySOYL0RviN56WFJNTtRZ9b4" />
+<meta name="robots" content="index, follow" />
+
+
+<!-- Open Graph (Facebook, LinkedIn) -->
+<meta property="og:title" content="The Elite Dream Builders" />
+<meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments." />
+<meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG" />
+<meta property="og:url" content="https://www.edbbilling.com/" />
+<meta property="og:type" content="website" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="The Elite Dream Builders" />
+<meta name="twitter:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments." />
+<meta name="twitter:image" content="https://edbbilling.com/static/images/logo.PNG" />
+
+<!-- CSS -->
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="{% static 'css/ledger.css' %}" />
+
+<!-- Structured Data for SEO -->
+<script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "The Elite Dream Builders",
-  "url": "https://www.edbbilling.com",
-  "logo": "https://www.edbbilling.com/static/images/logo.PNG",
-  "description": "Elite Dream Builders - View your projects, invoices, and payments online.",
-  "address": {
-    "@type": "PostalAddress",
-    "addressCountry": "IN"
+  "@type": "WebSite",
+  "name": "edbbilling",
+  "url": "https://www.edbbilling.com/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://www.edbbilling.com/?s={search_term_string}",
+    "query-input": "required name=search_term_string"
   }
 }
-</script>
 
+</script>
     <style>
         body {
             cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
@@ -81,6 +104,7 @@
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
+            border-radius: 12px;
         }
 
         .main-table th, .main-table td {
@@ -128,6 +152,12 @@
     display: none !important;
   }
 }
+
+
+
+
+
+
     </style>
 </head>
 <body>
@@ -163,7 +193,147 @@
 <!-- Add Expense Form -->
 
 
+{% billing_summary projects "In Progress" as ongoing %}
+{% billing_summary projects "Completed" as completed %}
+{% billing_summary projects "On Hold" as hold %}
+{% billing_summary projects "Not Started" as not_started %}
 
+<div class="row g-4 mb-5">
+
+  <!-- Ongoing -->
+  <div class="col-md-3">
+    <div class="summary-card summary-active">
+      <h3>Ongoing</h3>
+
+        <div class="stat-item ">
+          <span class="stat-label">Total Projects</span>
+          <span class="stat-value">
+            {{ ongoing.count }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ ongoing.budget|indian_currency }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ ongoing.paid|indian_currency }}
+          </span>
+        </div>
+          <!-- Highlight -->
+        <div class="stat-item highlight">
+          <span class="stat-label">Yet to Receive</span>
+          <span class="stat-value">
+            {{ ongoing.remaining|indian_currency }}
+          </span>
+        </div>
+
+    </div>
+  </div>
+
+  <!-- Completed -->
+  <div class="col-md-3">
+    <div class="summary-card summary-completed">
+      <h3>Completed</h3>
+        <div class="stat-item ">
+          <span class="stat-label">Total Projects</span>
+          <span class="stat-value">
+            {{ completed.count }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ completed.budget|indian_currency }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ completed.paid|indian_currency }}
+          </span>
+        </div>
+        <!-- Highlight -->
+        <div class="stat-item highlight">
+          <span class="stat-label">Yet to Receive</span>
+          <span class="stat-value">
+            {{ completed.remaining|indian_currency }}
+          </span>
+        </div>
+
+    </div>
+  </div>
+
+  <!-- On Hold -->
+  <div class="col-md-3">
+    <div class="summary-card summary-hold">
+      <h3>On Hold</h3>
+        <div class="stat-item ">
+          <span class="stat-label">Total Projects</span>
+          <span class="stat-value">
+            {{ hold.count }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ hold.budget|indian_currency }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ hold.paid|indian_currency }}
+          </span>
+        </div>
+          <!-- Highlight -->
+        <div class="stat-item highlight">
+          <span class="stat-label">Yet to Receive</span>
+          <span class="stat-value">
+            {{ hold.remaining|indian_currency }}
+          </span>
+        </div>
+    </div>
+  </div>
+
+  <!-- Not Started -->
+  <div class="col-md-3">
+    <div class="summary-card summary-not-started">
+      <h3>Yet to Started</h3>
+        <div class="stat-item ">
+          <span class="stat-label">Total Projects</span>
+          <span class="stat-value">
+            {{ not_started.count }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Budget</span>
+          <span class="stat-value">
+            {{ not_started.budget|indian_currency }}
+          </span>
+        </div>
+        <div class="stat-item ">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value">
+            {{ not_started.paid|indian_currency }}
+          </span>
+        </div>
+        <!-- Highlight -->
+        <div class="stat-item highlight">
+          <span class="stat-label">Yet to Receive</span>
+          <span class="stat-value">
+            {{ not_started.remaining|indian_currency }}
+          </span>
+        </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Alerts -->
 
 {% if messages %}
   <div class="alert-messages">
@@ -173,57 +343,118 @@
   </div>
 {% endif %}
 
-<table class="table table-bordered table-striped align-middle text-center main-table">
-    <thead class="table-dark">
-        <tr>
-            <th style="width: 5%;">S.No</th>
-            <th style="width: 10%;">Project ID</th>
-            <th style="width: 20%;">Client Name</th>
-            <th style="width: 20%;">Project Status</th>
-            <th style="width: 25%;">Total Budget</th>
-            <th style="width: 25%;">Total Paid</th>
-            <th style="width: 25%;">Yet to Receive</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for project in projects %}
-        <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{project.id}}</td>
-            <td><a href="{% url 'client_details' project.id %}" class="text-decoration-none text-dark fw-bold">
-                {{ project.client_name }}</a>
-            </td>
-            <td>
-                <span class="status-dot {% if project.status == 'Not Started' %}not-started
-                    {% elif project.status == 'In Progress' %}in-progress
-                    {% elif project.status == 'Completed' %}completed
-                    {% elif project.status == 'On Hold' %}on-hold
-                    {% endif %}">
-                </span>
-                {{ project.status }}
-                <br>
-                <a href="{% url 'update_project_status' project.id %}" class="btn btn-sm btn-outline-secondary mt-1 btn-status-update">
-                    Update
-                </a>
-            </td>
-            <td class="right-align">{{ project|total_budget_with_expense|indian_currency }}</td>
-            <td class="right-align">
-                {% if project.payments.all %}
-                    {{ project.payments.all|total_payment|indian_currency }}
-                {% else %}
-                    ₹0
-                {% endif %}
-            <td class="right-align">
-                {% if project.remaining < 0 %}
-                    <span class="text-danger">{{ project.remaining|indian_currency }}</span>
-                {% else %}
-                    {{ project.remaining|indian_currency }}
-                {% endif %}
-            </td>
-        </tr>
+<div class="row g-4">
+
+  <!-- LEFT : Recent Activity -->
+  <div class="col-lg-7 ">
+    <div class="card h-100">
+      <div class="card-header fw-bold">Recent Activity</div>
+      <ul class="list-group list-group-flush">
+        {% for a in activities %}
+          <li class="list-group-item d-flex align-items-start gap-3">
+            <span class="badge bg-{{ a.color }} p-2">
+              <i class="bi {{ a.icon }}"></i>
+            </span>
+            <div class="flex-grow-1">
+              <div class="fw-semibold">{{ a.title }}</div>
+              <small class="text-muted">{{ a.desc }}</small>
+            </div>
+            <small class="text-muted">{{ a.time }}</small>
+          </li>
+        {% empty %}
+          <li class="list-group-item text-muted text-center">
+            No recent activity
+          </li>
         {% endfor %}
-    </tbody>
-</table>
+      </ul>
+    </div>
+  </div>
+
+  <!-- RIGHT : Quick Actions -->
+  <div class="col-lg-5">
+    <div class="card quick-actions h-100">
+      <div class="card-header fw-bold">Quick Actions</div>
+
+      <div class="card-body">
+        <div class="quick-grid">
+          <a href="{% url 'add_project' %}" class="quick-card teal">
+            <i class="bi bi-plus-lg"></i>
+            <h6>New Project</h6>
+            <p>Start a new project</p>
+          </a>
+
+          <a href="{% url 'add_expense' %}" class="quick-card green">
+            <i class="bi bi-receipt"></i>
+            <h6>Add Cost</h6>
+            <p>Record project expense</p>
+          </a>
+
+          <a href="{% url 'analysis_dashboard' %}" class="quick-card blue">
+            <i class="bi bi-bar-chart-line"></i>
+            <h6>Analysis</h6>
+            <p>View insights</p>
+          </a>
+
+          <a href="{% url 'add_payment' %}" class="quick-card orange">
+            <i class="bi bi-cash-coin"></i>
+            <h6>Record Payment</h6>
+            <p>Log payment</p>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+
+
+<div class="table-responsive">
+    <table class="project-table">
+        <thead>
+            <tr>
+                <th>S.No</th>
+                <th>Project Name</th>
+                <th>Client Name</th>
+                <th>Project Status</th>
+                <th>Total Budget</th>
+                <th>Total Paid</th>
+                <th>Yet to Receive</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for project in projects %}
+            <tr>
+                <td class="sno">{{ forloop.counter }}</td>
+                <td class="project-name">{{ project.name }}</td>
+                <td class="client-name">
+                    <a href="{% url 'client_details' project.id %}" class="client-link">
+                        {{ project.client_name }}
+                    </a>
+                </td>
+                <td class="status-cell">
+                    <span class="status-badge status-{% if project.status == 'Not Started' %}not-started
+                        {% elif project.status == 'In Progress' %}in-progress
+                        {% elif project.status == 'Completed' %}completed
+                        {% elif project.status == 'On Hold' %}on-hold
+                        {% else %}default{% endif %}">
+                        {{ project.status }}
+                    </span>
+                    <a href="{% url 'update_project_status' project.id %}" class="btn-update-status">
+                        Update
+                    </a>
+                </td>
+                <td class="amount budget">{{ project|total_budget_with_expense|indian_currency }}</td>
+                <td class="amount paid">{{ project.payments.all|total_payment|indian_currency|default:"₹0" }}</td>
+                <td class="amount remaining {% if project.remaining < 0 %}negative{% endif %}">
+                    {{ project.remaining|indian_currency }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
 
    

@@ -2,10 +2,10 @@
 
 import os
 from pathlib import Path
-BASE_DIR == /root/edb/billing/ledger_system
 
-# BASE_DIR = Path(__file__).resolve().parent.parent
-import dj_database_url
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# import dj_database_url
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'
 
@@ -23,7 +23,7 @@ SECRET_KEY = 'django-insecure-nyo_fa03512tqw8lj2i=p)i9^bs+qg*%lxwm-ib-%)8u#18c@_
 DEBUG = False
 
 
-ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling.com']
+ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling.com','*']
 
 
 
@@ -31,8 +31,6 @@ ALLOWED_HOSTS = ['31.97.62.126', 'edbbilling.com', 'www.edbbilling.com']
 
 # Application definition
 INSTALLED_APPS = [
-    'cloudinary',
-    'cloudinary_storage',
 
     'jazzmin',  # for admin interface customization
     'django.contrib.admin',
@@ -42,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.humanize',  # For human-friendly formatting of numbers and dates
-    
+    'django.contrib.sitemaps',
     
     # Your apps
     'projects',
@@ -51,7 +49,7 @@ INSTALLED_APPS = [
 ]
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+     'whitenoise.middleware.WhiteNoiseMiddleware',  # WhiteNoiseMiddleware for serving static files in production
     'django.contrib.sessions.middleware.SessionMiddleware',  # SessionMiddleware should be here
     'projects.middleware.BlockUnauthorizedMiddleware',  # Your custom middleware should come after
     'django.middleware.common.CommonMiddleware',
@@ -62,6 +60,35 @@ MIDDLEWARE = [
 ]
 
 
+
+JAZZMIN_SETTINGS = {
+    "site_title": "Elite Dream Admin",
+    "site_header": "The Elite Dream Builders Admin",
+    "site_brand": "Elite Dream Builders",
+    "welcome_sign": "Welcome to The Elite Dream Builders Dashboard",
+    "copyright": "Elite Dream Builders",
+    
+    "icons": {
+        # Your app models
+        "projects.Project": "fas fa-project-diagram",
+        "projects.Expense": "fas fa-file-invoice-dollar",
+        "projects.Payment": "fas fa-money-bill-wave",
+        "projects.DailyExpense": "fas fa-calendar-day",
+        "projects.CustomProject": "fas fa-folder-plus",
+        "projects.SiteImage": "fas fa-image",
+
+        # Built-in auth models
+        "auth.User": "fas fa-user",
+        "auth.Group": "fas fa-users-cog",
+    },
+
+    "topmenu_links": [
+        {"name": "Home", "url": "/", "permissions": ["auth.view_user"]},
+    ],
+
+    "show_sidebar": True,
+    "navigation_expanded": True,
+}
 
 
 # Expire session after 10 minutes of inactivity
@@ -97,19 +124,32 @@ TEMPLATES = [
 WSGI_APPLICATION = 'ledger_system.wsgi.application'
 
 
-# Database
+# production database
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
+        'ENGINE': 'django.db.backends.postgresql',  # Use PostgreSQL as the database backend
         'NAME': 'billingdb',
-        'USER': 'billinguser',
+        'USER': 'billinguser',# billinguser for production
         'PASSWORD': 'Admin123',
         'HOST': '127.0.0.1',
-        'PORT': '5432',
+        'PORT': '5432',# 5432 is the default port for PostgreSQL 3306 for MySQL
     }
 }
 
+
+# development database 
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',  # Use mysql as the database backend
+#         'NAME': 'billingdb',
+#         'USER': 'root',# billinguser for production
+#         'PASSWORD': 'Admin123',
+#         'HOST': '127.0.0.1',
+#         'PORT': '3306',# 3306 is the default port for 3306 for MySQL
+#     }
+# }
 
 # Password validation
 # https://docs.djangoproject.com/en/5.2/ref/settings/#auth-password-validators
@@ -158,9 +198,11 @@ if not DEBUG:
     STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 
+import os
+BASE_DIR = Path(__file__).resolve().parent.parent
 
 MEDIA_URL = '/media/'
-MEDIA_ROOT = '/var/www/edb-media'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 
 

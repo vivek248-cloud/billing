@@ -7,7 +7,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+  <link rel="icon" href="/static/images/favicon.ico" type="image/x-icon">
   <title>Client Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <!-- Swiper CSS -->
@@ -24,17 +24,9 @@
       cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
       margin: 0;
       overflow-X: hidden!important;
-      padding: 20px;
     }
 
-    .dashboard {
-      max-width: 900px;
-      margin: auto;
-      background-color: white;
-      border-radius: 12px;
-      padding: 30px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
-    }
+    
 
     h2 {
       text-align: center;
@@ -138,31 +130,7 @@
       background-color: #2563eb;
     }
 
-    nav ul {
-      list-style: none;
-      display: flex;
-      justify-content: flex-start;
-      padding: 0;
-      justify-content: center;
-      margin-bottom: 20px;
-    }
 
-    nav ul li {
-      margin-right: 15px;
-      background-color: #2563eb;
-      padding: 10px 18px;
-      border-radius: 6px;
-    }
-
-    nav ul li:hover {
-      background-color: #3b82f6;
-    }
-
-    nav ul a {
-      text-decoration: none;
-      color: #ffffff;
-      font-weight: bold;
-    }
 .project-info {
       font-weight: 600;
       color: #374151;
@@ -313,324 +281,589 @@
     width: 100%;
     border-radius: 8px;
   }
+
+
+  /* Modern Client Navbar - Clean & Mobile-Friendly */
+.client-navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: rgba(15, 23, 42, 0.95);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 1rem 1.5rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  color: white;
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo {
+  width: 58px;
+  height: 58px;
+  border-radius: 12px;
+  object-fit: contain;
+  
+}
+
+.brand-text {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #ffd700;
+  letter-spacing: 0.5px;
+}
+
+/* Navigation Menu */
+.nav-menu {
+  display: flex;
+  list-style: none;
+  gap: 1rem;
+  margin: 0;
+  padding: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0.7rem 1.2rem;
+  color: #e2e8f0;
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 1rem;
+  border-radius: 12px;
+  transition: all 0.3s ease;
+}
+
+.nav-link:hover {
+  background: rgba(59, 130, 246, 0.25);
+  color: white;
+  transform: translateY(-2px);
+}
+
+.nav-link i {
+  font-size: 1.1rem;
+}
+
+/* Hamburger Toggle */
+.navbar-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 5px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+}
+
+.navbar-toggle span {
+  width: 28px;
+  height: 3px;
+  background: white;
+  border-radius: 3px;
+  transition: all 0.3s ease;
+}
+
+.navbar-toggle.active span:nth-child(1) {
+  transform: rotate(45deg) translate(6px, 6px);
+}
+
+.navbar-toggle.active span:nth-child(2) {
+  opacity: 0;
+}
+
+.navbar-toggle.active span:nth-child(3) {
+  transform: rotate(-45deg) translate(7px, -7px);
+}
+
+/* Mobile Styles */
+@media (max-width: 768px) {
+  .navbar-brand {
+    gap: 10px;
+  }
+
+  .brand-logo {
+    width: 36px;
+    height: 36px;
+  }
+
+  .brand-text {
+    font-size: 1.4rem;
+  }
+
+  .navbar-toggle {
+    display: flex;
+  }
+
+  .nav-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: rgba(15, 23, 42, 0.98);
+    backdrop-filter: blur(20px);
+    flex-direction: column;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.4s ease, padding 0.4s ease;
+    border-radius: 0 0 20px 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  }
+
+  .nav-menu.active {
+    max-height: 300px;
+    padding: 1rem;
+  }
+
+  .nav-link {
+    justify-content: center;
+    padding: 1rem;
+    font-size: 1.1rem;
+    border-radius: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .client-navbar {
+    padding: 0.8rem 1rem;
+  }
+
+  .brand-text {
+    font-size: 1.3rem;
+  }
+}
+
+
+.client-dashboard-container {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+  padding: 2rem 1rem;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+.welcome-header {
+  text-align: center;
+  margin-bottom: 2.5rem;
+  color: #1e293b;
+}
+
+.welcome-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin: 0 0 0.75rem 0;
+}
+
+.welcome-subtitle {
+  font-size: 1.125rem;
+  color: #64748b;
+  margin: 0;
+}
+
+/* Congratulations Card */
+.congrats-section {
+  display: flex;
+  justify-content: center;
+  margin: 2rem 0;
+}
+
+.congrats-card {
+  position: relative;
+  background: white;
+  padding: 2.5rem 2rem;
+  border-radius: 20px;
+  text-align: center;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+  overflow: hidden;
+}
+
+.confetti-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #10b981 0%, #3b82f6 50%, #a78bfa 100%);
+  opacity: 0.1;
+}
+
+.congrats-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  animation: bounce 2s infinite;
+}
+
+.congrats-card h3 {
+  font-size: 1.875rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0 0 1rem 0;
+}
+
+.congrats-card p {
+  font-size: 1.125rem;
+  color: #475569;
+  margin: 0 0 1.5rem 0;
+  line-height: 1.6;
+}
+
+.congrats-footer {
+  font-size: 0.975rem;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* Stepper Section */
+.stepper-section {
+  background: white;
+  padding: 2rem 1.5rem;
+  border-radius: 20px;
+  margin: 0 auto 2rem;
+  max-width: 600px;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+}
+
+.section-title {
+  text-align: center;
+  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.stepper-container {
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 0.5rem;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+}
+
+.stepper-progress-bar {
+  position: absolute;
+  top: 48px;
+  left: 10%;
+  width: 80%;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 3px;
+  z-index: 1;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(to right, #10b981, #3b82f6);
+  border-radius: 3px;
+  transition: width 0.6s ease;
+  width: 0%; /* Will be updated via JS or inline style based on status */
+}
+
+.step {
+  flex: 1;
+  min-width: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-align: center;
+  z-index: 2;
+  margin-top:1.4rem;
+}
+
+.step-circle {
+  width: 44px;
+  height: 44px;
+  background: white;
+  border: 5px solid #e2e8f0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+  transition: all 0.4s ease;
+  position: relative;
+}
+
+.step-icon {
+  font-size: 1.75rem;
+  color: #64748b;
+  transition: all 0.4s ease;
+}
+
+.check-icon {
+  position: absolute;
+  font-size: 2rem;
+  color: #10b981;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+.step-label {
+  margin-top: 1rem;
+  font-size: 0.925rem;
+  font-weight: 500;
+  color: #64748b;
+}
+
+/* Completed State */
+.step.completed .step-circle {
+  border-color: #10b981;
+  background: #10b981;
+}
+
+.step.completed .step-icon {
+  opacity: 0;
+}
+
+.step.completed .check-icon {
+  opacity: 1;
+  color: white;
+}
+
+/* Current State - Dynamic Color Heartbeat Pulse */
+.step.current .step-circle {
+  border-width: 6px;
+  background: #3b82f6; /* Base blue background */
+  box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  animation: 
+    heartbeat-pulse 1.8s ease-in-out infinite,
+    color-shift 6s linear infinite;
+}
+
+.step.current .step-icon,
+.step.current .check-icon {
+  color: white;
+}
+
+.step.current .step-label {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+/* Heartbeat scale + glow pulse */
+@keyframes heartbeat-pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.5);
+  }
+  40% {
+    transform: scale(1.12);
+    box-shadow: 0 0 0 16px rgba(167, 139, 250, 0.4); /* Purple hint in middle */
+  }
+  70% {
+    transform: scale(1);
+    box-shadow: 0 0 0 24px rgba(59, 130, 246, 0);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+  }
+}
+
+/* Dynamic color cycle on border and glow */
+@keyframes color-shift {
+  0% {
+    border-color: #3b82f6; /* Blue */
+  }
+  25% {
+    border-color: #a78bfa; /* Purple */
+  }
+  50% {
+    border-color: #ec4899; /* Pink */
+  }
+  75% {
+    border-color: #14b8a6; /* Teal */
+  }
+  100% {
+    border-color: #3b82f6; /* Back to blue */
+  }
+}
+.step.current .step-icon,
+.step.current .check-icon {
+  color: white;
+}
+
+.step.current .step-label {
+  color: #1e40af;
+  font-weight: 700;
+}
+
+/* Animation */
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .welcome-title { font-size: 1.875rem; }
+  .stepper-progress-bar { left: 8%; width: 84%; }
+  .step { min-width: 90px; }
+  .step-circle { width: 56px; height: 56px; }
+  .step-icon { font-size: 1.5rem; }
+}
+
   </style>
 </head>
 <body>
 
-<nav>
-  <ul>
-    <a href="{% url 'logout' %}"><li>🏠 Logout</li></a>
+<nav class="client-navbar">
+  <div class="navbar-brand">
+    <img src="{% static 'images/logo.PNG' %}" alt="EDB Billing" class="brand-logo">
+    <span class="brand-text">EDB Billing</span>
+  </div>
+
+  <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <ul class="nav-menu" id="navMenu">
+    <li><a href="{% url 'client_dashboard' phone %}" class="nav-link">
+      <i class="fas fa-sign-out-alt"></i> Dashboard
+    </a></li>
+    <li><a href="{% url 'siteprocess' phone %}" class="nav-link">
+      <i class="fas fa-clipboard-check"></i> Site Progress
+    </a></li>
+    <li><a href="{% url 'siteimage' phone %}" class="nav-link">
+      <i class="fas fa-camera"></i> Site Images
+    </a></li>
+    <li><a href="{% url 'logout' %}" class="nav-link">
+      <i class="fas fa-sign-out-alt"></i> Logout
+    </a></li>
   </ul>
 </nav>
 
-<div class="dashboard">
-  <h2>Welcome,  {{ project.client_name|title }}</h2>
-
-  <!-- Project Progress -->
-  <div class="section-title">Project Progress</div>
-  <div class="milestone-wrapper">
-    <div class="milestone-step {% if project.status in 'Not Started,In Progress,Completed,On Hold' %}active{% endif %}">
-      <div class="circle">1</div>
-      <span>Not Started</span>
-    </div>
-    <div class="line {% if project.status in 'In Progress,Completed,On Hold' %}active{% endif %}"></div>
-
-    <div class="milestone-step {% if project.status in 'In Progress,Completed,On Hold' %}active{% endif %}">
-      <div class="circle">2</div>
-      <span>In Progress</span>
-    </div>
-    <div class="line {% if project.status in 'Completed,On Hold' %}active{% endif %}"></div>
-
-    <div class="milestone-step {% if project.status in 'Completed,On Hold' %}active{% endif %}">
-      <div class="circle">3</div>
-      <span>Completed</span>
-    </div>
-    <div class="line {% if project.status == 'On Hold' %}active{% endif %}"></div>
-
-    <div class="milestone-step {% if project.status == 'On Hold' %}active{% endif %}">
-      <div class="circle">4</div>
-      <span>On Hold</span>
-    </div>
-  </div>
-
-  <!-- Project Summary -->
-  <div class="section-title">Project Summary</div>
-  <table>
-    <tbody>
-      <tr class="project-info">
-        <td>Name</td>
-        <td class="value">{{ project.client_name|upper }}</td>
-      </tr>
-      <tr class="project-info">
-        <td>Phone</td>
-        <td class="value">{{ project.phone }}</td>
-      </tr>
-      <tr>
-        <td>Total Budget</td>
-        <td class="value">{{ project.total_expenses|indian_currency }}</td>
-      </tr>
-      <tr>
-        <td>Amount Paid</td>
-        <td class="value">{{ project.payments.all|total_payment|indian_currency }}</td>
-      </tr>
-      <tr>
-        <td>Remaining Amount</td>
-        <td class="value">{{ project.remaining|indian_currency }}</td>
-      </tr>
-    </tbody>
-  </table>
-
-  <!-- Expense Details -->
-<div class="section-title">Expense Details</div>
-
-{% if project %}
-  <div class="expense-summary-card">
-    <p class="expense-count">Total Budget: </p>  
-{% comment %} {{ project.expenses_set.count }} {% endcomment %}
-
-    {% if project.expenses_set.all %}
-      <div class="expense-list">
-        {% for item in project.expenses_set.all %}
-          <div class="expense-item">
-            <div class="expense-date">{{ item.date|date:"Y-m-d" }}</div>
-            <div class="expense-detail">
-              <span class="expense-description">{{ item.description }}</span>
-              <span class="expense-amount">{{ item.amount|indian_currency }}</span>
-            </div>
-          </div>
-        {% endfor %}
-      </div>
-      <div class="expense-total">
-        <strong>Total:</strong> {{ project.total_expenses|indian_currency }}
-      </div>
-    {% else %}
-      <p class="no-expense">No expenses found.</p>
-    {% endif %}
-  </div>
-  {% comment %} <a href="{% url 'download_invoice' project.id %}" class="btn-download-invoice">
-  <svg xmlns="http://www.w3.org/2000/svg" class="icon" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M12 12v8m0 0l-4-4m4 4l4-4M12 4v8" />
-  </svg>
-  Download Invoice
-</a> {% endcomment %}
-{% else %}
-  <p class="no-project">No project found.</p>
-{% endif %}
-
-<h3>Payment History</h3>
-
-{% if payment_rows %}
-
-<div class="table-responsive" style="overflow-x: auto; -webkit-overflow-scrolling: touch;">
-  <table class="table table-striped table-bordered" style="min-width: 600px;">
-    <thead>
-      <tr>
-        <th>S.No</th>
-        <th>Date</th>
-        <th>Payment Mode</th>
-        <th>Amount Paid</th>
-        <th>Cumulative Before</th>
-        <th>Remaining After</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody>
-      {% for row in payment_rows %}
-      <tr>
-        <td>{{ forloop.counter }}</td>
-        <td>{{ row.date }}</td>
-        <td>{{ row.amount|indian_currency }}</td>
-        <td>{{ row.payment_mode }}</td>
-        <td>{{ row.cumulative_paid_before|indian_currency }}</td>
-        <td>{{ row.remaining_after_payment|indian_currency }}</td>
-        <td>
-          <a href="{% url 'payment_invoice' row.payment_obj.id %}" 
-             target="_blank" 
-             class="btn btn-sm"
-             style="
-               background-color: #2563EB;
-               color: white;
-               padding: 6px 12px;
-               border-radius: 8px;
-               font-weight: 500;
-               text-decoration: none;
-               box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-               transition: all 0.3s ease;
-               display: inline-block;
-             "
-             onmouseover="this.style.backgroundColor='#1D4ED8';"
-             onmouseout="this.style.backgroundColor='#2563EB';">
-             Invoice
-          </a>
-        </td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="7">No payments found.</td></tr>
-      {% endfor %}
-
-      <tr style="background-color: #2563EB; color: white;">
-        <td colspan="4" style="font-weight: bold;">Total:</td>
-        <td colspan="3" style="text-align: right; font-weight: bold;">₹{{ total_paid|indian_currency }}</td>
-      </tr>
-    </tbody>
-  </table>
-</div>
-
-  {% else %}
-    <p>No payments recorded yet.</p>
-  {% endif %}
-<p><strong>Total Paid:</strong> ₹{{ total_paid }}</p>
-
-
-
-
-
-<!-- Section Title with AOS -->
-<div class="section-title" data-aos="fade-up">Project Insights</div>
-
-<!-- Chart Canvas with animation -->
-<div style="position: relative; width: 100%; height: 350px;">
-  <canvas id="projectChart"></canvas>
-</div>
-
-
-<h3>Site Progress Images</h3>
-<div class="swiper mySwiper">
-  <div class="swiper-wrapper">
-    {% for img in site_images %}
-      {% if img.image %}
-        <div class="swiper-slide">
-          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
-          <p>{{ img.description }}</p>
-        </div>
-      {% else %}
-        <div class="swiper-slide">
-          <img src="{% static 'images/placeholder.jpg' %}" alt="No image uploaded" style="width: 100%; border-radius: 10px;">
-          <p>No image uploaded for this entry.</p>
-        </div>
-      {% endif %}
-    {% endfor %}
-  </div>
-
-  <!-- Optional controls -->
-  <div class="swiper-button-next"></div>
-  <div class="swiper-button-prev"></div>
-  <div class="swiper-pagination"></div>
-</div>
-
-
-
-<!-- Swiper JS -->
-  <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var swiper = new Swiper(".mySwiper", {
-      loop: true,
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
-      },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
-      },
-      slidesPerView: 1,
-      spaceBetween: 20,
+  const toggle = document.getElementById('navbarToggle');
+  const menu = document.getElementById('navMenu');
+
+  toggle.addEventListener('click', () => {
+    menu.classList.toggle('active');
+    toggle.classList.toggle('active');
+  });
+
+  // Close menu when clicking a link on mobile
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.addEventListener('click', () => {
+      if (window.innerWidth <= 768) {
+        menu.classList.remove('active');
+        toggle.classList.remove('active');
+      }
     });
   });
 </script>
 
+<div class="client-dashboard-container">
+  <!-- Enhanced Welcome Header -->
+  <header class="welcome-header">
+    <h1 class="welcome-title">Welcome back, {{ project.client_name|title }}!</h1>
+    <p class="welcome-subtitle">We're excited to keep you updated on your project progress in real-time.</p>
+  </header>
 
-<!-- Chart.js & AOS CDN -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <!-- Enhanced Congratulations Celebration -->
+  {% if project.status == "Completed" %}
+    <div class="congrats-section">
+      <div class="congrats-card">
+        <div class="confetti-bg"></div>
+        <div class="congrats-icon">🎉</div>
+        <h3>Congratulations!</h3>
+        <p>Your project has been successfully completed on time and with excellence.<br>Thank you for trusting us! 🏆✨</p>
+        <div class="congrats-footer">
+          <span>We're proud of what we've built together.</span>
+        </div>
+      </div>
+    </div>
+  {% endif %}
 
-<!-- Initialize AOS -->
-<script>
-  AOS.init();
-</script>
+  <!-- Enhanced Mobile-First Horizontal Progress Stepper -->
+    <section class="progress-section stepper-section">
+      <h4 class="section-title">Project Progress</h4>
 
-<!-- Chart Script -->
-<script>
-  const ctx = document.getElementById('projectChart').getContext('2d');
+    <div class="stepper-container">
+    <div class="stepper-progress-bar">
+      <div class="progress-fill"></div>
+    </div>
 
-  const chart = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: [
-        'Project Budget (₹ {{ project.total_expenses|indian_currency }})',
-        'Amount Paid (₹ {{ project.payments.all|total_payment|indian_currency }})',
-        'Remaining (₹ {{ project.remaining|indian_currency }})'
-      ],
-      datasets: [{
-        label: 'Project Finance Overview',
-        data: [
-          {{ project.total_expenses }},
-          {{ project.payments.all|total_payment }},
-          {{ project.remaining }}
-        ],
-        backgroundColor: [
-          'rgba(255, 99, 132, 0.6)',
-          'rgba(75, 192, 192, 0.6)',
-          'rgba(255, 206, 86, 0.6)'
-        ],
-        borderColor: [
-          'rgba(255, 99, 132, 1)',
-          'rgba(75, 192, 192, 1)',
-          'rgba(255, 206, 86, 1)'
-        ],
-        borderWidth: 5
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      animation: {
-        duration: 2000,
-        easing: 'easeOutElastic'
-      },
-      plugins: {
-        legend: {
-          display: true,
-          position: 'bottom'
-        },
-        tooltip: {
-          backgroundColor: 'rgba(0, 0, 0, 0.7)',
-          padding: 12,
-          borderRadius: 8,
-          titleFont: { size: 16 },
-          bodyFont: { size: 14 }
+    <!-- Step 1: Not Started -->
+    <div class="step 
+      {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}completed{% endif %}
+      {% if project.status == 'Not Started' %}current{% endif %}">
+      <div class="step-circle">
+        <i class="step-icon fas fa-hourglass-start"></i>
+        <i class="check-icon fas fa-check"></i>
+      </div>
+      <div class="step-label">Not Started</div>
+    </div>
+
+    <!-- Step 2: In Progress -->
+    <div class="step 
+      {% if project.status == 'Completed' or project.status == 'On Hold' %}completed{% endif %}
+      {% if project.status == 'In Progress' %}current{% endif %}">
+      <div class="step-circle">
+        <i class="step-icon fas fa-tools"></i>
+        <i class="check-icon fas fa-check"></i>
+      </div>
+      <div class="step-label">In Progress</div>
+    </div>
+
+    <!-- Step 3: Completed -->
+    <div class="step 
+      {% if project.status == 'Completed' or project.status == 'On Hold' %}completed{% endif %}
+      {% if project.status == 'Completed' %}current{% endif %}">
+      <div class="step-circle">
+        <i class="step-icon fas fa-check-circle"></i>
+        <i class="check-icon fas fa-check"></i>
+      </div>
+      <div class="step-label">Completed</div>
+    </div>
+
+    <!-- Step 4: On Hold -->
+    <div class="step 
+      {% if project.status == 'On Hold' %}completed current{% endif %}">
+      <div class="step-circle">
+        <i class="step-icon fas fa-pause-circle"></i>
+        <i class="check-icon fas fa-check"></i>
+      </div>
+      <div class="step-label">On Hold</div>
+    </div>
+  </div>
+  </section>
+</div>
+
+<!-- Confetti for Completed Projects -->
+{% if project.status == "Completed" %}
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <script>
+    // Elegant multi-burst confetti celebration
+    function launchConfetti() {
+      const colors = ['#22c55e', '#3b82f6', '#f59e0b', '#10b981'];
+      const end = Date.now() + 4000;
+
+      (function burst() {
+        confetti({
+          particleCount: 8,
+          spread: 70,
+          origin: { x: Math.random(), y: Math.random() - 0.2 },
+          colors: colors
+        });
+
+        if (Date.now() < end) {
+          requestAnimationFrame(burst);
         }
-      },
-      scales: {
-        x: {
-          ticks: {
-            font: {
-              size: 12
-            },
-            autoSkip: false,
-            maxRotation: 45,
-            minRotation: 20
-          }
-        },
-        y: {
-          beginAtZero: true,
-          ticks: {
-            font: {
-              size: 12
-            }
-          }
-        }
-      }
+      })();
     }
-  });
-</script>
 
-
-
-
-
+    window.addEventListener('load', launchConfetti);
+  </script>
+{% endif %}
 
 </body>
 </html>

@@ -1,4 +1,5 @@
 from urllib.parse import urlencode
+from django.utils import timezone
 
 from django.db.models import Sum
 from decimal import Decimal
@@ -44,6 +45,10 @@ from datetime import datetime
 from .models import Project, Expense, DailyExpense
 from .forms import ExpenseForm, DailyExpenseForm
 
+
+
+
+
 # home
 def home(request):
     return render(request, 'projects/index.html')
@@ -54,7 +59,7 @@ def home(request):
 # admin_login
 def admin_login(request):
     if request.session.get('admin_logged_in'):
-        return redirect('/dashboard/')
+        return redirect('/billing/')
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -170,7 +175,125 @@ def client_dashboard(request, phone):
 
     return render(request, 'projects/client_dashboard.html', context)
 
+from django.utils.dateparse import parse_date
 
+def siteimage(request, phone):
+    project = Project.objects.filter(phone=phone).first()
+    if not project:
+        return HttpResponseForbidden("Project not found.")
+    
+    if request.session.get('client_project_id') != project.id:
+        return HttpResponseForbidden("Access denied.")
+
+    # Expense and Payment logic (same as before)
+    expenses = Expense.objects.filter(project=project)
+    payments = Payment.objects.filter(project=project).order_by('date')
+
+    total_expense = sum(exp.amount for exp in expenses)
+    budget = project.budget or Decimal('0')
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+
+    for payment in payments:
+        amount = Decimal(str(payment.amount))
+        cumulative_paid += amount
+        payment_rows.append({
+            'payment_obj': payment,
+            'id': payment.id,
+            'date': payment.date,
+            'amount': amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+        })
+        cumulative_paid_before = cumulative_paid
+
+    remaining = budget - total_expense
+    remaining_after_payment = remaining - cumulative_paid
+
+    # ✅ Site Image Filters
+    from_date = parse_date(request.GET.get('img_from') or '')
+    to_date = parse_date(request.GET.get('img_to') or '')
+    site_images = SiteImage.objects.filter(project=project)
+
+    if from_date:
+        site_images = site_images.filter(uploaded_at__date__gte=from_date)
+    if to_date:
+        site_images = site_images.filter(uploaded_at__date__lte=to_date)
+
+    site_images = site_images.order_by('-uploaded_at')
+
+    context = {
+        'project': project,
+        'phone': phone,
+        'client_name': project.client_name,
+        'expenses': expenses,
+        'payment_rows': payment_rows,
+        'total_paid': cumulative_paid,
+        'remaining': remaining,
+        'remaining_after_payment': remaining_after_payment,
+        'site_images': site_images,
+        'img_from': request.GET.get('img_from', ''),
+        'img_to': request.GET.get('img_to', ''),
+    }
+
+    return render(request, 'projects/siteimage.html', context)
+
+
+
+
+def siteprocess(request, phone):
+    project = Project.objects.filter(phone=phone).first()
+
+    if not project:
+        return HttpResponseForbidden("Project not found.")
+    
+    if request.session.get('client_project_id') != project.id:
+        return HttpResponseForbidden("Access denied.")
+
+    expenses = Expense.objects.filter(project=project)
+    payments = Payment.objects.filter(project=project).order_by('date')
+    site_images = SiteImage.objects.filter(project=project).order_by('-uploaded_at')  # ✅
+
+    total_expense = sum(exp.amount for exp in expenses)
+    budget = project.budget or Decimal('0')
+
+    cumulative_paid = Decimal('0.00')
+    cumulative_paid_before = Decimal('0.00')
+    payment_rows = []
+
+    for payment in payments:
+        amount = Decimal(str(payment.amount))
+        cumulative_paid += amount
+        payment_rows.append({
+            'payment_obj': payment,
+            'id': payment.id,
+            'date': payment.date,
+            'amount': amount,
+            'payment_mode': payment.payment_mode,
+            'cumulative_paid_before': cumulative_paid_before,
+            'remaining_after_payment': (budget + total_expense) - cumulative_paid
+        })
+        cumulative_paid_before = cumulative_paid
+
+    remaining = budget - total_expense
+    remaining_after_payment = remaining - cumulative_paid
+
+    context = {
+        'project': project,
+        'phone': phone,
+        'client_name': project.client_name,
+        'expenses': expenses,
+        'payment_rows': payment_rows,
+        'total_paid': cumulative_paid,
+        'remaining': remaining,
+        'remaining_after_payment': remaining_after_payment,
+        'site_images': site_images  # ✅ pass to template
+    }
+
+    return render(request, 'projects/siteprocess.html', context)
 
 
 # logout_view
@@ -180,15 +303,94 @@ def logout_view(request):
 
 
 
-from django.contrib.auth.decorators import login_required
+# from django.db.models import Case, When, Value, IntegerField
 
-# billing
+# @session_login_required
+# def project_billing(request):
+#     if not request.session.get('admin_logged_in'):
+#         return redirect('/admin_login/')
+
+#     projects = (
+#         Project.objects
+#         .annotate(
+#             completed_order=Case(
+#                 When(status='Completed', then=Value(1)),
+#                 default=Value(0),
+#                 output_field=IntegerField()
+#             )
+#         )
+#         .order_by('completed_order', '-id')  # ✅ logic here
+#     )
+
+#     return render(request, 'projects/billing.html', {
+#         'projects': projects
+#     })
+
+
+from django.db.models import Case, When, Value, IntegerField
+from django.utils.timesince import timesince
+from .models import *
+
 @session_login_required
 def project_billing(request):
-    projects = Project.objects.all()
     if not request.session.get('admin_logged_in'):
         return redirect('/admin_login/')
-    return render(request, 'projects/billing.html', {'projects': projects})
+
+    # Projects (completed last)
+    projects = (
+        Project.objects
+        .annotate(
+            completed_order=Case(
+                When(status='Completed', then=Value(1)),
+                default=Value(0),
+                output_field=IntegerField()
+            )
+        )
+        .order_by('completed_order', '-id')
+    )
+
+    today = timezone.localdate()
+
+    activities = []
+
+    # 💰 Recent Payments
+    recent_payments = Payment.objects.select_related('project').order_by('-date')[:5]
+    for pay in recent_payments:
+        activities.append({
+            'icon': 'bi-currency-rupee',
+            'color': 'success',
+            'title': 'Payment Received',
+            'desc': f'{pay.project.name} – ₹{pay.amount}',
+            'time': 'Today' if pay.date == today else pay.date.strftime('%d %b %Y'),
+            'sort_time': pay.date
+        })
+
+    # 🧾 Recent Expenses
+    recent_expenses = Expense.objects.select_related('project').order_by('-date')[:5]
+    for exp in recent_expenses:
+        activities.append({
+            'icon': 'bi-receipt',
+            'color': 'warning',
+            'title': 'Expense Added',
+            'desc': f'{exp.project.name} – ₹{exp.amount}',
+            'time': 'Today' if exp.date == today else exp.date.strftime('%d %b %Y'),
+            'sort_time': exp.date
+        })
+
+    # Sort latest first
+    activities = sorted(
+        activities,
+        key=lambda x: x['sort_time'],
+        reverse=True
+    )[:5]
+    return render(request, 'projects/billing.html', {
+        'projects': projects,
+        'activities': activities
+    })
+
+
+
+
 
 from django.shortcuts import get_object_or_404
 
@@ -271,6 +473,8 @@ from django.utils.dateparse import parse_date
 
 from .models import Project, Expense, Payment, SiteImage
 
+from datetime import datetime
+
 def client_details(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
@@ -330,7 +534,15 @@ def client_details(request, project_id):
         })
         cumulative_paid_before = cumulative_paid
 
+    # ------- SITE IMAGES FILTER -------
     site_images = SiteImage.objects.filter(project=project)
+    image_from = request.GET.get('image_from')
+    image_to = request.GET.get('image_to')
+
+    if image_from:
+        site_images = site_images.filter(uploaded_at__date__gte=image_from)
+    if image_to:
+        site_images = site_images.filter(uploaded_at__date__lte=image_to)
 
     context = {
         'project': project,
@@ -340,9 +552,12 @@ def client_details(request, project_id):
         'payment_rows': payment_rows,
         'total_paid': cumulative_paid,
         'site_images': site_images,
+        'image_from': image_from,
+        'image_to': image_to,
     }
 
     return render(request, 'projects/client_details.html', context)
+
 
 
 from django.shortcuts import render, get_object_or_404, redirect
@@ -355,32 +570,37 @@ import sys
 
 def compress_image(file, quality=30):
     image_temp = Image.open(file)
-    image_temp = image_temp.convert('RGB')  # ensure compatibility (for PNG, etc.)
+    image_temp = image_temp.convert('RGB')  # Ensure it's JPEG compatible
     output_io = BytesIO()
     image_temp.save(output_io, format='JPEG', quality=quality, optimize=True)
     output_io.seek(0)
+
+    # Keep original name but change extension to .jpg
+    original_name = file.name.rsplit('.', 1)[0] + '.jpg'
+
     return InMemoryUploadedFile(
-        output_io, 'ImageField', file.name, 'image/jpeg', sys.getsizeof(output_io), None
+        output_io, 'ImageField', original_name, 'image/jpeg', sys.getsizeof(output_io), None
     )
 
 def upload_site_image(request, project_id):
     project = get_object_or_404(Project, id=project_id)
-    
+
     if request.method == 'POST':
         form = SiteImageForm(request.POST, request.FILES)
         if form.is_valid():
-            image_file = request.FILES['image']
-            compressed_image = compress_image(image_file, quality=30)  # Reduce size
-            
             site_image = form.save(commit=False)
-            site_image.image = compressed_image
             site_image.project = project
+
+            # 👇 This is critical to ensure image is written to disk
+            site_image.image = request.FILES['image']
+
             site_image.save()
             return redirect('client_details', project_id=project.id)
     else:
         form = SiteImageForm()
 
     return render(request, 'projects/upload_image.html', {'form': form, 'project': project})
+
 
 
 def payment_invoice(request, payment_id):
@@ -438,6 +658,9 @@ def payment_invoice(request, payment_id):
     return render(request, 'projects/payment_invoice.html', context)
 
 
+
+
+
 # add_project
 def add_project(request):
     projects = Project.objects.all().order_by('id')
@@ -479,6 +702,46 @@ def add_project(request):
                     error = f"Error creating project: {str(e)}"
 
     return render(request, 'projects/add_project.html', {'error': error, 'projects': projects})
+
+
+# edit_project
+
+def edit_project(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+    error = None
+
+    if request.method == 'POST':
+        name = request.POST.get('name').strip()
+        client_name = request.POST.get('client_name')
+        phone = request.POST.get('phone').strip()
+        budget = request.POST.get('budget', '0.00')
+        estimated_cost = request.POST.get('estimated_cost', '0.00')
+        status = request.POST.get('status')
+
+        # Duplicate checks (exclude current project)
+        if Project.objects.filter(name=name).exclude(id=pk).exists():
+            error = f"A project with name '{name}' already exists."
+        elif Project.objects.filter(phone=phone).exclude(id=pk).exists():
+            error = f"A project with phone '{phone}' already exists."
+        else:
+            try:
+                project.name = name
+                project.client_name = client_name
+                project.phone = phone
+                project.budget = Decimal(budget)
+                project.estimated_cost = Decimal(estimated_cost)
+                project.status = status
+                project.save()
+
+                return redirect('billing')
+            except Exception as e:
+                error = str(e)
+
+    return render(request, 'projects/edit_project.html', {
+        'project': project,
+        'error': error,
+        'statuses': Project.STATUS_CHOICES
+    })
 
 
 
@@ -1121,6 +1384,145 @@ def update_project_status(request, project_id):
 
 
 
+
+from django.db.models import Sum, Count
+from django.db.models.functions import TruncMonth
+from decimal import Decimal
+import calendar
+
+@session_login_required
+def analysis_dashboard(request):
+    if not request.session.get('admin_logged_in'):
+        return redirect('/admin_login/')
+
+    # 🔹 BASE QUERYSETS
+    all_projects = Project.objects.all()
+    payments = Payment.objects.all()
+
+    # 🔹 GET FILTERS
+    month = request.GET.get('month')
+    year = request.GET.get('year')
+
+    filter_applied = bool(month or year)
+
+    # 🔹 APPLY PAYMENT FILTERS
+    if month:
+        payments = payments.filter(date__month=int(month))
+    if year:
+        payments = payments.filter(date__year=int(year))
+
+    # 🔹 PROJECTS USED FOR FINANCIALS
+    if filter_applied:
+        project_ids = payments.values_list('project_id', flat=True).distinct()
+        projects = Project.objects.filter(id__in=project_ids)
+    else:
+        projects = all_projects
+
+    # 🔹 KPI COUNTS
+    total_projects = projects.count()
+    completed_projects = projects.filter(status='Completed').count()
+    ongoing_projects = projects.exclude(status='Completed').count()
+
+    # 🔹 TOTAL PAID (SAFE DECIMAL)
+    total_paid = Decimal(
+        str(payments.aggregate(total=Sum('amount'))['total'] or 0)
+    )
+
+    total_budget = Decimal('0.00')
+    total_remaining = Decimal('0.00')
+
+    # 🔹 FINANCIAL TOTALS
+    for project in projects:
+        expenses = Decimal(
+            str(project.expenses_set.aggregate(
+                total=Sum('amount')
+            )['total'] or 0)
+        )
+
+        budget = Decimal(str(project.budget)) + expenses
+
+        paid = Decimal(
+            str(payments.filter(project=project).aggregate(
+                total=Sum('amount')
+            )['total'] or 0)
+        )
+
+        total_budget += budget
+        total_remaining += (budget - paid)
+
+    # 🔹 STATUS PIE CHART
+    status_chart = projects.values('status').annotate(
+        count=Count('id')
+    )
+
+    # 🔹 MONTHLY PAYMENTS CHART
+    monthly_payments = (
+        payments
+        .annotate(month=TruncMonth('date'))
+        .values('month')
+        .annotate(total=Sum('amount'))
+        .order_by('month')
+    )
+
+    monthly_payments = [
+        {
+            'month': m['month'].strftime('%Y-%m'),
+            'total': float(m['total'] or 0)
+        }
+        for m in monthly_payments
+    ]
+
+
+    # 🔹 MONTH DROPDOWN (Jan 1, Feb 2...)
+    months = [
+        {'value': i, 'label': f"{calendar.month_abbr[i]} ({i})"}
+        for i in range(1, 13)
+    ]
+
+    # 🔹 YEAR DROPDOWN
+    years = Payment.objects.dates('date', 'year')
+
+    context = {
+        # KPI
+        'total_projects': total_projects,
+        'completed_projects': completed_projects,
+        'ongoing_projects': ongoing_projects,
+        'total_budget': total_budget,
+        'total_paid': total_paid,
+        'total_remaining': total_remaining,
+
+        # Charts
+        'status_chart': list(status_chart),
+        'monthly_payments': list(monthly_payments),
+
+        # Filters
+        'months': months,
+        'years': [y.year for y in years],
+    }
+
+    return render(request, 'projects/analysis.html', context)
+
+
+
+
+# custom session exprired page
+
+def session_expired(request):
+    """
+    Shown when session is invalid / expired
+    """
+    return render(request, 'projects/session_expired.html')
+
+
+
+# views.py
+from django.contrib.sitemaps.views import sitemap
+from .sitemaps import StaticViewSitemap
+
+def custom_sitemap_view(request):
+    response = sitemap(request, sitemaps={'static': StaticViewSitemap()})
+    response['X-Robots-Tag'] = 'index, follow'  # ✅ Allow indexing
+    return response
 
 
 # Custom error handlers

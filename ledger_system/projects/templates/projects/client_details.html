@@ -36,6 +36,50 @@
         padding: 0.4rem 0.6rem;
       }
     }
+
+    .swiper {
+  width: 100%;
+  padding: 30px 0;
+}
+
+.swiper-slide {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.image-card {
+  max-width: 90%;
+  background: #fff;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  text-align: left;
+}
+
+.image-card img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border-bottom: 1px solid #ddd;
+}
+
+.image-info {
+  padding: 15px;
+}
+
+.image-info p {
+  margin: 8px 0;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.upload-date {
+  color: #666;
+  font-size: 0.85rem;
+}
+
   </style>
 {% block title %}Client Details - {{ project.client_name }}{% endblock %}
 
@@ -202,47 +246,80 @@
 
 <h2>Upload Image for {{ project.client_name }}</h2>
 
- <a href="{% url 'upload_site_image' project.id %}" class="btn btn-primary">Upload</a>
+ <a href="{% url 'upload_site_image' project.id %}" class="btn btn-primary mb-5 mt-5" style="margin-bottom: 20px;">Upload</a>
+
+ <form method="get" class="border rounded p-3 mb-4 bg-light shadow-sm">
+  <div class="row g-3 align-items-end">
+    <div class="col-md-4">
+      <label for="image_from" class="form-label fw-semibold">From Date:</label>
+      <input type="date" name="image_from" id="image_from" class="form-control" value="{{ image_from }}">
+    </div>
+    <div class="col-md-4">
+      <label for="image_to" class="form-label fw-semibold">To Date:</label>
+      <input type="date" name="image_to" id="image_to" class="form-control" value="{{ image_to }}">
+    </div>
+    <div class="col-md-4 d-grid">
+      <button type="submit" class="btn btn-primary btn-lg">
+        <i class="bi bi-funnel-fill me-1"></i> Filter
+      </button>
+    </div>
+  </div>
+</form>
 
 
-<h4>Site Images</h4>
+<h4 class="mt-4">Site Images</h4>
 <div class="swiper mySwiper">
   <div class="swiper-wrapper">
     {% for img in site_images %}
       {% if img.image %}
         <div class="swiper-slide">
-          <img src="{{ img.image.url }}" alt="Site Image" style="width: 100%; border-radius: 10px;">
-          <p>{{ img.description }}</p>
+          <div class="image-card">
+            <img src="{{ img.image.url }}" alt="Site Image">
+            <div class="image-info">
+              <p class="upload-date">📅 Uploaded on {{ img.uploaded_at|date:"d M Y, h:i A" }}</p>
+              <p class="description"><strong>Description:</strong> {{ img.description }}</p>
+            </div>
+          </div>
         </div>
       {% endif %}
     {% endfor %}
   </div>
 
-  <!-- Optional controls -->
+  <!-- Navigation buttons -->
   <div class="swiper-button-next"></div>
   <div class="swiper-button-prev"></div>
+
+  <!-- Pagination -->
   <div class="swiper-pagination"></div>
 </div>
 
 
-
-<script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
 
 <script>
-  document.addEventListener("DOMContentLoaded", function () {
-    var swiper = new Swiper(".mySwiper", {
-      loop: true,
-      navigation: {
-        nextEl: ".swiper-button-next",
-        prevEl: ".swiper-button-prev",
+  const swiper = new Swiper(".mySwiper", {
+    loop: true,
+    spaceBetween: 20,
+    slidesPerView: 1,
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+    },
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+    breakpoints: {
+      640: {
+        slidesPerView: 1,
       },
-      pagination: {
-        el: ".swiper-pagination",
-        clickable: true,
+      768: {
+        slidesPerView: 1,
       },
-      slidesPerView: 1,
-      spaceBetween: 20,
-    });
+      1024: {
+        slidesPerView: 1,
+      },
+    }
   });
 </script>
 
