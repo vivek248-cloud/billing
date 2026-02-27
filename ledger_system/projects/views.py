@@ -1525,6 +1525,102 @@ def custom_sitemap_view(request):
     return response
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+import os
+import subprocess
+from datetime import datetime, timedelta
+from django.conf import settings
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect
+from django.http import FileResponse, Http404
+from django.contrib import messages
+
+BACKUP_DIR = "/var/backups/edb"
+BACKUP_SCRIPT = "/root/edb/billing/backup_db.sh"
+
+
+def superuser_required(view_func):
+    decorated_view_func = login_required(user_passes_test(lambda u: u.is_superuser)(view_func))
+    return decorated_view_func
+
+
+@superuser_required
+def settings_page(request):
+
+    files_data = []
+    total_size = 0
+    latest_backup_time = None
+
+    if os.path.exists(BACKUP_DIR):
+        files = sorted(os.listdir(BACKUP_DIR), reverse=True)
+
+        for file in files:
+            file_path = os.path.join(BACKUP_DIR, file)
+            stat = os.stat(file_path)
+
+            file_size = stat.st_size
+            total_size += file_size
+
+            created_time = datetime.fromtimestamp(stat.st_mtime)
+
+            if not latest_backup_time or created_time > latest_backup_time:
+                latest_backup_time = created_time
+
+            files_data.append({
+                "name": file,
+                "size": round(file_size / 1024, 2),  # KB
+                "date": created_time.strftime("%d %b %Y %I:%M %p")
+            })
+
+    # Backup Health Check
+    backup_status = "healthy"
+    if latest_backup_time:
+        if latest_backup_time < datetime.now() - timedelta(days=2):
+            backup_status = "warning"
+    else:
+        backup_status = "danger"
+
+    context = {
+        "admin_user": request.user,
+        "files": files_data,
+        "total_storage": round(total_size / 1024, 2),
+        "backup_status": backup_status,
+    }
+
+    return render(request, "projects/settings.html", context)
+
+
+@superuser_required
+def download_backup(request, filename):
+    file_path = os.path.join(BACKUP_DIR, filename)
+    if os.path.exists(file_path):
+        return FileResponse(open(file_path, 'rb'), as_attachment=True)
+    raise Http404("File not found")
+
+
+@superuser_required
+def run_backup_now(request):
+    try:
+        subprocess.run(["bash", BACKUP_SCRIPT], check=True)
+        messages.success(request, "Backup created successfully!")
+    except:
+        messages.error(request, "Backup failed!")
+
+    return redirect("settings")
+
+
 # Custom error handlers
 
 

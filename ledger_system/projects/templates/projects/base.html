@@ -65,6 +65,17 @@
             width:100vw;
             overflow-x: hidden;
         }
+
+        /* --- General Body and Container --- */
+      body {
+        font-family: var(--page-font-body);
+        background: linear-gradient(135deg, var(--page-bg-gradient-start) 0%, var(--page-bg-gradient-end) 100%);
+        min-height: 100vh;
+        margin: 0;
+        color: var(--page-text-medium);
+        
+      }
+
        /* Navbar Base */
 .navbar {
     background: rgba(30, 30, 50, 0.95);
@@ -198,7 +209,7 @@
 
 /* Main Content Offset */
 .main-content {
-    margin-top: 2rem;
+    margin-top: 5rem;
     padding: 0 1rem;
 }
 
@@ -263,6 +274,13 @@
         font-size: 1.3rem;
     }
 }
+
+
+
+
+
+
+
 .scroll-container {
   max-height: 300px; /* Set height as needed */
   overflow-y: auto;
@@ -1125,15 +1143,6 @@ canvas {
   --page-border-radius-button: 12px;
 }
 
-/* --- General Body and Container --- */
-body {
-  font-family: var(--page-font-body);
-  background: linear-gradient(135deg, var(--page-bg-gradient-start) 0%, var(--page-bg-gradient-end) 100%);
-  min-height: 100vh;
-  margin: 0;
-  color: var(--page-text-medium);
-  padding: 2.5rem 0; /* Add vertical padding for the overall page */
-}
 
 /* Customizing the .container class to fit this page's aesthetic */
 .container.mt-4 {
@@ -1793,6 +1802,58 @@ body {
   display: inline;
 }
 
+
+
+
+
+
+
+
+
+
+
+/* Card and Interaction Refinements */
+.bg-dark {
+    background:rgba(30, 30, 50, 0.95);
+}
+
+.rounded-4 { border-radius: 1rem !important; }
+
+.hover-lift {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3) !important;
+}
+
+/* Status Icon Styling */
+.bg-success-subtle { background-color: rgba(25, 135, 84, 0.1) !important; }
+.bg-warning-subtle { background-color: rgba(255, 193, 7, 0.1) !important; }
+.bg-danger-subtle { background-color: rgba(220, 53, 69, 0.1) !important; }
+.bg-primary-subtle { background-color: rgba(13, 110, 253, 0.1) !important; }
+.bg-info-subtle { background-color: rgba(13, 202, 240, 0.1) !important; }
+
+/* Table Adjustments */
+.table-dark {
+    --bs-table-bg: rgb(30, 30, 50);
+    --bs-table-hover-bg: rgba(39, 19, 19, 0.03);
+}
+
+.table > thead {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.avatar-sm, .status-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
 </style>
 
 
@@ -1842,9 +1903,29 @@ body {
         <li><a href="{% url 'add_payment' %}" class="nav-link">
             <i class="fas fa-credit-card"></i> Add Payment
         </a></li>
-        <li><a href="{% url 'logout' %}" class="nav-link logout-link">
-            <i class="bi bi-box-arrow-in-left"></i> Logout
-        </a></li>
+        <ul class="nav-menu" id="nav-menu">
+            <li class="nav-item dropdown ms-lg-3">
+                <a class="nav-link dropdown-toggle user-dropdown-pill" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-user-circle"></i> <span>Account</span>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0 animate slideIn" aria-labelledby="userDropdown">
+                    <li class="px-3 py-2 d-lg-none">
+                        <span class="text-dark small fw-bold">USER ACTIONS</span>
+                    </li>
+                    <li>
+                        <a class="dropdown-item py-2 text-dark" href="{% url 'settings' %}">
+                            <i class="fas fa-cogs me-2 text-secondary"></i> System Settings
+                        </a>
+                    </li>
+                    <li><hr class="dropdown-divider opacity-10"></li>
+                    <li>
+                        <a class="dropdown-item py-2 text-danger" href="{% url 'logout' %}">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </li>
+        </ul>
     </ul>
 
     <div class="hamburger" id="hamburger" onclick="toggleMenu()">
@@ -1882,3 +1963,6 @@ body {
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+
+{% comment %} <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> {% endcomment %}

@@ -68,6 +68,15 @@ urlpatterns = [
 
     path('project/<int:project_id>/upload/', views.upload_site_image, name='upload_site_image'),
 
+
+
+
+
+    path("settings/", views.settings_page, name="settings"),
+    path("download-backup/<str:filename>/", views.download_backup, name="download_backup"),
+    path("run-backup/", views.run_backup_now, name="run_backup"),
+
+
     path("sitemap.xml", views.custom_sitemap_view, name="sitemap"),
 
 ]
