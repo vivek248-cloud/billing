@@ -26,7 +26,9 @@
             <div class="card stats-card p-3">
                 <small class="text-muted fw-bold text-uppercase ls-1">Critical Changes</small>
                 <div class="d-flex justify-content-between mt-2">
-                    <h3 class="fw-bold text-danger mb-0" id="critical-count">0</h3>
+                    <h3 class="fw-bold mb-0 text-danger" id="critical-count">
+                        {{ critical_count }}
+                    </h3>
                     <div class="icon-circle bg-danger-soft text-danger">
                         <i class="bi bi-exclamation-octagon"></i>
                     </div>
@@ -34,13 +36,37 @@
             </div>
         </div>
 
-        <div class="col-md-6 text-md-end d-flex align-items-end justify-content-md-end gap-2">
-            <button class="btn btn-dark-glass btn-sm px-4 rounded-3">
-                <i class="bi bi-calendar-range me-2"></i>Date Range
-            </button>
-            <button class="btn btn-primary-glass btn-sm px-4 rounded-3">
-                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export
-            </button>
+        <div class="col-md-6 d-flex justify-content-md-end align-items-end">
+
+            <form method="GET" class="date-filter d-flex align-items-end gap-3">
+
+                <input type="hidden" name="q" value="{{ query }}">
+
+                <!-- Start Date -->
+                <div class="date-field">
+                    <label class="date-label">Start</label>
+                    <input type="date" 
+                        name="from_date" 
+                        value="{{ from_date }}"
+                        class="form-control form-control-sm">
+                </div>
+
+                <!-- End Date -->
+                <div class="date-field">
+                    <label class="date-label">End</label>
+                    <input type="date" 
+                        name="to_date" 
+                        value="{{ to_date }}"
+                        class="form-control form-control-sm">
+                </div>
+
+                <!-- Filter Button -->
+                <button type="submit" class="btn btn-dark-glass btn-sm px-3 rounded-3 mt-3">
+                    <i class="bi bi-funnel"></i>
+                </button>
+
+            </form>
+
         </div>
     </div>
 
@@ -317,7 +343,43 @@
     pointer-events: none;
 }
 
+/* Date Filter UI */
+.date-filter {
+    background: #ffffff;
+    padding: 10px 14px;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+}
 
+.date-field {
+    display: flex;
+    flex-direction: column;
+}
+
+.date-label {
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #64748b;
+    margin-bottom: 3px;
+    text-transform: uppercase;
+}
+
+/* Inputs */
+.date-filter input {
+    background: #f1f5f9;
+    border: none;
+    border-radius: 8px;
+    padding: 6px 8px;
+    font-size: 0.8rem;
+    transition: 0.2s;
+}
+
+.date-filter input:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+    background: #fff;
+}
 </style>
 
 
@@ -350,14 +412,17 @@ document.addEventListener("DOMContentLoaded", function () {
 <script>
 document.addEventListener("DOMContentLoaded", () => {
     let el = document.getElementById("critical-count");
+    let target = parseInt(el.innerText);  // ✅ real value
     let count = 0;
-    let target = 8;
 
-    let i = setInterval(()=>{
+    el.innerText = 0;
+
+    let i = setInterval(() => {
         count++;
         el.innerText = count;
-        if(count >= target) clearInterval(i);
-    },40);
+
+        if (count >= target) clearInterval(i);
+    }, 30);
 });
 </script>
 

@@ -1599,13 +1599,18 @@ def custom_sitemap_view(request):
 
 
 
+
+
 from django.db.models import Q
 
 def activity_page(request):
     query = request.GET.get('q', '')
+    from_date = request.GET.get('from_date')
+    to_date = request.GET.get('to_date')
 
     activities = Activity.objects.all().order_by('-created_at')
 
+    # 🔍 Search
     if query:
         activities = activities.filter(
             Q(title__icontains=query) |
@@ -1613,13 +1618,25 @@ def activity_page(request):
             Q(action__icontains=query)
         )
 
+    # 📅 Date filter
+    if from_date:
+        activities = activities.filter(created_at__date__gte=from_date)
+
+    if to_date:
+        activities = activities.filter(created_at__date__lte=to_date)
+
+    # 🔥 Critical = delete + update
+    critical_count = activities.filter(action__in=['delete', 'update']).count()
+
     activities = activities[:50]
 
     return render(request, 'projects/activity.html', {
         'activities': activities,
-        'query': query
+        'query': query,
+        'from_date': from_date,
+        'to_date': to_date,
+        'critical_count': critical_count   # ✅ send to template
     })
-
 
 
 
