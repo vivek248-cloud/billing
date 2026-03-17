@@ -2,128 +2,197 @@
 {% load static %}
 {% load indian_format %}
 
+{% block page_title %}Financial Ledger{% endblock %}
+
 {% block content %}
+<div class="container-fluid px-4 py-2">
+    <div class="row g-4">
+        
+        <div class="col-lg-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden border-top border-success border-4">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-success-soft text-success me-3">
+                            <i class="bi bi-cash-stack"></i>
+                        </div>
+                        <h5 class="fw-bold mb-0">Record Payment</h5>
+                    </div>
+                </div>
 
-<div class="payment-wrapper">
+                <div class="card-body p-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 small fw-bold mb-4" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    {% endif %}
 
-  <div class="payment-card">
+                    <form method="post" action="{% url 'add_payment' %}" id="paymentForm">
+                        {% csrf_token %}
 
-    <!-- Header -->
-    <div class="payment-header">
-      <h3>Add Payment</h3>
-      <p>Record payments received from clients</p>
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold text-muted text-uppercase">Select Client Profile</label>
+                            <select name="project" class="form-select form-select-lg custom-select" required onchange="this.form.submit()">
+                                <option value="" disabled {% if not selected_project_id %}selected{% endif %}>Choose Client...</option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
+                                    {{ project.client_name }} ({{ project.name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                        {% if selected_project_id %}
+                        <div class="row g-3 mb-4">
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Payment Amount</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-success fw-bold">₹</span>
+                                    <input type="number" name="amount" step="0.01" class="form-control form-control-lg border-start-0 custom-input fw-bold" 
+                                           placeholder="0.00" required>
+                                </div>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-bold text-muted text-uppercase">Mode of Payment</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-wallet2"></i></span>
+                                    <select name="payment_mode" class="form-select form-select-lg border-start-0 custom-input" required>
+                                        <option value="" disabled selected>Select mode</option>
+                                        <option value="Cash">Cash</option>
+                                        <option value="Bank Transfer">Bank Transfer</option>
+                                        <option value="Cheque">Cheque</option>
+                                        <option value="UPI">UPI / Online</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <button type="submit" class="btn btn-success btn-lg w-100 rounded-3 fw-bold shadow-sm py-3 hover-lift">
+                            <i class="bi bi-plus-circle-fill me-2"></i> Post Payment
+                        </button>
+                        {% else %}
+                        <div class="text-center py-4 bg-light rounded-4 border border-dashed">
+                            <i class="bi bi-arrow-up-circle text-muted display-6"></i>
+                            <p class="text-muted small mt-2 px-3">Please select a client to enable payment entry</p>
+                        </div>
+                        {% endif %}
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            {% if selected_project_id %}
+            <div class="row g-3 mb-4">
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4 h-100">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 small text-uppercase fw-bold">Total Collected</h6>
+                                <h2 class="fw-bold mb-0">{{ total_paid|indian_currency }}</h2>
+                            </div>
+                            <i class="bi bi-check-all display-6 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 shadow-sm rounded-4 {% if selected_project.remaining < 0 %}bg-danger{% else %}bg-dark{% endif %} text-white p-4 h-100">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <h6 class="text-white-50 small text-uppercase fw-bold">Balance Receivable</h6>
+                                <h2 class="fw-bold mb-0">{{ selected_project.remaining|indian_currency }}</h2>
+                            </div>
+                            <i class="bi bi-hourglass-split display-6 text-white-50"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card border-0 shadow-sm rounded-4">
+                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                    <h5 class="fw-bold mb-0">Payment Log — <span class="text-primary">{{ selected_project.client_name }}</span></h5>
+                    <span class="badge bg-light text-dark rounded-pill px-3">{{ payments|length }} Entries</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted small text-uppercase">
+                                <tr>
+                                    <th class="border-0 px-4 py-3">Date</th>
+                                    <th class="border-0 py-3">Amount</th>
+                                    <th class="border-0 py-3">Method</th>
+                                    <th class="border-0 px-4 py-3 text-end">Manage</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for payment in payments %}
+                                <tr>
+                                    <td class="px-4 fw-medium text-muted small">{{ payment.date|date:"d M Y" }}</td>
+                                    <td class="fw-bold text-dark">{{ payment.amount|indian_currency }}</td>
+                                    <td>
+                                        <span class="badge bg-light text-muted fw-normal rounded-pill px-3">{{ payment.payment_mode }}</span>
+                                    </td>
+                                    <td class="px-4 text-end">
+                                        <div class="d-flex justify-content-end gap-2">
+                                            <a href="{% url 'edit_payment' payment.id %}" class="btn btn-sm btn-light border-0" title="Edit">
+                                                <i class="bi bi-pencil-square text-primary"></i>
+                                            </a>
+                                            <form method="post" action="{% url 'delete_payment' payment.id %}" class="d-inline">
+                                                {% csrf_token %}
+                                                <button type="submit" class="btn btn-sm btn-light border-0" onclick="return confirm('Delete record?');">
+                                                    <i class="bi bi-trash text-danger"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% if not payments %}
+                    <div class="text-center py-5 opacity-50">
+                        <i class="bi bi-receipt display-4"></i>
+                        <p class="mt-2">No transaction history found for this client.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <div class="card border-0 shadow-sm rounded-4 h-100 d-flex align-items-center justify-content-center text-center p-5">
+                <div class="bg-light icon-box-lg mb-4 rounded-circle">
+                    <i class="bi bi-search display-5 text-muted"></i>
+                </div>
+                <h4 class="fw-bold text-dark">Client Ledger</h4>
+                <p class="text-muted mx-auto" style="max-width: 300px;">Select a client from the left panel to view their detailed payment history and financial standing.</p>
+            </div>
+            {% endif %}
+        </div>
     </div>
-
-    <!-- Messages -->
-    {% if messages %}
-      <div class="message-box">
-        {% for message in messages %}
-          <div class="alert alert-{{ message.tags }}">{{ message }}</div>
-        {% endfor %}
-      </div>
-    {% endif %}
-
-    <!-- Add Payment Form -->
-    <form method="post" action="{% url 'add_payment' %}" class="payment-form">
-      {% csrf_token %}
-
-      <div class="form-group">
-        <label>Select Client</label>
-        <select name="project" required onchange="this.form.submit()">
-          <option value="" disabled {% if not selected_project_id %}selected{% endif %}>
-            Select Client
-          </option>
-          {% for project in projects %}
-            <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
-              {{ project.client_name }}
-            </option>
-          {% endfor %}
-        </select>
-      </div>
-
-      {% if selected_project_id %}
-      <div class="project-summary">
-        <div>
-          <span>Total Paid</span>
-          <strong>{{ total_paid|indian_currency }}</strong>
-        </div>
-        <div>
-          <span>Yet to Receive</span>
-          <strong class="{% if selected_project.remaining < 0 %}text-danger{% endif %}">
-            {{ selected_project.remaining|indian_currency }}
-          </strong>
-        </div>
-      </div>
-      {% endif %}
-
-      <div class="form-grid">
-        <div class="form-group">
-          <label>Amount (₹)</label>
-          <input type="number" name="amount" step="0.01" required placeholder="Enter amount">
-        </div>
-
-        <div class="form-group">
-          <label>Payment Mode</label>
-          <select name="payment_mode" required>
-            <option value="" disabled selected>Select mode</option>
-            <option value="Cash">Cash</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Cheque">Cheque</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="form-actions">
-        <button type="submit" class="btn-save">
-          <i class="bi bi-plus-circle"></i> Add Payment
-        </button>
-      </div>
-
-    </form>
-
-    <!-- Payment List -->
-    {% if payments %}
-    <div class="payment-table-wrapper table-responsive">
-      <h4>Payments for Selected Project</h4>
-
-      <table class="payment-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Amount</th>
-            <th>Mode</th>
-            <th>Date</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for payment in payments %}
-          <tr>
-            <td>{{ forloop.counter }}</td>
-            <td>{{ payment.amount|indian_currency }}</td>
-            <td>{{ payment.payment_mode }}</td>
-            <td>{{ payment.date|date:"d M Y" }}</td>
-            <td class="actions">
-              <a href="{% url 'edit_payment' payment.id %}" class="btn-edit">
-                <i class="bi bi-pencil"></i>
-              </a>
-
-              <form method="post" action="{% url 'delete_payment' payment.id %}" class="inline-form">
-                {% csrf_token %}
-                <button type="submit" class="btn-delete"
-                  onclick="return confirm('Delete this payment?');">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </form>
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
-    </div>
-    {% endif %}
-
-  </div>
 </div>
 
+<style>
+    .icon-box { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
+    .icon-box-lg { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
+    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
+    
+    .custom-select, .custom-input { 
+        border: 1px solid #e9ecef; 
+        background-color: #fbfbfb; 
+        transition: all 0.2s ease;
+    }
+    .custom-select:focus, .custom-input:focus { 
+        background-color: #fff; 
+        border-color: #198754; 
+        box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.05); 
+    }
+
+    .hover-lift { transition: transform 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-2px); }
+    
+    .table thead th { font-size: 0.75rem; letter-spacing: 0.5px; }
+    .bg-dark { background-color: #0f172a !important; }
+</style>
 {% endblock %}

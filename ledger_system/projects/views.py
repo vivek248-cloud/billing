@@ -661,10 +661,14 @@ def payment_invoice(request, payment_id):
 
 
 
-# add_project
+from django.contrib import messages
+from decimal import Decimal
+from django.shortcuts import render, redirect
+from .models import Project
+
+
 def add_project(request):
     projects = Project.objects.all().order_by('id')
-    error = None
 
     if request.method == 'POST':
         name = request.POST.get('name').strip()
@@ -673,92 +677,119 @@ def add_project(request):
         budget = request.POST.get('budget', '0.00')
         estimated_cost = request.POST.get('estimated_cost', '0.00')
 
-        # Check for duplicate name
+        # Check duplicate project name
         if Project.objects.filter(name=name).exists():
-            error = f"A project with name '{name}' already exists."
-        # Check for duplicate phone
+            messages.error(request, f"A project with name '{name}' already exists.")
+
+        # Check duplicate phone
         elif Project.objects.filter(phone=phone).exists():
-            error = f"A project with phone number '{phone}' already exists."
+            messages.error(request, f"A project with phone number '{phone}' already exists.")
+
         else:
-            # Validate budget and estimated cost
             try:
                 budget = Decimal(budget)
                 estimated_cost = Decimal(estimated_cost)
+
+                Project.objects.create(
+                    name=name,
+                    client_name=client_name,
+                    phone=phone,
+                    budget=budget,
+                    estimated_cost=estimated_cost
+                )
+
+                messages.success(request, "Project created successfully!")
+                return redirect('add_project')
+
             except Exception:
-                error = "Invalid budget or estimated cost."
+                messages.error(request, "Invalid budget or estimated cost.")
 
-            # Create project if no errors
-            if not error:
-                try:
-                    Project.objects.create(
-                        name=name,
-                        client_name=client_name,
-                        phone=phone,
-                        budget=budget,
-                        estimated_cost=estimated_cost
-                    )
-                    return redirect('billing')
-                except Exception as e:
-                    error = f"Error creating project: {str(e)}"
-
-    return render(request, 'projects/add_project.html', {'error': error, 'projects': projects})
-
+    return render(request, 'projects/add_project.html', {
+        'projects': projects
+    })
 
 # edit_project
 
+from django.contrib import messages
+from decimal import Decimal
+from django.shortcuts import get_object_or_404, redirect, render
+
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
-    error = None
 
     if request.method == 'POST':
         name = request.POST.get('name').strip()
         client_name = request.POST.get('client_name')
         phone = request.POST.get('phone').strip()
         budget = request.POST.get('budget', '0.00')
-        estimated_cost = request.POST.get('estimated_cost', '0.00')
         status = request.POST.get('status')
 
-        # Duplicate checks (exclude current project)
+        # Duplicate checks
         if Project.objects.filter(name=name).exclude(id=pk).exists():
-            error = f"A project with name '{name}' already exists."
+            messages.error(request, f"A project with name '{name}' already exists.")
+
         elif Project.objects.filter(phone=phone).exclude(id=pk).exists():
-            error = f"A project with phone '{phone}' already exists."
+            messages.error(request, f"A project with phone '{phone}' already exists.")
+
         else:
             try:
                 project.name = name
                 project.client_name = client_name
                 project.phone = phone
                 project.budget = Decimal(budget)
-                project.estimated_cost = Decimal(estimated_cost)
                 project.status = status
+
                 project.save()
 
-                return redirect('billing')
-            except Exception as e:
-                error = str(e)
+                # ✅ Recalculate automatically
+                project.update_estimated_cost()
+
+                messages.success(request, "Project updated successfully!")
+                return redirect('edit_project', pk=project.id)
+
+            except Exception:
+                messages.error(request, "Invalid budget value.")
 
     return render(request, 'projects/edit_project.html', {
         'project': project,
-        'error': error,
         'statuses': Project.STATUS_CHOICES
     })
 
 
 
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect
+
+def delete_project(request, pk):
+    project = get_object_or_404(Project, pk=pk)
+
+    project.delete()
+    messages.success(request, "Project deleted successfully!")
+
+    return redirect('add_project')
+
+
 
 # add_expense
-from .forms import ExpenseForm2  # Assuming you have this
+from decimal import Decimal
+from django.db.models import Sum
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from .models import Project, Expense
+from .forms import ExpenseForm2
+
 
 from decimal import Decimal
 from django.db.models import Sum
 from django.shortcuts import render, get_object_or_404, redirect
-from .models import Project, Expense
+from django.contrib import messages
+from .models import Project, Expense, Activity
 from .forms import ExpenseForm2
 
+
 def add_expense(request, project_id=None):
-    success = False
     selected_project_id = None
-    total_expense = Decimal('0.00')  # default
+    total_expense = Decimal('0.00')
 
     if request.method == 'POST':
         project_id = request.POST.get('project')
@@ -766,18 +797,35 @@ def add_expense(request, project_id=None):
         project = get_object_or_404(Project, id=project_id)
 
         form = ExpenseForm2(request.POST)
+
         if form.is_valid():
             expense = form.save(commit=False)
             expense.project = project
             expense.amount = form.cleaned_data['area'] * form.cleaned_data['rate']
             expense.save()
-            success = True
-            return redirect(f"{request.path}?success=1&project={selected_project_id}")
+
+            # ✅ Activity log
+            Activity.objects.create(
+                title="Expense Added",
+                description=f"{expense.description} - ₹{expense.amount} added to {project.name}",
+                action="create",
+                project=project
+            )
+
+            # ✅ SweetAlert
+            messages.success(request, f"₹{expense.amount} expense added successfully!")
+
+            # ✅ Keep same project selected after redirect
+            return redirect(f"{request.path}?project={project.id}")
+
+        else:
+            messages.error(request, "Invalid expense data. Please check inputs.")
+
     else:
         form = ExpenseForm2()
         selected_project_id = request.GET.get('project')
 
-    # Get expenses and total expense if a project is selected
+    # Fetch expenses
     if selected_project_id:
         expenses = Expense.objects.filter(project_id=selected_project_id).order_by('-date')
         total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
@@ -786,24 +834,70 @@ def add_expense(request, project_id=None):
 
     projects = Project.objects.all()
 
-    if request.GET.get('success'):
-        success = True
-
     return render(request, 'projects/add_expense.html', {
         'projects': projects,
         'form': form,
-        'success': success,
         'expenses': expenses,
         'total_expense': total_expense,
         'selected_project_id': int(selected_project_id) if selected_project_id else None,
     })
 
+from django.contrib import messages
+
+@session_login_required
+
+def edit_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id)
+    projects = Project.objects.all()
+
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, instance=expense)
+        if form.is_valid():
+            form.save()
+
+            messages.success(request, "Expense updated successfully!")
+
+            return redirect('client_details', project_id=expense.project.id)
+        else:
+            messages.error(request, "Invalid data. Please check the fields.")
+
+    else:
+        form = ExpenseForm(instance=expense)
+
+    return render(request, 'projects/edit_expense.html', {
+        'form': form,
+        'projects': projects,
+        'selected_project_id': expense.project.id
+    })
+
+
+
+
+from django.contrib import messages
+
+def delete_expense(request, expense_id):
+    expense = get_object_or_404(Expense, id=expense_id)
+    project_id = expense.project.id
+
+    expense.delete()
+
+    messages.success(request, "Expense deleted successfully!")
+
+    return redirect('client_details', project_id=project_id)
+
+
 
 # remove_expense
 def remove_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
+
     expense.delete()
+
+    messages.success(request, "Expense removed successfully!")
+
     return redirect('billing')
+
+
 
 # remove_notes
 def remove_notes(request, expense_id):
@@ -1126,32 +1220,6 @@ def remove_daily_expense(request, expense_id):
 
 
 # daily_report
-@session_login_required
-
-
-def edit_expense(request, expense_id):
-    expense = get_object_or_404(Expense, id=expense_id)
-    projects = Project.objects.all()  # In case you want to pass this to the template
-
-    if request.method == 'POST':
-        form = ExpenseForm(request.POST, instance=expense)
-        if form.is_valid():
-            form.save()
-            return redirect('client_details', project_id=expense.project.id)  # Make sure this URL name exists
-    else:
-        form = ExpenseForm(instance=expense)
-
-    return render(request, 'projects/edit_expense.html', {
-        'form': form,
-        'projects': projects,
-        'selected_project_id': expense.project.id
-    })
-
-def delete_expense(request, expense_id):
-    expense = get_object_or_404(Expense, id=expense_id)
-    project_id = expense.project.id
-    expense.delete()
-    return redirect('client_details', project_id=project_id)  # Adjust as needed
 
 def daily_report(request):
     start_date = request.GET.get('start_date')
@@ -1531,8 +1599,26 @@ def custom_sitemap_view(request):
 
 
 
+from django.db.models import Q
 
+def activity_page(request):
+    query = request.GET.get('q', '')
 
+    activities = Activity.objects.all().order_by('-created_at')
+
+    if query:
+        activities = activities.filter(
+            Q(title__icontains=query) |
+            Q(description__icontains=query) |
+            Q(action__icontains=query)
+        )
+
+    activities = activities[:50]
+
+    return render(request, 'projects/activity.html', {
+        'activities': activities,
+        'query': query
+    })
 
 
 

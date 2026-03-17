@@ -37,6 +37,7 @@ urlpatterns = [
     
     path('add_project/', views.add_project, name='add_project'),
     path('projects/<int:pk>/edit/', views.edit_project, name='edit_project'),
+    path('delete-project/<int:pk>/', views.delete_project, name='delete_project'),
 
     path('remove_expense/<int:expense_id>/', views.remove_expense, name='remove_expense'),
     path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
@@ -78,6 +79,8 @@ urlpatterns = [
 
 
     path("sitemap.xml", views.custom_sitemap_view, name="sitemap"),
+
+    path('activity/', views.activity_page, name='activity'),
 
 ]
 

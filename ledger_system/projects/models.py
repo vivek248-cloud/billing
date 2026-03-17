@@ -144,3 +144,24 @@ class SiteImage(models.Model):
 
     def __str__(self):
         return f"Image for {self.project.client_name}"
+
+
+
+from django.utils.timezone import now
+
+class Activity(models.Model):
+    ACTION_CHOICES = [
+        ('create', 'Create'),
+        ('update', 'Update'),
+        ('delete', 'Delete'),
+    ]
+
+    title = models.CharField(max_length=255)
+    description = models.TextField()
+    action = models.CharField(max_length=20, choices=ACTION_CHOICES)
+    created_at = models.DateTimeField(default=now)
+
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.title} - {self.created_at}"

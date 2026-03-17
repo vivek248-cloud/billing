@@ -1,0 +1,364 @@
+{% extends 'projects/base.html' %}
+{% load static %}
+
+{% block page_title %}System Intelligence{% endblock %}
+
+{% block content %}
+
+<div id="activity-container">
+<div class="container-fluid px-4 py-4 bg-dashboard-subtle">
+
+    <!-- 🔥 STATS -->
+    <div class="row g-3 mb-5">
+        <div class="col-md-3">
+            <div class="card stats-card p-3">
+                <small class="text-muted fw-bold text-uppercase ls-1">Total Operations</small>
+                <div class="d-flex justify-content-between mt-2">
+                    <h3 class="fw-bold mb-0">{{ activities.count }}</h3>
+                    <div class="icon-circle bg-primary-soft text-primary">
+                        <i class="bi bi-cpu"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card stats-card p-3">
+                <small class="text-muted fw-bold text-uppercase ls-1">Critical Changes</small>
+                <div class="d-flex justify-content-between mt-2">
+                    <h3 class="fw-bold text-danger mb-0" id="critical-count">0</h3>
+                    <div class="icon-circle bg-danger-soft text-danger">
+                        <i class="bi bi-exclamation-octagon"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 text-md-end d-flex align-items-end justify-content-md-end gap-2">
+            <button class="btn btn-dark-glass btn-sm px-4 rounded-3">
+                <i class="bi bi-calendar-range me-2"></i>Date Range
+            </button>
+            <button class="btn btn-primary-glass btn-sm px-4 rounded-3">
+                <i class="bi bi-file-earmark-spreadsheet me-2"></i>Export
+            </button>
+        </div>
+    </div>
+
+    <!-- 🔍 FILTER BAR -->
+    <div class="col-xl-9 mx-auto">
+        <div class="glass-toolbar mb-4 px-4 py-2 d-flex justify-content-between">
+
+            <div class="d-flex gap-2">
+                <button class="filter-btn active">All</button>
+                <button class="filter-btn success">Create</button>
+                <button class="filter-btn warning">Update</button>
+                <button class="filter-btn danger">Delete</button>
+            </div>
+
+            <div class="search-box-sm">
+                <form method="GET" class="search-box-sm">
+                    <i class="bi bi-search"></i>
+                    <input 
+                        type="text" 
+                        name="q"
+                        value="{{ query }}"
+                        placeholder="Search activity..."
+                        class="form-control form-control-sm border-0 shadow-none"
+                    >
+                </form>
+            </div>
+
+        </div>
+
+        <!-- 🧠 TIMELINE -->
+        <div class="saas-timeline">
+
+            {% for act in activities %}
+            <div class="timeline-block">
+
+                <div class="timeline-indicator">
+                    <div class="indicator-icon
+                        {% if act.action == 'create' %}bg-success text-white
+                        {% elif act.action == 'update' %}bg-warning text-white
+                        {% elif act.action == 'delete' %}bg-danger text-white
+                        {% else %}bg-primary text-white{% endif %}">
+
+                        {% if act.action == 'create' %}
+                            <i class="bi bi-plus-lg"></i>
+                        {% elif act.action == 'update' %}
+                            <i class="bi bi-arrow-repeat"></i>
+                        {% elif act.action == 'delete' %}
+                            <i class="bi bi-trash"></i>
+                        {% else %}
+                            <i class="bi bi-lightning"></i>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="timeline-content-card">
+
+                    <div class="d-flex justify-content-between mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge-dot 
+                                {% if act.action == 'create' %}bg-success
+                                {% elif act.action == 'update' %}bg-warning
+                                {% else %}bg-danger{% endif %}">
+                            </span>
+
+                            <h6 class="fw-bold mb-0">{{ act.title }}</h6>
+                        </div>
+
+                        <small class="text-muted">{{ act.created_at|timesince }} ago</small>
+                    </div>
+
+                    <p class="activity-desc">{{ act.description }}</p>
+
+                    <div class="footer-meta mt-3">
+
+                        <div class="user-chip">
+                            <div class="user-avatar-mini">
+                                {{ act.user.username|default:"S"|slice:":1"|upper }}
+                            </div>
+                            {{ act.user.username|default:"System" }}
+                        </div>
+
+                        <div>
+                            <span class="tag-outline">ID-{{ act.id }}</span>
+                        </div>
+
+                    </div>
+
+                </div>
+            </div>
+            {% empty %}
+
+            <div class="text-center py-5">
+                <i class="bi bi-inboxes display-5 text-muted"></i>
+                <h4 class="mt-3">No Activity Yet</h4>
+                <p class="text-muted">Start using system to see logs</p>
+            </div>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+</div>
+
+
+
+
+<!-- 🔥 STYLE -->
+<style>
+:root {
+    --primary:#3b82f6;
+}
+
+/* Background */
+.bg-dashboard-subtle { background:#f8fafc; min-height:100vh; }
+
+/* Cards */
+.stats-card {
+    background:linear-gradient(145deg,#fff,#f8fafc);
+    border:1px solid #e2e8f0;
+    border-radius:14px;
+    transition:0.3s;
+}
+.stats-card:hover {
+    transform:translateY(-5px);
+    box-shadow:0 15px 30px rgba(0,0,0,0.06);
+}
+
+/* Icons */
+.icon-circle {
+    width:40px;height:40px;border-radius:10px;
+    display:flex;align-items:center;justify-content:center;
+}
+.bg-primary-soft { background:rgba(59,130,246,0.1); }
+.bg-success-soft { background:rgba(34,197,94,0.1); }
+.bg-warning-soft { background:rgba(234,179,8,0.1); }
+.bg-danger-soft { background:rgba(239,68,68,0.1); }
+
+/* Filter */
+.filter-btn {
+    border:none;
+    background:#f1f5f9;
+    padding:6px 14px;
+    border-radius:20px;
+    font-size:0.8rem;
+}
+.filter-btn.active { background:var(--primary); color:#fff; }
+
+/* Search */
+.search-box-sm { position:relative; }
+.search-box-sm input {
+    padding-left:30px;
+    border-radius:8px;
+    background:#f1f5f9;
+    border:none;
+}
+.search-box-sm i {
+    position:absolute;
+    left:8px; top:6px;
+    color:#94a3b8;
+}
+
+/* Timeline */
+.saas-timeline {
+    position:relative;
+    padding-left:50px;
+}
+.saas-timeline::before {
+    content:"";
+    position:absolute;
+    left:18px;
+    width: 2px;
+    top:0;
+    bottom:0;
+    width:3px;
+    background:linear-gradient(#3b82f6,#22c55e,#ef4444);
+    opacity:0.3;
+}
+
+.timeline-block { position:relative; margin-bottom:20px; }
+
+
+.indicator-icon {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: white;   /* 👈 important */
+    border: 3px solid #f8fafc;
+}
+
+/* Card */
+.timeline-content-card {
+    background:#fff;
+    border-radius:14px;
+    padding:16px;
+    border:1px solid #e2e8f0;
+    transition:0.3s;
+    position:relative;
+}
+.timeline-content-card:hover {
+    transform:translateY(-4px);
+    box-shadow:0 20px 40px rgba(0,0,0,0.08);
+}
+
+/* Left highlight */
+.timeline-content-card::before {
+    content:"";
+    position:absolute;
+    left:0; top:0;
+    width:4px; height:100%;
+    background:transparent;
+}
+
+
+/* Text */
+.activity-desc {
+    font-size:0.9rem;
+    color:#475569;
+}
+
+/* Footer */
+.footer-meta {
+    display:flex;
+    justify-content:space-between;
+}
+.user-chip {
+    background:#f1f5f9;
+    padding:4px 10px;
+    border-radius:20px;
+    font-size:0.75rem;
+}
+.user-avatar-mini {
+    width:18px;height:18px;
+    background:#3b82f6;
+    color:#fff;
+    border-radius:50%;
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    font-size:0.6rem;
+}
+
+/* Tags */
+.tag-outline {
+    font-size:0.7rem;
+    border:1px solid #e2e8f0;
+    padding:2px 6px;
+    border-radius:6px;
+}
+
+/* Buttons */
+.btn-dark-glass { background:#1e293b;color:#fff; }
+.btn-primary-glass { background:#3b82f6;color:#fff; }
+
+
+#activity-container {
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.fade-out {
+    opacity: 0;
+}
+
+.fade-in {
+    opacity: 1;
+}
+
+/* Optional loading blur */
+.loading {
+    filter: blur(2px);
+    pointer-events: none;
+}
+
+
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const input = document.querySelector('input[name="q"]');
+    const container = document.getElementById("activity-container");
+
+    input.addEventListener('input', function () {
+        clearTimeout(this.delay);
+
+        this.delay = setTimeout(() => {
+
+            // 🔥 smooth fade before submit
+            container.classList.add("fade-out", "loading");
+
+            setTimeout(() => {
+                this.form.submit();
+            }, 250); // wait animation
+
+        }, 400);
+    });
+});
+</script>
+
+
+
+
+<!-- 🔥 SCRIPT -->
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    let el = document.getElementById("critical-count");
+    let count = 0;
+    let target = 8;
+
+    let i = setInterval(()=>{
+        count++;
+        el.innerText = count;
+        if(count >= target) clearInterval(i);
+    },40);
+});
+</script>
+
+{% endblock %}

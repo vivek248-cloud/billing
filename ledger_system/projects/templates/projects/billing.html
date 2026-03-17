@@ -335,13 +335,7 @@
 
 <!-- Alerts -->
 
-{% if messages %}
-  <div class="alert-messages">
-    {% for message in messages %}
-      <div class="alert alert-success">{{ message }}</div>
-    {% endfor %}
-  </div>
-{% endif %}
+
 
 <div class="row g-4">
 
@@ -429,8 +423,12 @@
                 <td class="sno">{{ forloop.counter }}</td>
                 <td class="project-name">{{ project.name }}</td>
                 <td class="client-name">
-                    <a href="{% url 'client_details' project.id %}" class="client-link">
-                        {{ project.client_name }}
+                    <a href="{% url 'client_details' project.id %}" class="client-link text-decoration-none">
+                        <div class="d-flex align-items-center">
+                            <span class="fw-bold text-primary">{{ project.client_name }}</span>
+                            <i class="bi bi-arrow-up-right-circle ms-2 small opacity-50 link-icon"></i>
+                        </div>
+                        <div class="extra-small text-muted mt-n1">View</div>
                     </a>
                 </td>
                 <td class="status-cell">
@@ -455,9 +453,34 @@
         </tbody>
     </table>
 </div>
+
+
+
+
+
+    
 {% endblock %}
 
    
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    {% if messages %}
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        {% for message in messages %}
+        Swal.fire({
+            title: "{{ message.tags|capfirst }}",
+            text: "{{ message|escapejs }}",
+            icon: "{% if 'success' in message.tags %}success
+                {% elif 'error' in message.tags %}error
+                {% elif 'warning' in message.tags %}warning
+                {% else %}info{% endif %}",
+            confirmButtonColor: "#3085d6"
+        });
+        {% endfor %}
+    });
+    </script>
+    {% endif %}
 
 
 

@@ -1,58 +1,250 @@
 {% extends 'projects/base.html' %}
+{% load static %}
+
+{% block page_title %}Project Management{% endblock %}
 
 {% block content %}
-<div class="container mt-4">
-  <h2 class="page-title">Add New Project</h2> {# Added custom class for heading #}
-  {% if error %}
-  <div class="alert alert-danger">{{ error }}</div>
-{% endif %}
-
-  <form method="post" class="project-form"> {# Added custom class for form #}
-    {% csrf_token %}
-    <div class="form-group">
-      <label for="name">Project Name</label>
-      <input type="text" name="name" id="name" class="form-control" placeholder="e.g., Beach House Renovation" required>
+<div class="container-fluid px-4">
+    
+    <div class="row mb-4 g-3">
+        <div class="col-md-4 col-xl-3">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center">
+                    <div class="icon-square bg-primary-soft text-primary me-3">
+                        <i class="bi bi-briefcase"></i>
+                    </div>
+                    <div>
+                        <h6 class="text-muted small mb-0">Active Portfolios</h6>
+                        <h4 class="fw-bold mb-0">{{ projects|length }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-      <label for="client_name">Client Name</label>
-      <input type="text" name="client_name" id="client_name" class="form-control" placeholder="e.g., Jane Doe" required>
+
+    <div class="row g-4">
+        <div class="col-lg-4 col-xl-3 position-relative">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-top border-primary border-4 sticky-top" style="top: 20px; z-index: 10;">
+                <div class="card-header bg-white border-0 pt-4 px-4">
+                    <h5 class="fw-bold text-dark mb-1">New Project</h5>
+                    <p class="text-muted small">Quick register new contract.</p>
+                </div>
+                
+                <div class="card-body px-4 pb-4">
+                    {% if error %}
+                    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
+                        <i class="bi bi-x-circle-fill me-2"></i>
+                        <div class="small fw-bold">{{ error }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="form-floating mb-3">
+                            <input type="text" name="name" id="name" class="form-control border-0 bg-light rounded-3 shadow-none" placeholder="Reference" required>
+                            <label for="name" class="text-muted small">Project Title</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="text" name="client_name" id="client_name" class="form-control border-0 bg-light rounded-3 shadow-none" placeholder="Client" required>
+                            <label for="client_name" class="text-muted small">Client Name</label>
+                        </div>
+
+                        <div class="form-floating mb-3">
+                            <input type="tel" name="phone" id="phone" class="form-control border-0 bg-light rounded-3 shadow-none" placeholder="Phone" required>
+                            <label for="phone" class="text-muted small">Phone Number</label>
+                        </div>
+
+                        <div class="form-floating mb-4">
+                            <input type="number" step="0.01" name="budget" id="budget" class="form-control border-0 bg-light rounded-3 shadow-none fw-bold text-success" placeholder="Budget">
+                            <label for="budget" class="text-muted small">Initial Budget (₹)</label>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2 hover-lift">
+                            <i class="bi bi-plus-circle-dotted fs-5"></i>
+                            <span class="fw-bold">Create Project</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8 col-xl-9">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-top border-primary border-4 sticky-top" style="top: 20px;">
+                <div class="card-header bg-white border-0 py-4 px-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <h5 class="fw-bold text-dark mb-0">Project Directory</h5>
+                        </div>
+                        <div class="col-md-6 mt-3 mt-md-0">
+                            <div class="input-group bg-light rounded-pill px-3 py-1">
+                                <span class="input-group-text bg-transparent border-0 text-muted">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" id="projectSearch" class="form-control bg-transparent border-0 shadow-none" 
+                                       placeholder="Search projects...">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="bg-light text-muted extra-small text-uppercase">
+                                <tr>
+                                    <th class="border-0 px-4 py-3">Project & Client</th>
+                                    <th class="border-0 py-3">Total Budget</th>
+                                    <th class="border-0 py-3">Status</th>
+                                    <th class="border-0 px-4 py-3 text-end">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="projectTableBody">
+                                {% for project in projects %}
+                                <tr class="project-item transition-all border-bottom border-light">
+                                    <td class="px-4">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm bg-primary-soft text-primary fw-bold me-3 rounded-2 d-flex align-items-center justify-content-center">
+                                                {{ project.name|slice:":1"|upper }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold text-dark mb-0">{{ project.name }}</div>
+                                                <div class="text-muted extra-small">{{ project.client_name }} • {{ project.phone }}</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-dark">₹{{ project.budget|default:"0.00" }}</span>
+                                    </td>
+                                    <td>
+                                        {% if project.status == 'Ongoing' %}
+                                            <span class="badge rounded-pill bg-warning-soft text-warning px-3 py-2">Ongoing</span>
+                                        {% elif project.status == 'Completed' %}
+                                            <span class="badge rounded-pill bg-success-soft text-success px-3 py-2">Completed</span>
+                                        {% elif project.status == 'On Hold' %}
+                                            <span class="badge rounded-pill bg-secondary-soft text-secondary px-3 py-2">On Hold</span>
+                                        {% else %}
+                                            <span class="badge rounded-pill bg-light text-muted px-3 py-2">{{ project.status|default:"Pending" }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td class="px-4 text-end">
+                                        <a href="{% url 'edit_project' project.id %}" class="btn btn-sm btn-outline-primary border-0 rounded-2">
+                                            <i class="bi bi-pencil-square"></i> Edit
+                                        </a>
+                                        <a href="{% url 'delete_project' project.id %}" 
+                                        class="btn btn-sm btn-outline-danger delete-btn">
+                                        <i class="bi bi-trash"></i> Delete
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="4" class="text-center py-5">
+                                        <div class="text-muted">
+                                            <i class="bi bi-layers display-6 d-block mb-3"></i>
+                                            No projects registered yet.
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="form-group">
-      <label for="phone">Client Phone</label>
-      <input type="tel" name="phone" id="phone" class="form-control" placeholder="e.g., +91 98765 43210" required>
-    </div>
-    <button type="submit" class="btn btn-primary mt-2">Add Project</button> {# Changed btn-success to btn-primary for consistency #}
-  </form>
-
-  <h3 class="section-heading mt-4">Existing Projects</h3> {# Added custom class for heading #}
- 
-  <div class="scroll-container project-list-card"> {# Added custom class for card style #}
-    <ul class="project-list">
-  {% for project in projects %}
-    <li class="project-list-item d-flex align-items-center justify-content-between">
-      
-      <div>
-        <span class="project-number">{{ forloop.counter }}.</span>
-        <span class="project-details">
-          <span class="project-name">{{ project.name }}</span> –
-          <span class="client-info">{{ project.client_name }} ({{ project.phone }})</span>
-        </span>
-      </div>
-
-      <!-- Edit Icon -->
-      <a href="{% url 'edit_project' project.id %}"
-         class="edit-project-btn"
-         title="Edit Project">
-        <i class="bi bi-pencil-square"></i>
-      </a>
-
-    </li>
-  {% empty %}
-    <li class="no-projects-message">No projects added yet.</li>
-  {% endfor %}
-</ul>
-
-  </div>
-
 </div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    // ✅ DELETE CONFIRMATION
+    document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', function (e) {
+            e.preventDefault();
+
+            const url = this.getAttribute('href');
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "This project will be permanently deleted!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!",
+                cancelButtonText: "Cancel"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = url;
+                }
+            });
+        });
+    });
+
+    // ✅ DJANGO MESSAGES (SUCCESS / ERROR)
+    {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            icon: "{{ message.tags }}",
+            title: "{{ message.tags|capfirst }}",
+            text: "{{ message|escapejs }}",
+            confirmButtonColor: "#3085d6",
+            timer: 2000,
+            showConfirmButton: false
+        });
+        {% endfor %}
+    {% endif %}
+
+});
+</script>
+
+
+<style>
+    /* Status Badge Soft Colors */
+    .bg-warning-soft { background-color: #fff3cd; }
+    .bg-success-soft { background-color: #d1e7dd; }
+    .bg-secondary-soft { background-color: #e2e3e5; }
+    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
+
+    .avatar-sm { width: 38px; height: 38px; font-size: 0.9rem; }
+    .extra-small { font-size: 0.75rem; letter-spacing: 0.3px; }
+    
+    .icon-square {
+        width: 48px; height: 48px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 12px; font-size: 1.4rem;
+    }
+
+    /* Input Focus Effects */
+    .form-floating > .form-control:focus {
+        background-color: #fff !important;
+        border: 1px solid #0d6efd !important;
+    }
+
+    .hover-lift { transition: transform 0.2s ease; }
+    .hover-lift:hover { transform: translateY(-2px); }
+    .transition-all { transition: all 0.2s ease-in-out; }
+
+    /* For Sticky Form on Scroll */
+    .sticky-top { transition: all 0.3s ease; }
+</style>
+
+<script>
+    // Advanced Search Filter
+    document.getElementById('projectSearch').addEventListener('input', function(e) {
+        const searchTerm = e.target.value.toLowerCase();
+        const rows = document.querySelectorAll('#projectTableBody .project-item');
+        
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(searchTerm) ? '' : 'none';
+        });
+    });
+</script>
 {% endblock %}

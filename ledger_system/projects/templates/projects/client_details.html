@@ -2,325 +2,267 @@
 {% load static %}
 {% load indian_format %}
 
-<head>
-  <title>Client Details - {{ project.client_name }}</title>
-    <!-- Swiper CSS -->
-
-  <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    .main-table th, .main-table td {
-      text-align: center;
-      vertical-align: middle;
-    }
-    .main-table th {
-      background-color: #f8f9fa;
-    }
-    body {
-      font-family: 'Poppins', sans-serif;
-      background: #f4f5f7;
-      margin: 0;
-      padding: 20px;
-      overflow-x:hidden;
-    }
-    .table td, .table th {
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 576px) {
-      h2, h4 {
-        font-size: 1.2rem;
-      }
-      .btn {
-        font-size: 0.8rem;
-        padding: 0.4rem 0.6rem;
-      }
-    }
-
-    .swiper {
-  width: 100%;
-  padding: 30px 0;
-}
-
-.swiper-slide {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 10px;
-}
-
-.image-card {
-  max-width: 90%;
-  background: #fff;
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-  text-align: left;
-}
-
-.image-card img {
-  width: 100%;
-  height: auto;
-  object-fit: cover;
-  border-bottom: 1px solid #ddd;
-}
-
-.image-info {
-  padding: 15px;
-}
-
-.image-info p {
-  margin: 8px 0;
-  font-size: 0.95rem;
-  color: #333;
-}
-
-.upload-date {
-  color: #666;
-  font-size: 0.85rem;
-}
-
-  </style>
-{% block title %}Client Details - {{ project.client_name }}{% endblock %}
-
-</head>
-
-
+{% block page_title %}Ledger: {{ project.client_name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-2">
-  <div class="mb-4">
-    <h2>Client: {{ project.client_name }}</h2>
-    <p><strong>Budget:</strong> {{ total_expense|indian_currency }}</p>
-    <p><strong>total Paid:</strong> {{ total_paid|indian_currency }}</p>
-    <p><strong>Remaining Amount:</strong>
-      {% if remaining < 0 %}
-        <strong><span class="text-danger">{{ project.remaining|indian_currency }}</span></strong>
-      {% else %}
-        {{ remaining|indian_currency }}
-      {% endif %}
-    </p>
-  </div>
+<div class="container-fluid px-4 py-4">
 
-
-  <h4 class="mb-3">Budget Details</h4>
-  <form method="get" class="row g-2 mb-4">
-  <div class="col-sm-4">
-    <input type="text" name="desc" class="form-control" placeholder="Search by description" value="{{ request.GET.desc }}">
-  </div>
-  <div class="col-sm-3">
-    <input type="date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
-  </div>
-  <div class="col-sm-3">
-    <input type="date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
-  </div>
-  <div class="col-sm-2 mt-4">
-    <button type="submit" class="btn btn-primary w-100" style="background: #2563eb;">Filter</button>
-  </div>
-</form>
-<a href="{% url 'client_details' project.id %}" class="btn btn-secondary w-100">Clear</a>
-
-  {% if expenses %}
-  <div class="table-responsive">
-    <table class="table table-bordered main-table">
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>Date</th>
-          <th>Description</th>
-          <th>Area</th>
-          <th>Unit</th>
-          <th>Rate/Unit</th>
-          <th>Note</th>
-          <th>Amount</th>
-          <th>Actions</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for expense in expenses %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ expense.date|date:"d-m-y" }}</td>
-          <td>{{ expense.description }}</td>
-          <td>{{ expense.area }}</td>
-          <td>{{ expense.unit }}</td>
-          <td style="text-align: right;">{{ expense.rate }}</td>
-          <td>{{ expense.note|default:"-" }}</td>
-          <td style="text-align: right;">{{ expense.amount|indian_currency }}</td>
-          <td>
-            <a href="{% url 'edit_expense' expense.id %}" class="btn btn-sm text-white" style="background: #2563eb;">Edit</a>
-            <a href="{% url 'delete_expense' expense.id %}" class="btn btn-sm btn-danger"
-              onclick="return confirm('Are you sure you want to delete this expense?');">Delete</a>
-          </td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-    <p>No expenses recorded yet.</p>
-  {% endif %}
-
-  <h4 class="mt-5">Payment History</h4>
-<form method="get" class="row g-2 mb-4">
-  <div class="col-sm-4">
-    <select name="payment_mode" class="form-select">
-      <option value="">All Modes</option>
-      <option value="Cash" {% if request.GET.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
-      <option value="Online" {% if request.GET.payment_mode == 'Online' %}selected{% endif %}>Online</option>
-      <option value="Cheque" {% if request.GET.payment_mode == 'Cheque' %}selected{% endif %}>Cheque</option>
-    </select>
-  </div>
-  <div class="col-sm-3">
-    <input type="date" name="pay_from" class="form-control" value="{{ request.GET.pay_from }}">
-  </div>
-  <div class="col-sm-3">
-    <input type="date" name="pay_to" class="form-control" value="{{ request.GET.pay_to }}">
-  </div>
-  <div class="col-sm-2 mt-4">
-    <button type="submit" class="btn btn-success w-100 "style="background: #2563eb;">Filter</button>
-  </div>
-</form>
-<a href="{% url 'client_details' project.id %}" class="btn btn-secondary w-100">Clear</a>
-
-
-  {% if payment_rows %}
-  <div class="table-responsive">
-    <table class="table table-striped table-bordered">
-      <thead>
-        <tr>
-          <th>S.No</th>
-          <th>Date</th>
-          <th>Payment Mode</th>
-          <th>Amount Paid</th>
-          <th>Cumulative Before</th>
-          <th>Remaining After</th>
-          <th>Actions</th>
-          <th>Share via WhatsApp</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for payment in payment_rows %}
-        <tr>
-          <td>{{ forloop.counter }}</td>
-          <td>{{ payment.date|date:"d-m-Y" }}</td>
-          <td>{{ payment.payment_mode }}</td>
-          <td style="text-align: right;">{{ payment.amount|indian_currency }}</td>
-          <td style="text-align: right;">{{ payment.cumulative_paid_before|indian_currency }}</td>
-          <td style="text-align: right;">{{ payment.remaining_after_payment|indian_currency }}</td>
-          <td>
-            <a href="{% url 'payment_invoice' payment.payment_obj.id %}" target="_blank" class="btn btn-sm btn-outline-primary" style="background-color: #2563EB; color: white; text-align: center;">Invoice</a>
-            <a href="{% url 'edit_payment' payment.payment_obj.id %}" class="btn btn-sm text-white" style="background: #2563eb;">Edit</a>
-          </td>
-          <td>
-            <a href="https://wa.me/?text={{ payment.whatsapp_text|urlencode }}"
-              target="_blank"
-              class="btn btn-sm btn-success">
-              Share via WhatsApp
-            </a>
-          </td>
-
-
-
-        </tr>
-        {% endfor %}
-        
-        <tr style="background-color: #2563EB; color: white;">
-          <td colspan="6" style="font-weight: bold;">Total:</td>
-          <td colspan="2" style="text-align: right; font-weight: bold;">{{ total_paid|indian_currency }}</td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-  {% else %}
-    <p>No payments recorded yet.</p>
-  {% endif %}
-
-  <div class="mt-4 d-flex flex-column flex-sm-row justify-content-between gap-2">
-    <a href="{% url 'invoice' project.id %}" target="_blank" class="btn btn-primary mb-4">Preview All Invoice</a>
-  </div>
-</div>
-
-
-
-
-<h2>Upload Image for {{ project.client_name }}</h2>
-
- <a href="{% url 'upload_site_image' project.id %}" class="btn btn-primary mb-5 mt-5" style="margin-bottom: 20px;">Upload</a>
-
- <form method="get" class="border rounded p-3 mb-4 bg-light shadow-sm">
-  <div class="row g-3 align-items-end">
-    <div class="col-md-4">
-      <label for="image_from" class="form-label fw-semibold">From Date:</label>
-      <input type="date" name="image_from" id="image_from" class="form-control" value="{{ image_from }}">
-    </div>
-    <div class="col-md-4">
-      <label for="image_to" class="form-label fw-semibold">To Date:</label>
-      <input type="date" name="image_to" id="image_to" class="form-control" value="{{ image_to }}">
-    </div>
-    <div class="col-md-4 d-grid">
-      <button type="submit" class="btn btn-primary btn-lg">
-        <i class="bi bi-funnel-fill me-1"></i> Filter
-      </button>
-    </div>
-  </div>
-</form>
-
-
-<h4 class="mt-4">Site Images</h4>
-<div class="swiper mySwiper">
-  <div class="swiper-wrapper">
-    {% for img in site_images %}
-      {% if img.image %}
-        <div class="swiper-slide">
-          <div class="image-card">
-            <img src="{{ img.image.url }}" alt="Site Image">
-            <div class="image-info">
-              <p class="upload-date">📅 Uploaded on {{ img.uploaded_at|date:"d M Y, h:i A" }}</p>
-              <p class="description"><strong>Description:</strong> {{ img.description }}</p>
+    <div class="row g-3 mb-5">
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-box bg-primary-soft text-primary rounded-3 p-3">
+                        <i class="bi bi-wallet2 fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-bold d-block mb-1 text-uppercase letter-spacing-1">Total Budget</small>
+                        <h4 class="fw-bold mb-0 text-dark">{{ total_expense|indian_currency }}</h4>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      {% endif %}
-    {% endfor %}
-  </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-box bg-success-soft text-success rounded-3 p-3">
+                        <i class="bi bi-cash-stack fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-bold d-block mb-1 text-uppercase letter-spacing-1">Total Paid</small>
+                        <h4 class="fw-bold mb-0 text-success">{{ total_paid|indian_currency }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="icon-box {% if remaining < 0 %}bg-danger-soft text-danger{% else %}bg-info-soft text-info{% endif %} rounded-3 p-3">
+                        <i class="bi bi-clock-history fs-4"></i>
+                    </div>
+                    <div>
+                        <small class="text-muted fw-bold d-block mb-1 text-uppercase letter-spacing-1">Remaining</small>
+                        <h4 class="fw-bold mb-0 {% if remaining < 0 %}text-danger{% endif %}">{{ project.remaining|indian_currency }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-  <!-- Navigation buttons -->
-  <div class="swiper-button-next"></div>
-  <div class="swiper-button-prev"></div>
+    <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
+        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+            <h5 class="fw-bold mb-0">Budget Breakdown</h5>
+            <div class="d-flex gap-2">
+                <button class="btn btn-danger btn-sm rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#expenseFilters">
+                    <i class="bi bi-funnel"></i>
+                </button>
+                <a href="{% url 'invoice' project.id %}" target="_blank" class="btn btn-primary btn-sm rounded-3">
+                    <i class="bi bi-printer me-2"></i>Invoice
+                </a>
+            </div>
+        </div>
 
-  <!-- Pagination -->
-  <div class="swiper-pagination"></div>
+        <div class="collapse" id="expenseFilters">
+            <div class="card-body bg-light border-bottom p-4">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <input type="text" name="desc" class="form-control" placeholder="Search description..." value="{{ request.GET.desc }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
+                    </div>
+                    <div class="col-md-3">
+                        <input type="date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
+                    </div>
+                    <div class="col-md-2 d-flex gap-1">
+                        <button type="submit" class="btn btn-primary w-100">Apply</button>
+                        <a href="{% url 'client_details' project.id %}" class="btn btn-secondary"><i class="bi bi-x-circle"></i></a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr class="small text-muted text-uppercase fw-bold">
+                        <th class="ps-4">S.No</th>
+                        <th>Date</th>
+                        <th>Description</th>
+                        <th class="text-center">Area/Units</th>
+                        <th class="text-end">Rate</th>
+                        <th class="text-end">Amount</th>
+                        <th class="text-center pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for expense in expenses %}
+                    <tr>
+                        <td class="ps-4 text-muted">{{ forloop.counter }}</td>
+                        <td class="fw-medium">{{ expense.date|date:"d M y" }}</td>
+                        <td>
+                            <span class="d-block fw-bold text-dark">{{ expense.description }}</span>
+                            <small class="text-muted">{{ expense.note|default:"-" }}</small>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-primary-soft text-primary rounded-pill">{{ expense.area }} {{ expense.unit }}</span>
+                        </td>
+                        <td class="text-end">{{ expense.rate }}</td>
+                        <td class="text-end fw-bold text-dark">{{ expense.amount|indian_currency }}</td>
+                        <td class="text-center pe-4">
+                            <div class="btn-group btn-group-sm rounded-3">
+                                <a href="{% url 'edit_expense' expense.id %}" class="btn btn-light border"><i class="bi bi-pencil-square"></i></a>
+                                <a href="{% url 'delete_expense' expense.id %}" class="btn btn-light-danger border text-danger" onclick="return confirm('Delete?');"><i class="bi bi-trash"></i></a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center py-5 text-muted">No expenses found matching the criteria.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-xl-8">
+            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
+                <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
+                    <h5 class="fw-bold mb-0 text-success"><i class="bi bi-credit-card-2-front me-2"></i>Payments</h5>
+                    <div class="dropdown">
+                        <button class="btn btn-danger btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#payFilter">
+                            <i class="bi bi-funnel"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="collapse" id="payFilter">
+                    <div class="card-body bg-light-success p-3 border-bottom">
+                        <form method="get" class="row g-2">
+                            <div class="col-sm-4">
+                                <select name="payment_mode" class="form-select form-select-sm">
+                                    <option value="">All Modes</option>
+                                    <option value="Cash" {% if request.GET.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
+                                    <option value="Online" {% if request.GET.payment_mode == 'Online' %}selected{% endif %}>Online</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="date" name="pay_from" class="form-control form-control-sm" value="{{ request.GET.pay_from }}">
+                            </div>
+                            <div class="col-sm-3">
+                                <input type="date" name="pay_to" class="form-control form-control-sm" value="{{ request.GET.pay_to }}">
+                            </div>
+                            <div class="col-sm-2">
+                                <button type="submit" class="btn btn-success btn-sm w-100">Go</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle mb-0">
+                        <thead class="bg-light-success-subtle">
+                            <tr class="small text-muted text-uppercase fw-bold">
+                                <th class="ps-4">Date</th>
+                                <th>Mode</th>
+                                <th class="text-end">Paid</th>
+                                <th class="text-end">Balance After</th>
+                                <th class="text-center pe-4">Share</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payment_rows %}
+                            <tr>
+                                <td class="ps-4">{{ payment.date|date:"d-m-Y" }}</td>
+                                <td><span class="badge bg-white border text-dark fw-medium px-2">{{ payment.payment_mode }}</span></td>
+                                <td class="text-end fw-bold text-success">{{ payment.amount|indian_currency }}</td>
+                                <td class="text-end text-muted small">{{ payment.remaining_after_payment|indian_currency }}</td>
+                                <td class="text-center pe-4">
+                                    <div class="btn-group btn-group-sm shadow-sm rounded-3">
+                                        <a href="{% url 'payment_invoice' payment.payment_obj.id %}" target="_blank" class="btn btn-white border"><i class="bi bi-receipt"></i></a>
+                                        <a href="https://wa.me/?text={{ payment.whatsapp_text|urlencode }}" target="_blank" class="btn btn-success"><i class="bi bi-whatsapp"></i></a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                            <tr class="bg-dark text-white fw-bold">
+                                <td colspan="2" class="ps-4">TOTAL COLLECTED</td>
+                                <td class="text-end text-white">{{ total_paid|indian_currency }}</td>
+                                <td colspan="2"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-4">
+            <div class="card border-0 shadow-sm rounded-4 h-100 bg-glass-dark text-white p-4 overflow-hidden">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h5 class="fw-bold mb-0"><i class="bi bi-images me-2 text-info"></i>Site Media</h5>
+                    <a href="{% url 'upload_site_image' project.id %}" class="btn btn-info-soft btn-sm rounded-3">
+                        <i class="bi bi-cloud-arrow-up-fill"></i>
+                    </a>
+                </div>
+
+                <form method="get" class="row g-2 mb-4">
+                    <div class="col-6">
+                        <input type="date" name="image_from" class="form-control form-control-sm bg-dark border-secondary text-white" value="{{ image_from }}">
+                    </div>
+                    <div class="col-6">
+                        <button type="submit" class="btn btn-sm btn-outline-info w-100">Filter Media</button>
+                    </div>
+                </form>
+
+                <div class="swiper mySwiper rounded-4">
+                    <div class="swiper-wrapper">
+                        {% for img in site_images %}
+                        <div class="swiper-slide">
+                            <div class="media-card position-relative">
+                                <img src="{{ img.image.url }}" class="rounded-4 w-100 shadow" style="height: 250px; object-fit: cover;">
+                                <div class="media-info-overlay p-3 rounded-bottom-4">
+                                    <p class="mb-1 x-small text-info"><i class="bi bi-calendar3 me-1"></i>{{ img.uploaded_at|date:"d M Y" }}</p>
+                                    <p class="small fw-medium mb-0 text-white text-truncate">{{ img.description }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    <div class="swiper-pagination mt-2"></div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+<style>
+    /* Global Styling */
+    .bg-primary-soft { background: rgba(37, 99, 235, 0.1) !important; }
+    .bg-success-soft { background: rgba(22, 163, 74, 0.1) !important; }
+    .bg-danger-soft { background: rgba(220, 38, 38, 0.1) !important; }
+    .bg-info-soft { background: rgba(8, 145, 178, 0.1) !important; }
+    .bg-light-success-subtle { background: #f0fdf4; }
+    .bg-glass-dark { background: #0f172a; border: 1px solid rgba(255,255,255,0.05); }
+    
+    .letter-spacing-1 { letter-spacing: 0.5px; font-size: 0.65rem; }
+    .x-small { font-size: 0.75rem; }
+    
+    .btn-light-glass { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); color: #64748b; font-weight: 600; }
+    .btn-light-glass:hover { background: #fff; color: #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .btn-white { background: #fff; color: #64748b; }
+    .btn-light-danger { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.1); }
 
-<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
-<script>
-  const swiper = new Swiper(".mySwiper", {
-    loop: true,
-    spaceBetween: 20,
-    slidesPerView: 1,
-    pagination: {
-      el: ".swiper-pagination",
-      clickable: true,
-    },
-    navigation: {
-      nextEl: ".swiper-button-next",
-      prevEl: ".swiper-button-prev",
-    },
-    breakpoints: {
-      640: {
-        slidesPerView: 1,
-      },
-      768: {
-        slidesPerView: 1,
-      },
-      1024: {
-        slidesPerView: 1,
-      },
+    /* Media Overlay */
+    .media-info-overlay {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(transparent, rgba(0,0,0,0.9));
     }
-  });
-</script>
 
+    /* Swiper customization */
+    .swiper-pagination-bullet { background: #fff !important; }
+    .swiper-pagination-bullet-active { background: #3b82f6 !important; }
+</style>
 {% endblock %}

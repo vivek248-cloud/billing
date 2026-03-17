@@ -1,72 +1,187 @@
 {% extends 'projects/base.html' %}
+{% load static %}
+
+{% block page_title %}Edit Project Settings{% endblock %}
 
 {% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-xl-8">
+            
+            <nav aria-label="breadcrumb" class="mb-4">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="{% url 'billing' %}" class="text-decoration-none">Dashboard</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Edit {{ project.name }}</li>
+                </ol>
+            </nav>
 
-<div class="edit-project-wrapper">
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card-header bg-dark p-4 border-0">
+                    <div class="d-flex align-items-center">
+                        <div class="icon-box bg-white-soft text-white me-3">
+                            <i class="bi bi-pencil-square"></i>
+                        </div>
+                        <div>
+                            <h4 class="fw-bold mb-0 text-white">Project Configuration</h4>
+                            <p class="text-white-50 small mb-0">Modify details for Project ID: #{{ project.id|default:"N/A" }}</p>
+                        </div>
+                    </div>
+                </div>
 
-  <div class="edit-project-card">
-    <div class="edit-header">
-      <h3>Edit Project</h3>
-      <p>Update project details carefully</p>
+                <div class="card-body p-4 p-md-5">
+                    {% if error %}
+                    <div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm mb-4">
+                        <i class="bi bi-exclamation-octagon-fill fs-5 me-2"></i>
+                        <div>{{ error }}</div>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" class="needs-validation">
+                        {% csrf_token %}
+
+                        <h6 class="text-uppercase fw-bold text-muted extra-small mb-4 pb-2 border-bottom">Basic Information</h6>
+                        
+                        <div class="row g-4 mb-5">
+                            <div class="col-md-12">
+                                <label class="form-label fw-bold small">Project Title</label>
+                                <input type="text" name="name" class="form-control form-control-lg custom-field" 
+                                       value="{{ project.name }}" placeholder="Enter project name" required>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Client Name</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
+                                    <input type="text" name="client_name" class="form-control border-start-0 custom-field" 
+                                           value="{{ project.client_name }}" placeholder="Full name">
+                                </div>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold small">Contact Phone</label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-muted"></i></span>
+                                    <input type="text" name="phone" class="form-control border-start-0 custom-field" 
+                                           value="{{ project.phone }}" placeholder="+91 XXXX">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h6 class="text-uppercase fw-bold text-muted extra-small mb-4 pb-2 border-bottom">Financials & Status</h6>
+
+                        <div class="row g-4 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Total Budget (₹)</label>
+                                <input type="number" step="0.01" name="budget" class="form-control custom-field fw-bold text-success" 
+                                       value="{{ project.budget }}" placeholder="0.00">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Est. Cost (₹)</label>
+                                <input type="number" step="0.01" name="estimated_cost" class="form-control custom-field" 
+                                       value="{{ project.estimated_cost }}" placeholder="0.00">
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label fw-bold small">Project Status</label>
+                                <select name="status" class="form-select custom-field">
+                                    {% for key, label in statuses %}
+                                      <option value="{{ key }}" {% if project.status == key %}selected{% endif %}>
+                                        {{ label }}
+                                      </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions d-flex flex-column flex-md-row gap-3 mt-5 pt-4 border-top">
+                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 fw-bold shadow-sm">
+                                <i class="bi bi-cloud-arrow-up me-2"></i> Update Project
+                            </button>
+                            <a href="{% url 'billing' %}" class="btn btn-light btn-lg px-5 rounded-3 text-muted border">
+                                Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <div class="mt-4 text-center">
+                <p class="text-muted small">
+                    <i class="bi bi-info-circle me-1"></i> 
+                    Updating the budget will automatically recalculate the "Yet to Receive" totals in your ledger.
+                </p>
+            </div>
+        </div>
     </div>
-
-    {% if error %}
-      <div class="alert alert-danger">{{ error }}</div>
-    {% endif %}
-
-    <form method="post">
-      {% csrf_token %}
-
-      <div class="form-grid">
-
-        <div class="form-group">
-          <label>Project Name</label>
-          <input type="text" name="name" value="{{ project.name }}" required>
-        </div>
-
-        <div class="form-group">
-          <label>Client Name</label>
-          <input type="text" name="client_name" value="{{ project.client_name }}">
-        </div>
-
-        <div class="form-group">
-          <label>Phone</label>
-          <input type="text" name="phone" value="{{ project.phone }}">
-        </div>
-
-        <div class="form-group">
-          <label>Budget (₹)</label>
-          <input type="number" step="0.01" name="budget" value="{{ project.budget }}">
-        </div>
-
-        <div class="form-group">
-          <label>Estimated Cost (₹)</label>
-          <input type="number" step="0.01" name="estimated_cost" value="{{ project.estimated_cost }}">
-        </div>
-
-        <div class="form-group">
-          <label>Status</label>
-          <select name="status">
-            {% for key, label in statuses %}
-              <option value="{{ key }}" {% if project.status == key %}selected{% endif %}>
-                {{ label }}
-              </option>
-            {% endfor %}
-          </select>
-        </div>
-
-      </div>
-
-      <div class="form-actions">
-        <a href="{% url 'billing' %}" class="btn-cancel">Cancel</a>
-        <button type="submit" class="btn-save">
-          <i class="bi bi-check-circle"></i> Save Changes
-        </button>
-      </div>
-
-    </form>
-  </div>
-
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    {% if messages %}
+        {% for message in messages %}
+        Swal.fire({
+            icon: "{{ message.tags }}",
+            title: "{{ message.tags|capfirst }}",
+            text: "{{ message|escapejs }}",
+            confirmButtonColor: "#3085d6",
+            timer: 2000,
+            showConfirmButton: false
+        });
+        {% endfor %}
+    {% endif %}
+
+});
+</script>
+
+
+<style>
+    /* Custom Styling for the Edit Page */
+    .bg-dark { background-color: #0f172a !important; }
+    
+    .icon-box {
+        width: 48px; height: 48px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 12px; font-size: 1.5rem;
+    }
+    .bg-white-soft { background-color: rgba(255, 255, 255, 0.1); }
+    
+    .extra-small { font-size: 0.75rem; letter-spacing: 1px; }
+
+    .custom-field {
+        padding: 0.75rem 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        background-color: #fcfcfc;
+        transition: all 0.2s ease;
+    }
+
+    .custom-field:focus {
+        background-color: #fff;
+        border-color: #3b82f6;
+        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
+    }
+
+    .form-label {
+        color: #475569;
+        margin-bottom: 0.5rem;
+    }
+
+    .breadcrumb-item + .breadcrumb-item::before {
+        content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E");
+    }
+
+    /* Animation */
+    .card {
+        animation: slideUp 0.4s ease-out;
+    }
+
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
 {% endblock %}
