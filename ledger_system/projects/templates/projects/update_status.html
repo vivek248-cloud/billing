@@ -4,100 +4,267 @@
 <head>
   <meta charset="UTF-8">
   <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
-  <title>Update Project Status</title>
+  <title>Update Status | {{ project.client_name }}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="{% static 'css/ledger.css' %}">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
   <style>
+    :root {
+      --primary: #3b82f6;
+      --primary-hover: #2563eb;
+      --bg-slate: #0f172a;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+    }
+
     body {
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #e0eafc, #cfdef3);
+      background: #f8fafc;
+      /* Subtle grid pattern background */
+      background-image: radial-gradient(#e2e8f0 1px, transparent 1px);
+      background-size: 20px 20px;
       margin: 0;
-      padding: 40px 20px;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
+      color: var(--text-main);
     }
 
-    .form-container {
-      background-color: white;
-      padding: 30px 40px;
-      border-radius: 10px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
-      max-width: 500px;
+    .status-wrapper {
       width: 100%;
+      max-width: 450px;
+      padding: 20px;
+    }
+
+    .status-card {
+      background: #ffffff;
+      padding: 40px;
+      border-radius: 24px;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+      border: 1px solid #e2e8f0;
+    }
+
+    .header-section {
+      text-align: center;
+      margin-bottom: 32px;
+    }
+
+    .icon-badge {
+      width: 60px;
+      height: 60px;
+      background: rgba(59, 130, 246, 0.1);
+      color: var(--primary);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      margin: 0 auto 16px;
     }
 
     h2 {
-      text-align: center;
-      margin-bottom: 25px;
-      color: #1f2937;
-      font-size: 24px;
+      margin: 0;
+      font-size: 1.25rem;
+      font-weight: 800;
+      color: var(--bg-slate);
+      letter-spacing: -0.025em;
     }
 
-    form {
-      display: flex;
-      flex-direction: column;
+    .client-label {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+      display: block;
+    }
+
+    .current-status-preview {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f1f5f9;
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-top: 12px;
+      color: var(--bg-slate);
+    }
+
+    .status-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--primary);
+    }
+
+    label {
+      display: block;
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 8px;
+    }
+
+    .select-container {
+      position: relative;
     }
 
     select {
-      padding: 12px 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 6px;
+      width: 100%;
+      appearance: none;
+      padding: 14px 16px;
+      font-size: 1rem;
+      font-weight: 500;
+      background-color: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      color: var(--bg-slate);
       outline: none;
-      transition: border-color 0.3s;
+      transition: all 0.2s ease;
+      cursor: pointer;
     }
 
     select:focus {
-      border-color: #10b981;
+      border-color: var(--primary);
+      background-color: #fff;
+      box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
     }
 
-    button {
-      margin-top: 25px;
-      padding: 12px;
-      background-color: #10b981;
-      border: none;
+    .select-container::after {
+      content: "\F285"; /* Bootstrap Icon Chevron Down */
+      font-family: "bootstrap-icons";
+      position: absolute;
+      right: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      pointer-events: none;
+      color: var(--text-muted);
+    }
+
+    .btn-submit {
+      width: 100%;
+      margin-top: 32px;
+      padding: 14px;
+      background-color: var(--bg-slate);
       color: white;
-      font-weight: bold;
-      border-radius: 6px;
+      border: none;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-weight: 700;
       cursor: pointer;
-      font-size: 16px;
-      transition: background-color 0.3s;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
     }
 
-    button:hover {
-      background-color: #0e9e6e;
+    .btn-submit:hover {
+      background-color: #1e293b;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.2);
     }
 
-    @media (max-width: 600px) {
-      .form-container {
-        padding: 20px;
-      }
+    .btn-submit:active {
+      transform: translateY(0);
+    }
 
-      h2 {
-        font-size: 20px;
-      }
+    .back-link {
+        display: block;
+        text-align: center;
+        margin-top: 20px;
+        color: var(--text-muted);
+        text-decoration: none;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
 
-      select, button {
-        font-size: 14px;
+    .back-link:hover {
+        color: var(--primary);
+    }
+
+    @media (max-width: 480px) {
+      .status-card {
+        padding: 30px 20px;
       }
     }
+
+    .btn-return {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px;
+    background: #0062ffc2; /* Dark Slate */
+    color: #ffffff; /* Muted text */
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    border-radius: 12px;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    transition: all 0.2s ease;
+}
+
+.btn-return i {
+    font-size: 1.25rem;
+    transition: transform 0.2s ease;
+}
+
+.btn-return:hover {
+    background: #0062ff; /* Dark Slate */
+    color: #ffffff;
+    border-color: #1e293b;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+}
+
+.btn-return:hover i {
+    transform: translateX(-4px); /* Subtle "moving back" animation */
+}
   </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>Update Status for {{ project.name }}({{project.client_name}})</h2>
-    <form method="POST" class="add-expense-form">
-      {% csrf_token %}
-      <select name="status">
-        {% for value, label in project.STATUS_CHOICES %}
-          <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
-        {% endfor %}
-      </select>
-      <button type="submit">Update</button>
-    </form>
+  <div class="status-wrapper">
+    <div class="status-card">
+      <div class="header-section">
+        <div class="icon-badge">
+          <i class="bi bi-arrow-repeat"></i>
+        </div>
+        <h2>Update Milestone</h2>
+        <span class="client-label">{{ project.name }} — {{ project.client_name }}</span>
+        
+        <div class="current-status-preview">
+            <span class="status-dot"></span>
+            Current: {{ project.get_status_display }}
+        </div>
+      </div>
+
+      <form method="POST">
+        {% csrf_token %}
+        <label for="status">Select New Status</label>
+        <div class="select-container">
+          <select name="status" id="status">
+            {% for value, label in project.STATUS_CHOICES %}
+              <option value="{{ value }}" {% if project.status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        
+        <button type="submit" class="btn-submit">
+          Confirm Update <i class="bi bi-check2-circle"></i>
+        </button>
+      </form>
+    </div>
+    
+    <div class="mt-4" style="text-align: center;margin-top: 24px;">
+        <a href="{% url 'client_details' project.id %}" class="btn-return">
+            <i class="bi bi-arrow-left-short"></i>
+            <span>Return to Client Details</span>
+        </a>
+    </div>
   </div>
 </body>
 </html>

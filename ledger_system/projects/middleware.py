@@ -78,6 +78,7 @@ class BlockUnauthorizedMiddleware:
                 path.startswith('/media/') or
                 (path.startswith('/projects/') and path.endswith('/download_invoice/')) or
                 path.startswith('/client/dashboard/') or
+                path.startswith('/client/confirm-login/') or
                 path.startswith('/payment-invoice/') or
                 path.startswith('/open-invoice/') or
                 path in always_allowed_paths
@@ -96,7 +97,7 @@ class BlockUnauthorizedMiddleware:
 
 
             # ✅ Prevent logged-in users from accessing login pages again
-            if path in ['/admin-login/', '/client/login/']:
+            if path in ['/admin-login/', '/client/login/','client/confirm-login/']:
                 return redirect('/billing/')
 
             return self.get_response(request)

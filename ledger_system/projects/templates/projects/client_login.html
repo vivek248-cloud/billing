@@ -1,194 +1,276 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-   <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-  <link rel="icon" href="{% static 'images/favicon-512x512.jpg' %}" type="image/jpeg">
-  <title>Client Login</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" crossorigin="anonymous" />
-   <meta property="og:title" content="Welcome to The Elite Dream Builders Billing">
-    <meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments.">
-    <meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG">
-    <meta property="og:url" content="https://edbbilling.com">
-    <meta name="twitter:card" content="summary_large_image">
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-  <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "LocalBusiness",
-  "name": "The Elite Dream Builders",
-  "url": "https://www.edbbilling.com",
-  "logo": "https://www.edbbilling.com/static/images/logo.PNG",
-  "description": "Elite Dream Builders - View your projects, invoices, and payments online.",
-  "address": {
-    "@type": "PostalAddress",
-    "addressCountry": "IN"
-  }
-}
-</script>
+  <title>Client Portal | Secure Login</title>
 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
   <style>
+    :root {
+      /* Soft pastel palette for Claymorphism */
+      --bg-clay: #e0e7ff; 
+      --clay-white: #ffffff;
+      --clay-blue: #6366f1;
+      --clay-blue-shadow: #4f46e5;
+    }
+
     body {
       margin: 0;
       font-family: 'Poppins', sans-serif;
-      background: linear-gradient(135deg, #f8e7f8, #f3d0ec);
+      background-color: var(--bg-clay);
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      color: #1e293b;
     }
 
-    .form-container {
-      background: #fff;
-      padding: 2rem;
-      border-radius: 20px;
-      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    /* The Main Clay Card */
+    .login-card {
+      background: var(--clay-white);
+      padding: 3rem 2.5rem;
+      border-radius: 40px; /* Large rounded corners are key */
+      
+      /* Claymorphism Shadow Combo: Outer soft shadow + Inner highlight + Inner deep shadow */
+      box-shadow: 
+        20px 20px 40px rgba(0, 0, 0, 0.05),
+        -20px -20px 40px rgba(255, 255, 255, 0.8),
+        inset 8px 8px 16px rgba(0, 0, 0, 0.02),
+        inset -8px -8px 16px rgba(255, 255, 255, 0.5);
+      
       max-width: 400px;
       width: 90%;
       text-align: center;
+      animation: bounceIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     }
 
-    .form-container h1 {
-      font-size: 2rem;
-      margin-bottom: 1.5rem;
-      color: #333;
+    @keyframes bounceIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .logo-area {
+      width: 70px;
+      height: 70px;
+      background: var(--clay-blue);
+      border-radius: 25px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+      font-size: 1.8rem;
+      color: white;
+      
+      /* Clay Icon Shadow */
+      box-shadow: 
+        inset -6px -6px 12px var(--clay-blue-shadow),
+        inset 6px 6px 12px rgba(255, 255, 255, 0.3),
+        10px 10px 20px rgba(99, 102, 241, 0.2);
+    }
+
+    h1 {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: #334155;
+    }
+
+    p.subtitle {
+      color: #64748b;
+      font-size: 0.9rem;
+      margin-bottom: 2rem;
     }
 
     .input-group {
       position: relative;
-      margin-bottom: 1.2rem;
+      margin-bottom: 1.5rem;
     }
 
+    /* Clay Styled Input */
     .input-group input {
-      width: 80%;
-      padding: 0.9rem 1rem 0.9rem 2.8rem;
+      width: 100%;
+      box-sizing: border-box;
+      padding: 1.1rem 1rem 1.1rem 3.5rem;
       border: none;
-      background: #f2f2f2;
-      border-radius: 12px;
+      background: #f8fafc;
+      border-radius: 20px;
       font-size: 1rem;
+      color: #1e293b;
+      outline: none;
+      
+      /* Inset shadow for the "hollow" clay look */
+      box-shadow: 
+        inset 6px 6px 10px rgba(0, 0, 0, 0.05),
+        inset -6px -6px 10px rgba(255, 255, 255, 1);
       transition: all 0.3s ease;
     }
 
     .input-group input:focus {
-      outline: none;
-      background: #eaeaea;
+      box-shadow: 
+        inset 4px 4px 6px rgba(99, 102, 241, 0.1),
+        inset -4px -4px 6px rgba(255, 255, 255, 1);
     }
 
     .input-group i {
       position: absolute;
+      left: 1.4rem;
       top: 50%;
-      left: 1rem;
       transform: translateY(-50%);
-      color: #999;
-      font-size: 1.1rem;
+      color: #94a3b8;
     }
 
-    .password-container {
-      position: relative;
-    }
-
-    .toggle-password {
-      position: absolute;
-      top: 50%;
-      left: 80%;
-      right: 1rem;
-      transform: translateY(-50%);
-      color: #888;
-      cursor: pointer;
-    }
-
+    /* Clay Styled Button */
     button {
       width: 100%;
-      padding: 0.9rem;
-      background: linear-gradient(to right, #a100ff, #ff0080);
+      padding: 1.1rem;
+      background: var(--clay-blue);
       color: #fff;
       border: none;
-      border-radius: 12px;
-      font-weight: bold;
-      font-size: 1rem;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 1.1rem;
       cursor: pointer;
-      transition: opacity 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      
+      /* Multi-layer shadow for 3D clay depth */
+      box-shadow: 
+        inset -8px -8px 16px var(--clay-blue-shadow),
+        inset 8px 8px 16px rgba(255, 255, 255, 0.2),
+        10px 10px 20px rgba(0, 0, 0, 0.1);
+      
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     button:hover {
-      opacity: 0.9;
+      transform: translateY(-2px) scale(1.02);
+      box-shadow: 
+        inset -6px -6px 12px var(--clay-blue-shadow),
+        inset 6px 6px 12px rgba(255, 255, 255, 0.3),
+        12px 12px 24px rgba(0, 0, 0, 0.1);
     }
 
-    .form-footer {
-      margin-top: 1rem;
-      font-size: 0.9rem;
-      color: #666;
+    button:active {
+      transform: scale(0.98);
+      box-shadow: 
+        inset 4px 4px 8px var(--clay-blue-shadow),
+        inset -4px -4px 8px rgba(255, 255, 255, 0.2);
     }
 
-    .form-footer a {
-      color: #a100ff;
-      text-decoration: none;
-      margin-left: 4px;
-    }
-
-    .error {
-      color: red;
+    .footer-note {
       font-size: 0.85rem;
-      margin-top: 1rem;
+      color: #94a3b8;
+      margin-top: 1.8rem;
+    }
+
+    /* Customizing SweetAlert for Clay Theme */
+    .swal2-popup {
+      border-radius: 35px !important;
+      box-shadow: 20px 20px 40px rgba(0,0,0,0.1) !important;
+      background: white !important;
+    }
+    
+    .swal2-confirm {
+      border-radius: 15px !important;
+      background-color: var(--clay-blue) !important;
+      box-shadow: inset -4px -4px 8px var(--clay-blue-shadow) !important;
     }
   </style>
 </head>
+
 <body>
 
-  <div class="form-container">
-    <h1>User Login</h1>
-
-    <form method="POST" action="{% url 'client_login' %}">
-      {% csrf_token %}
-
-      <div class="input-group">
-        <i class="fa fa-user"></i>
-        <input type="text" name="username" placeholder="Username"
-          value="{{ request.COOKIES.saved_username|default:'' }}" required>
-      </div>
-
-      <div class="input-group password-container">
-        <i class="fa fa-lock"></i>
-        <input type="tel" name="password" id="passwordField"
-          placeholder="Password" value="{{ request.COOKIES.saved_password|default:'' }}" required>
-        <span class="toggle-password" onclick="togglePassword()">
-          <i id="eyeIcon" class="fa-solid fa-eye"></i>
-        </span>
-      </div>
-
-      <label style="display:flex;align-items:center;justify-content:left;font-size: 0.9rem; margin-bottom: 1rem;">
-        <input type="checkbox" name="remember_me" {% if request.COOKIES.saved_username %}checked{% endif %} style="margin-right:8px;">
-        Remember me for 30 days
-      </label>
-
-      <button type="submit">LOGIN</button>
-
-      {% if error %}
-        <div class="error">{{ error }}
-          <p>Note: If you are a client, use your phone number as password. and use Mr. / Mrs. before your name eg:( Mr.admin )</p>
-        </div>
-      {% endif %}
-
-      
-    </form>
+<div class="login-card">
+  <div class="logo-area">
+    <i class="fa fa-fingerprint"></i>
   </div>
 
-  <script>
-    function togglePassword() {
-      const passwordInput = document.getElementById("passwordField");
-      const eyeIcon = document.getElementById("eyeIcon");
-      if (passwordInput.type === "password") {
-        passwordInput.type = "text";
-        eyeIcon.classList.replace("fa-eye", "fa-eye-slash");
+  <h1>Client Portal</h1>
+  <p class="subtitle">Enter your registered number to start</p>
+
+  <form id="clientLoginForm">
+    {% csrf_token %}
+
+    <div class="input-group">
+      <input type="tel" id="phoneInput" placeholder="Mobile Number" required autocomplete="off">
+      <i class="fa fa-phone"></i>
+    </div>
+
+    <button type="submit">
+      Continue <i class="fa fa-chevron-right"></i>
+    </button>
+
+    <div class="footer-note">
+      Your information is always secure
+    </div>
+  </form>
+</div>
+
+<script>
+  // Script logic remains functionally identical, handling the "Clay" button state
+  document.getElementById("clientLoginForm").addEventListener("submit", function(e){
+    e.preventDefault();
+    let phone = document.getElementById("phoneInput").value;
+    const btn = e.target.querySelector('button');
+    const originalContent = btn.innerHTML;
+
+    btn.innerHTML = '<i class="fa fa-circle-notch fa-spin"></i> Loading';
+    btn.disabled = true;
+
+    fetch("{% url 'client_login' %}", {
+      method: "POST",
+      headers: {
+        "X-Requested-With": "XMLHttpRequest",
+        "X-CSRFToken": document.querySelector('[name=csrfmiddlewaretoken]').value,
+        "Content-Type": "application/x-www-form-urlencoded"
+      },
+      body: `phone=${phone}`
+    })
+    .then(res => res.json())
+    .then(data => {
+      btn.innerHTML = originalContent;
+      btn.disabled = false;
+
+      if(data.status === "success"){
+        Swal.fire({
+          title: "Verify Identity",
+          html: `<div style="padding:15px; background:#f1f5f9; border-radius:20px; box-shadow: inset 4px 4px 8px rgba(0,0,0,0.05);">
+                  <h3 style="margin:0; color:#4f46e5;">${data.client_name}</h3>
+                  <p style="margin:5px 0 0; color:#64748b;">****${data.phone.slice(-4)}</p>
+                 </div>`,
+          icon: "info",
+          showCancelButton: true,
+          confirmButtonText: "Confirm",
+          cancelButtonText: "No",
+          confirmButtonColor: "#6366f1",
+          cancelButtonColor: "#94a3b8"
+        }).then((result)=>{
+          if(result.isConfirmed){
+            window.location.href = `/client/confirm-login/?phone=${data.phone}`;
+          }
+        });
       } else {
-        passwordInput.type = "password";
-        eyeIcon.classList.replace("fa-eye-slash", "fa-eye");
+        Swal.fire({
+          icon: "error",
+          title: "Oops...",
+          text: data.message,
+          confirmButtonColor: "#6366f1"
+        });
       }
-    }
-  </script>
+    })
+    .catch(() => {
+        btn.innerHTML = originalContent;
+        btn.disabled = false;
+    });
+  });
+</script>
+
 </body>
 </html>

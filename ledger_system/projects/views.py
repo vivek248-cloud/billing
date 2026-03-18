@@ -89,37 +89,90 @@ def admin_login(request):
 
 
 
-# client_login
-from django.shortcuts import redirect
+# # client_login
+# from django.shortcuts import redirect
+
+# def client_login(request):
+#     error = ""
+#     if request.method == 'POST':
+#         uname = request.POST['username']
+#         pwd = request.POST['password']
+
+#         try:
+#             # Use __iexact for case-insensitive username matching
+#             project = Project.objects.get(client_name__iexact=uname, phone=pwd)
+#             request.session['client_project_id'] = project.id
+
+#             response = redirect('client_dashboard', phone=project.phone)
+
+#             # ✅ Remember Me logic
+#             if 'remember_me' in request.POST:
+#                 response.set_cookie('saved_username', uname, max_age=2592000)  # 30 days
+#                 response.set_cookie('saved_password', pwd, max_age=2592000)
+#             else:
+#                 response.delete_cookie('saved_username')
+#                 response.delete_cookie('saved_password')
+
+#             return response
+
+#         except Project.DoesNotExist:
+#             error = "Invalid username or password."
+
+#     return render(request, 'projects/client_login.html', {'error': error})
+
+
+from django.http import JsonResponse
+
+from django.http import JsonResponse
+from django.shortcuts import render
+from .models import Project
 
 def client_login(request):
-    error = ""
-    if request.method == 'POST':
-        uname = request.POST['username']
-        pwd = request.POST['password']
+    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+        phone = request.POST.get('phone', '').strip()
+
+        if not phone:
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Phone number is required'
+            })
 
         try:
-            # Use __iexact for case-insensitive username matching
-            project = Project.objects.get(client_name__iexact=uname, phone=pwd)
-            request.session['client_project_id'] = project.id
+            project = Project.objects.get(phone=phone)
 
-            response = redirect('client_dashboard', phone=project.phone)
-
-            # ✅ Remember Me logic
-            if 'remember_me' in request.POST:
-                response.set_cookie('saved_username', uname, max_age=2592000)  # 30 days
-                response.set_cookie('saved_password', pwd, max_age=2592000)
-            else:
-                response.delete_cookie('saved_username')
-                response.delete_cookie('saved_password')
-
-            return response
+            return JsonResponse({
+                'status': 'success',
+                'client_name': project.client_name,
+                'phone': project.phone
+            })
 
         except Project.DoesNotExist:
-            error = "Invalid username or password."
+            return JsonResponse({
+                'status': 'error',
+                'message': 'Phone number not found'
+            })
 
-    return render(request, 'projects/client_login.html', {'error': error})
+    return render(request, 'projects/client_login.html')
 
+from django.shortcuts import redirect, get_object_or_404
+
+def client_confirm_login(request):
+    phone = request.GET.get('phone')
+
+    if not phone:
+        return redirect('client_login')
+
+    project = get_object_or_404(Project, phone=phone)
+
+    # ✅ SET SESSION PROPERLY
+    request.session['client_project_id'] = project.id
+
+    # 🔥 IMPORTANT FIXES
+    request.session.modified = True
+    request.session.save()   # force save session
+
+    return redirect('client_dashboard', phone=project.phone)
+    
 
 
 # client_dashboard
@@ -280,6 +333,8 @@ def siteprocess(request, phone):
 
     remaining = budget - total_expense
     remaining_after_payment = remaining - cumulative_paid
+    site_images = SiteImage.objects.filter(project=project).order_by('-uploaded_at')
+    preview_images = site_images[:3]  # ✅ only 3 for preview on dashboard
 
     context = {
         'project': project,
@@ -290,7 +345,8 @@ def siteprocess(request, phone):
         'total_paid': cumulative_paid,
         'remaining': remaining,
         'remaining_after_payment': remaining_after_payment,
-        'site_images': site_images  # ✅ pass to template
+        'site_images': site_images,  # ✅ pass to template
+        'preview_images': preview_images  # ✅ pass preview images to template
     }
 
     return render(request, 'projects/siteprocess.html', context)

@@ -12,6 +12,8 @@ urlpatterns = [
 
 
     # client dashboard
+    path('client/confirm-login/', views.client_confirm_login, name='client_confirm_login'),
+    
     path('client/dashboard/<str:phone>/', views.client_dashboard, name='client_dashboard'),
 
     path('client/dashboard/<str:phone>/siteprocess/', views.siteprocess, name='siteprocess'),
