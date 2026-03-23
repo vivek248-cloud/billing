@@ -179,15 +179,37 @@
                                 <td class="text-end text-muted small">{{ payment.remaining_after_payment|indian_currency }}</td>
                                 <td class="text-center pe-4">
                                     <div class="btn-group btn-group-sm shadow-sm rounded-3">
-                                        <a href="{% url 'payment_invoice' payment.payment_obj.id %}" target="_blank" class="btn btn-white border"><i class="bi bi-receipt"></i></a>
-                                        <a href="https://wa.me/?text={{ payment.whatsapp_text|urlencode }}" target="_blank" class="btn btn-success"><i class="bi bi-whatsapp"></i></a>
+
+                                        <!-- Invoice -->
+                                        <a href="{% url 'payment_invoice' payment.payment_obj.id %}" 
+                                        target="_blank" 
+                                        class="btn btn-white border"
+                                        title="View Invoice">
+                                            <i class="bi bi-receipt"></i>
+                                        </a>
+
+                                        <!-- WhatsApp -->
+                                        <a href="https://wa.me/?text={{ payment.whatsapp_text|urlencode }}" 
+                                        target="_blank" 
+                                        class="btn btn-success"
+                                        title="Share via WhatsApp">
+                                            <i class="bi bi-whatsapp"></i>
+                                        </a>
+
+                                        <!-- 🔥 Edit Payment -->
+                                        <a href="{% url 'edit_payment' payment.payment_obj.id %}" 
+                                        class="btn btn-primary"
+                                        title="Edit Payment">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+
                                     </div>
                                 </td>
                             </tr>
                             {% endfor %}
                             <tr class="bg-dark text-white fw-bold">
                                 <td colspan="2" class="ps-4">TOTAL COLLECTED</td>
-                                <td class="text-end text-white">{{ total_paid|indian_currency }}</td>
+                                <td class="text-end text-primary">{{ total_paid|indian_currency }}</td>
                                 <td colspan="2"></td>
                             </tr>
                         </tbody>

@@ -48,11 +48,18 @@
                         <div class="row g-3 mb-4">
                             <div class="col-12">
                                 <label class="form-label small fw-bold text-muted text-uppercase">Payment Amount</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-success fw-bold">₹</span>
-                                    <input type="number" name="amount" step="0.01" class="form-control form-control-lg border-start-0 custom-input fw-bold" 
-                                           placeholder="0.00" required>
-                                </div>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-light border-end-0 text-success fw-bold">₹</span>
+                                        <input type="number" id="amountInput" name="amount" step="0.01"
+                                            class="form-control form-control-lg border-start-0 custom-input fw-bold"
+                                            placeholder="0.00" required>
+                                    </div>
+
+                                    <!-- 🔥 Amount in words -->
+                                    <div id="amountWords" style="font-size: 0.85rem; color:red; margin-top:6px;">
+                                        <!-- words appear here -->
+                                    </div>
+
                             </div>
                             <div class="col-12">
                                 <label class="form-label small fw-bold text-muted text-uppercase">Mode of Payment</label>
@@ -68,7 +75,6 @@
                                 </div>
                             </div>
                         </div>
-
                         <button type="submit" class="btn btn-success btn-lg w-100 rounded-3 fw-bold shadow-sm py-3 hover-lift">
                             <i class="bi bi-plus-circle-fill me-2"></i> Post Payment
                         </button>
@@ -172,6 +178,79 @@
         </div>
     </div>
 </div>
+
+
+
+<script>
+function numberToWords(num) {
+    const ones = [
+        "", "One", "Two", "Three", "Four", "Five", "Six",
+        "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
+        "Thirteen", "Fourteen", "Fifteen", "Sixteen",
+        "Seventeen", "Eighteen", "Nineteen"
+    ];
+
+    const tens = [
+        "", "", "Twenty", "Thirty", "Forty", "Fifty",
+        "Sixty", "Seventy", "Eighty", "Ninety"
+    ];
+
+    function convertBelowThousand(n) {
+        let str = "";
+
+        if (n > 99) {
+            str += ones[Math.floor(n / 100)] + " Hundred ";
+            n %= 100;
+        }
+
+        if (n > 19) {
+            str += tens[Math.floor(n / 10)] + " ";
+            n %= 10;
+        }
+
+        if (n > 0) {
+            str += ones[n] + " ";
+        }
+
+        return str;
+    }
+
+    if (num === 0) return "Zero Only";
+
+    let result = "";
+
+    let crore = Math.floor(num / 10000000);
+    num %= 10000000;
+
+    let lakh = Math.floor(num / 100000);
+    num %= 100000;
+
+    let thousand = Math.floor(num / 1000);
+    num %= 1000;
+
+    let remainder = num;
+
+    if (crore) result += convertBelowThousand(crore) + "Crore ";
+    if (lakh) result += convertBelowThousand(lakh) + "Lakh ";
+    if (thousand) result += convertBelowThousand(thousand) + "Thousand ";
+    if (remainder) result += convertBelowThousand(remainder);
+
+    return result.trim() + " Only";
+}
+
+// Live update
+document.getElementById("amountInput").addEventListener("input", function () {
+    let value = parseInt(this.value);
+
+    if (!isNaN(value)) {
+        document.getElementById("amountWords").innerText = numberToWords(value);
+    } else {
+        document.getElementById("amountWords").innerText = "";
+    }
+});
+</script>
+
+
 
 <style>
     .icon-box { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
