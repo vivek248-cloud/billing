@@ -1493,18 +1493,49 @@ def daily_statistics(request):
 
 
 # update_project_status
+# def update_project_status(request, project_id):
+#     project = get_object_or_404(Project, id=project_id)
+
+#     if request.method == 'POST':
+#         status = request.POST.get('status')
+#         if status in dict(Project.STATUS_CHOICES):
+#             project.status = status
+#             project.save()
+#             messages.success(request, "Project status updated successfully!")
+#             return redirect('billing')
+
+#     return render(request, 'projects/update_status.html', {'project': project})
+
+
+from django.contrib import messages
+from django.shortcuts import get_object_or_404, redirect, render
+
 def update_project_status(request, project_id):
     project = get_object_or_404(Project, id=project_id)
 
     if request.method == 'POST':
         status = request.POST.get('status')
+
         if status in dict(Project.STATUS_CHOICES):
+            
+            # 🔥 Check previous status
+            old_status = project.status
+
             project.status = status
             project.save()
-            messages.success(request, "Project status updated successfully!")
+
+            # 🎉 ONLY trigger when becoming completed (not already completed)
+            if status == "Completed" and old_status != "Completed":
+                messages.success(request, "PROJECT_COMPLETED")
+            else:
+                messages.success(request, "Project status updated successfully!")
+
             return redirect('billing')
 
-    return render(request, 'projects/update_status.html', {'project': project})
+    return render(request, 'projects/update_status.html', {
+        'project': project
+    })
+
 
 
 
