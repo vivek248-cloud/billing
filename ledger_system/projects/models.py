@@ -3,7 +3,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django import template
 from django.urls import reverse
-
+from django.contrib.auth.models import User
 
 register = template.Library()
 from decimal import Decimal
@@ -121,7 +121,28 @@ class Payment(models.Model):
         return reverse('payment_invoice', args=[str(self.id)])
 
 
+# models.py
 
+class PaymentNote(models.Model):
+    payment = models.ForeignKey(
+        Payment,
+        on_delete=models.CASCADE,
+        related_name='notes'
+    )
+
+    content = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    created_by = models.ForeignKey(
+        User,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True
+    )
+
+    def __str__(self):
+        return f"Note for Payment #{self.payment.id}"
+    
 
 class DailyExpense(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE)

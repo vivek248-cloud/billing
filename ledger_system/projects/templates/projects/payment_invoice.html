@@ -193,6 +193,7 @@
         display: none;
     }
 }
+
 /* RESPONSIVE STYLES */
 @media screen and (max-width: 768px) {
     .invoice-box {
@@ -251,6 +252,12 @@
         width: 90%;
         margin: 8px auto;
         font-size: 15px;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none !important;
     }
 }
 
@@ -393,13 +400,17 @@
     <div class="notes-box">
         
         <label class="notes-label">
-            <i class="bi bi-sticky"></i> Notes
+            <i class="bi bi-sticky"></i> Notes :
         </label>
 
         <textarea 
-            name="notes"
+            id="noteInput"
             class="notes-textarea"
-            placeholder="Add additional notes, instructions, or remarks..."></textarea>
+            placeholder="Enter note..."
+            {% if is_shared %}readonly{% endif %}
+        >
+        {{ payment.notes.first.content|default:'' }}
+        </textarea>
 
     </div>
    
@@ -430,6 +441,97 @@
     
 </div>
 
+
+<script>
+{% if is_admin %}
+
+let timer;
+const noteInput = document.getElementById("noteInput");
+
+if (noteInput) {
+
+    noteInput.addEventListener("input", function () {
+        clearTimeout(timer);
+
+        let content = this.value;
+
+        showSavingIndicator();
+
+        timer = setTimeout(() => {
+
+            fetch("{% url 'autosave_payment_note' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: new URLSearchParams({
+                    payment_id: "{{ payment.id }}",
+                    content: content
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    showSavedIndicator();
+                } else {
+                    showErrorIndicator();
+                }
+            })
+            .catch(() => {
+                showErrorIndicator();
+            });
+
+        }, 800); // debounce
+    });
+}
+
+/* ---------- UI Indicators ---------- */
+
+function getStatusElement() {
+    let el = document.getElementById("saveStatus");
+
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "saveStatus";
+        el.className = "save-status no-print";
+        el.style.fontSize = "12px";
+        el.style.marginTop = "5px";
+        document.querySelector(".notes-box").appendChild(el);
+    }
+
+    return el;
+}
+
+function showSavingIndicator() {
+    let el = getStatusElement();
+    el.style.color = "#f59e0b"; // amber
+    el.innerText = "Saving...";
+}
+
+function showSavedIndicator() {
+    let el = getStatusElement();
+    el.style.color = "#16a34a"; // green
+    el.innerText = "✔ Saved";
+
+    // auto fade text
+    setTimeout(() => {
+        el.innerText = "";
+    }, 2000);
+}
+
+function showErrorIndicator() {
+    let el = getStatusElement();
+    el.style.color = "#dc2626"; // red
+    el.innerText = "⚠ Failed to save";
+}
+
+{% endif %}
+</script>
+
+
+
+
 <script>
 function downloadPDF() {
     const element = document.querySelector('.invoice-box');
@@ -441,8 +543,8 @@ function downloadPDF() {
         jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    document.querySelector("textarea").value = "";
     
+
     html2pdf().set(opt).from(element).save();
 }
 </script>

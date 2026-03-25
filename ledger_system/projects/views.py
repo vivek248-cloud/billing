@@ -697,6 +697,8 @@ def payment_invoice(request, payment_id):
     total_received = sum([p.amount for p in payments])
     yet_to_receive = (project.budget + total_expense) - Decimal(total_received)
 
+    is_admin = request.session.get('admin_logged_in', False)
+    is_shared = not is_admin
 
     context = {
         'payment': payment,
@@ -709,12 +711,42 @@ def payment_invoice(request, payment_id):
         'logo_url': '/static/images/logo.png',  # Adjust if you have a dynamic logo path
         'invoice_number': invoice_number,
         'invoice_date': invoice_date,
+        'is_shared': is_shared,
+        'is_admin': is_admin,
     }
 
     return render(request, 'projects/payment_invoice.html', context)
 
 
+# views.py
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from .models import Payment, PaymentNote
 
+@csrf_exempt
+def autosave_payment_note(request):
+    if request.method == "POST":
+        payment_id = request.POST.get("payment_id")
+        content = request.POST.get("content")
+
+        try:
+            payment = Payment.objects.get(id=payment_id)
+
+            # update or create (1 note per payment)
+            note, created = PaymentNote.objects.update_or_create(
+                payment=payment,
+                defaults={
+                    "content": content,
+                    "created_by": request.user if request.user.is_authenticated else None
+                }
+            )
+
+            return JsonResponse({"status": "success"})
+
+        except Payment.DoesNotExist:
+            return JsonResponse({"status": "error", "message": "Invalid payment"})
+
+    return JsonResponse({"status": "error"})
 
 
 from django.contrib import messages

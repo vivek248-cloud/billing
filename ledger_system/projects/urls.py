@@ -29,7 +29,9 @@ urlpatterns = [
 
     # Payment Invoice
     path('payment-invoice/<int:payment_id>/', views.payment_invoice, name='payment_invoice'),
-
+    path('invoice/<int:project_id>/', views.invoice_view, name='invoice'),
+    
+    path('autosave-note/', views.autosave_payment_note, name='autosave_payment_note'),
 
     path('expense/edit/<int:expense_id>/', views.edit_expense, name='edit_expense'),
     path('expense/delete/<int:expense_id>/', views.delete_expense, name='delete_expense'),
@@ -43,7 +45,7 @@ urlpatterns = [
 
     path('remove_expense/<int:expense_id>/', views.remove_expense, name='remove_expense'),
     # path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
-    path('invoice/<int:project_id>/', views.invoice_view, name='invoice'),
+    
     path('edit-payment/<int:payment_id>/', views.edit_payment, name='edit_payment'),
     path('billing/<int:project_id>/', views.project_billing, name='project_billing'),
     path('delete-payment/<int:payment_id>/', views.delete_payment, name='delete_payment'),
