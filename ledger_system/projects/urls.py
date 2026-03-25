@@ -42,7 +42,7 @@ urlpatterns = [
     path('delete-project/<int:pk>/', views.delete_project, name='delete_project'),
 
     path('remove_expense/<int:expense_id>/', views.remove_expense, name='remove_expense'),
-    path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
+    # path('projects/<int:project_id>/download_invoice/', views.download_invoice, name='download_invoice'),
     path('invoice/<int:project_id>/', views.invoice_view, name='invoice'),
     path('edit-payment/<int:payment_id>/', views.edit_payment, name='edit_payment'),
     path('billing/<int:project_id>/', views.project_billing, name='project_billing'),

@@ -253,7 +253,140 @@
         font-size: 15px;
     }
 }
+   @media print {
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: 12pt;
+    }
 
+    .invoice-box {
+        padding: 10px !important;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 1cm;
+    }
+
+    /* Remove any print-unfriendly elements */
+    .no-print {
+        display: none;
+    }
+}
+/* RESPONSIVE STYLES */
+@media screen and (max-width: 768px) {
+    .invoice-box {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .top-section h1 {
+        font-size: 28px;
+        text-align: center;
+    }
+
+    .invoice-meta {
+        float: none;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .invoice-meta h1 {
+        font-size: 36px;
+    }
+
+    .top-section img {
+        height: 100px;
+        display: block;
+        margin: 0 auto 10px auto;
+    }
+
+    table th, table td {
+        font-size: 12px;
+        padding: 6px 4px;
+    }
+
+    .payment-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signature, .qr-sign {
+        width: 100%;
+        text-align: center;
+    }
+
+    .qr-code {
+        margin-bottom: 20px;
+    }
+
+    .notes ol {
+        padding-left: 20px;
+        font-size: 12px;
+    }
+
+    .no-print button,
+    .no-print a {
+        display: inline-block;
+        width: 90%;
+        margin: 8px auto;
+        font-size: 15px;
+    }
+}
+
+/* Container */
+.notes-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+}
+
+/* Label */
+.notes-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Textarea */
+.notes-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    resize: vertical;
+    outline: none;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+/* Focus effect */
+.notes-box:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+/* Placeholder */
+.notes-textarea::placeholder {
+    color: #94a3b8;
+}
 </style>
 
 
@@ -345,18 +478,18 @@
     </div>
 
 
-    {% if expenses %}
-    <div class="notes">
-        <strong>NOTES:</strong>
-        <ol>
-            {% for expense in expenses %}
-                {% if expense.note %}
-                    <li><strong>{{ expense.description }}:</strong> {{ expense.note }}</li>
-                {% endif %}
-            {% endfor %}
-        </ol>
+    <div class="notes-box">
+        
+        <label class="notes-label">
+            <i class="bi bi-sticky"></i> Notes
+        </label>
+
+        <textarea 
+            name="notes"
+            class="notes-textarea"
+            placeholder="Add additional notes, instructions, or remarks..."></textarea>
+
     </div>
-    {% endif %}
 
     <div class="payment-section d-flex justify-content-between flex-wrap">
     
@@ -396,6 +529,7 @@ function downloadPDF() {
     };
 
     html2pdf().set(opt).from(element).save();
+    document.querySelector("textarea").value = "";
 }
 </script>
 </body>

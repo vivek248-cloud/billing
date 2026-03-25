@@ -1042,92 +1042,92 @@ def invoice_view(request, project_id):
 
 
 # download_invoice
-def download_invoice(request, project_id):
-    print(f"Download invoice called for project_id: {project_id}")
+# def download_invoice(request, project_id):
+#     print(f"Download invoice called for project_id: {project_id}")
 
-    project = get_object_or_404(Project, id=project_id)
-    print(f"Project found: {project.name}")
+#     project = get_object_or_404(Project, id=project_id)
+#     print(f"Project found: {project.name}")
 
-    latest_payment = Payment.objects.filter(project=project).order_by('-date').first()
+#     latest_payment = Payment.objects.filter(project=project).order_by('-date').first()
 
-    if latest_payment:
-        invoice_number = f"INV-{project.id}-{latest_payment.id}-{latest_payment.date.strftime('%Y%m%d')}"
-        invoice_date = latest_payment.date.strftime('%d-%m-%Y')
-    else:
-        invoice_number = f"INV-{project.id}-0000"
-        invoice_date = datetime.now().strftime('%d-%m-%Y')
+#     if latest_payment:
+#         invoice_number = f"INV-{project.id}-{latest_payment.id}-{latest_payment.date.strftime('%Y%m%d')}"
+#         invoice_date = latest_payment.date.strftime('%d-%m-%Y')
+#     else:
+#         invoice_number = f"INV-{project.id}-0000"
+#         invoice_date = datetime.now().strftime('%d-%m-%Y')
 
-    # Check permissions
-    if request.user.is_authenticated and request.user.is_staff:
-        allowed = True
-        print(f"User {request.user.username} is staff, allowed to download.")
-    else:
-        # Check client session
-        session_project_id = request.session.get('client_project_id')
-        allowed = (session_project_id == project.id)
-        print(f"Session project id: {session_project_id}, Allowed: {allowed}")
+#     # Check permissions
+#     if request.user.is_authenticated and request.user.is_staff:
+#         allowed = True
+#         print(f"User {request.user.username} is staff, allowed to download.")
+#     else:
+#         # Check client session
+#         session_project_id = request.session.get('client_project_id')
+#         allowed = (session_project_id == project.id)
+#         print(f"Session project id: {session_project_id}, Allowed: {allowed}")
 
-    if not allowed:
-        print("Access denied.")
-        return HttpResponse("Access Denied", status=403)
+#     if not allowed:
+#         print("Access denied.")
+#         return HttpResponse("Access Denied", status=403)
 
-    logo_url = request.build_absolute_uri(static('images/logo.PNG'))
+#     logo_url = request.build_absolute_uri(static('images/logo.PNG'))
 
-    # Query expenses
-    expense_rows = Expense.objects.filter(project=project)
-    total_expense = Decimal(expense_rows.aggregate(Sum('amount'))['amount__sum'] or 0)
-    print(f"Total expense: {total_expense}")
+#     # Query expenses
+#     expense_rows = Expense.objects.filter(project=project)
+#     total_expense = Decimal(expense_rows.aggregate(Sum('amount'))['amount__sum'] or 0)
+#     print(f"Total expense: {total_expense}")
 
-    # Query payments
-    raw_payments = Payment.objects.filter(project=project).order_by('date')
-    total_received = Decimal(raw_payments.aggregate(Sum('amount'))['amount__sum'] or 0)
+#     # Query payments
+#     raw_payments = Payment.objects.filter(project=project).order_by('date')
+#     total_received = Decimal(raw_payments.aggregate(Sum('amount'))['amount__sum'] or 0)
 
-    cumulative_paid = Decimal('0.00')
-    cumulative_paid_before = Decimal('0.00')
-    payment_rows = []
+#     cumulative_paid = Decimal('0.00')
+#     cumulative_paid_before = Decimal('0.00')
+#     payment_rows = []
 
-    for payment in raw_payments:
-        payment_amount = Decimal(str(payment.amount))
-        cumulative_paid += payment_amount
-        row = {
-            'date': payment.date,
-            'amount': payment_amount,
-            'payment_mode': payment.payment_mode,
-            'cumulative_paid_before': cumulative_paid_before,
-            'remaining_after_payment': (Decimal(project.budget) + total_expense) - cumulative_paid
-        }
-        cumulative_paid_before = cumulative_paid
-        payment_rows.append(row)
+#     for payment in raw_payments:
+#         payment_amount = Decimal(str(payment.amount))
+#         cumulative_paid += payment_amount
+#         row = {
+#             'date': payment.date,
+#             'amount': payment_amount,
+#             'payment_mode': payment.payment_mode,
+#             'cumulative_paid_before': cumulative_paid_before,
+#             'remaining_after_payment': (Decimal(project.budget) + total_expense) - cumulative_paid
+#         }
+#         cumulative_paid_before = cumulative_paid
+#         payment_rows.append(row)
 
-    yet_to_receive = (Decimal(project.budget) + total_expense) - cumulative_paid
-    current_date = datetime.now().strftime('%Y-%m-%d')
+#     yet_to_receive = (Decimal(project.budget) + total_expense) - cumulative_paid
+#     current_date = datetime.now().strftime('%Y-%m-%d')
 
-    context = {
-        'project': project,
-        'expenses': expense_rows,
-        'payment_rows': payment_rows,
-        'total_expense': total_expense,
-        'total_received': total_received,
-        'yet_to_receive': yet_to_receive,
-        'date': current_date,
-        'logo_url': logo_url,
-        'invoice_number': invoice_number,
-        'invoice_date': invoice_date,
-    }
+#     context = {
+#         'project': project,
+#         'expenses': expense_rows,
+#         'payment_rows': payment_rows,
+#         'total_expense': total_expense,
+#         'total_received': total_received,
+#         'yet_to_receive': yet_to_receive,
+#         'date': current_date,
+#         'logo_url': logo_url,
+#         'invoice_number': invoice_number,
+#         'invoice_date': invoice_date,
+#     }
 
-    template = get_template('projects/invoice.html')
-    html_content = template.render(context)
+#     template = get_template('projects/invoice.html')
+#     html_content = template.render(context)
 
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = f'attachment; filename="invoice_{project.client_name}.pdf"'
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = f'attachment; filename="invoice_{project.client_name}.pdf"'
 
-    pisa_status = pisa.CreatePDF(html_content, dest=response)
+#     pisa_status = pisa.CreatePDF(html_content, dest=response)
 
-    if pisa_status.err:
-        print("PDF generation error")
-        return HttpResponse('Error generating PDF', status=500)
+#     if pisa_status.err:
+#         print("PDF generation error")
+#         return HttpResponse('Error generating PDF', status=500)
 
-    return response
+#     return response
 
 # edit_payment
 def edit_payment(request, payment_id):
