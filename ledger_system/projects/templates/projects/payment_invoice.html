@@ -254,6 +254,50 @@
     }
 }
 
+/* Container */
+.notes-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+}
+
+/* Label */
+.notes-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Textarea */
+.notes-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    resize: vertical;
+    outline: none;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+/* Focus effect */
+.notes-box:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+/* Placeholder */
+.notes-textarea::placeholder {
+    color: #94a3b8;
+}
+
 </style>
 
 
@@ -345,18 +389,20 @@
     </div>
 
 
-    {% if expenses %}
-    <div class="notes">
-        <strong>NOTES:</strong>
-        <ol>
-            {% for expense in expenses %}
-                {% if expense.note %}
-                    <li><strong>{{ expense.description }}:</strong> {{ expense.note }}</li>
-                {% endif %}
-            {% endfor %}
-        </ol>
+    
+    <div class="notes-box">
+        
+        <label class="notes-label">
+            <i class="bi bi-sticky"></i> Notes
+        </label>
+
+        <textarea 
+            name="notes"
+            class="notes-textarea"
+            placeholder="Add additional notes, instructions, or remarks..."></textarea>
+
     </div>
-    {% endif %}
+   
 
     <div class="payment-section d-flex justify-content-between flex-wrap">
     
