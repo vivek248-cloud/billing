@@ -528,7 +528,7 @@ from django.core.signing import TimestampSigner
 from django.utils.dateparse import parse_date
 
 from .models import Project, Expense, Payment, SiteImage
-
+from urllib.parse import quote
 from datetime import datetime
 
 def client_details(request, project_id):
@@ -576,18 +576,27 @@ def client_details(request, project_id):
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
 
-        # ✅ WhatsApp SAFE LINK (NEW VIEW)
+        phone = project.phone.strip().replace("+", "").replace(" ", "")
+
         share_url = request.build_absolute_uri(
             reverse('payment_invoice_share', args=[payment.id])
         )
 
-        whatsapp_text = f"Here is your invoice: {share_url}"
+        whatsapp_message = (
+            f"Hi {project.client_name} 👋\n\n"
+            f"Here is your invoice:\n{share_url}"
+        )
+
+        # ✅ Encode ONLY message
+        encoded_message = quote(whatsapp_message)
+
+        whatsapp_link = f"https://wa.me/{phone}?text={encoded_message}"
 
         payment_rows.append({
             'payment_obj': payment,
             'date': payment.date,
             'amount': amount,
-            'whatsapp_text': whatsapp_text,
+            'whatsapp_link': whatsapp_link,
             'payment_mode': payment.payment_mode,
             'cumulative_paid_before': cumulative_paid_before,
             'remaining_after_payment': (budget + total_expense) - cumulative_paid
