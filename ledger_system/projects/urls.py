@@ -30,6 +30,7 @@ urlpatterns = [
     # Payment Invoice
     path('payment-invoice/<int:payment_id>/', views.payment_invoice, name='payment_invoice'),
     path('invoice/<int:project_id>/', views.invoice_view, name='invoice'),
+    path('payment-invoice-share/<int:payment_id>/', views.payment_invoice_share, name='payment_invoice_share'),
     
     path('autosave-note/', views.autosave_payment_note, name='autosave_payment_note'),
 

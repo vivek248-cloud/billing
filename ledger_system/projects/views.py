@@ -553,6 +553,7 @@ def client_details(request, project_id):
 
     # ------- PAYMENT FILTERS -------
     payments = Payment.objects.filter(project=project).order_by('date')
+    
     payment_mode = request.GET.get('payment_mode')
     pay_from = parse_date(request.GET.get('pay_from') or '')
     pay_to = parse_date(request.GET.get('pay_to') or '')
@@ -570,14 +571,17 @@ def client_details(request, project_id):
     payment_rows = []
     signer = TimestampSigner()
 
+    
     for payment in payments:
         amount = Decimal(str(payment.amount))
         cumulative_paid += amount
 
-        invoice_url = request.build_absolute_uri(payment.get_absolute_url())
-        signed_token = signer.sign(invoice_url)
-        redirect_url = request.build_absolute_uri(reverse('open_signed_invoice')) + f"?token={signed_token}"
-        whatsapp_text = f"Here is your invoice: {redirect_url}"
+        # ✅ WhatsApp SAFE LINK (NEW VIEW)
+        share_url = request.build_absolute_uri(
+            reverse('payment_invoice_share', args=[payment.id])
+        )
+
+        whatsapp_text = f"Here is your invoice: {share_url}"
 
         payment_rows.append({
             'payment_obj': payment,
@@ -588,6 +592,7 @@ def client_details(request, project_id):
             'cumulative_paid_before': cumulative_paid_before,
             'remaining_after_payment': (budget + total_expense) - cumulative_paid
         })
+
         cumulative_paid_before = cumulative_paid
 
     # ------- SITE IMAGES FILTER -------
@@ -716,6 +721,59 @@ def payment_invoice(request, payment_id):
     }
 
     return render(request, 'projects/payment_invoice.html', context)
+
+
+def payment_invoice_share(request, payment_id):
+    payment = get_object_or_404(Payment, id=payment_id)
+    project = payment.project
+
+    invoice_number = f"INV-{project.id}-{payment.id}-{payment.date.strftime('%Y%m%d')}"
+    invoice_date = payment.date.strftime('%d-%m-%Y')
+
+    payments = Payment.objects.filter(project=project).order_by('date')
+    expenses = Expense.objects.filter(project=project)
+
+    cumulative_paid = Decimal('0.00')
+    payment_rows = []
+
+    for pay in payments:
+        amount = Decimal(str(pay.amount))
+
+        payment_rows.append({
+            'date': pay.date,
+            'amount': amount,
+            'cumulative_paid_before': cumulative_paid,
+            'remaining_after_payment': (project.budget + project.total_expenses) - (cumulative_paid + amount),
+            'payment_mode': pay.payment_mode,
+        })
+
+        cumulative_paid += amount
+
+        if pay.id == payment.id:
+            break
+
+    total_expense = sum([expense.amount for expense in expenses])
+    total_received = sum([p.amount for p in payments])
+    yet_to_receive = (project.budget + total_expense) - Decimal(total_received)
+
+    context = {
+        'payment': payment,
+        'project': project,
+        'expenses': expenses,
+        'total_expense': total_expense,
+        'payment_rows': payment_rows,
+        'total_received': total_received,
+        'yet_to_receive': yet_to_receive,
+        'invoice_number': invoice_number,
+        'invoice_date': invoice_date,
+        'logo_url': '/static/images/logo.png',
+
+        # 🔒 FORCE READONLY
+        'is_shared': True,
+        'is_admin': False,
+    }
+
+    return render(request, 'projects/payment_invoice_share.html', context)
 
 
 # views.py

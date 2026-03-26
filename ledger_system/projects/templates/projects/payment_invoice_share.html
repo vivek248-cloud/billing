@@ -1,0 +1,680 @@
+{% load extra_filters %}
+{% load static %}
+{% load humanize %}
+{% load indian_format %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
+    <title>Invoice - {{ project.client_name }} ({{ invoice_date }})</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+   <!-- Add this to <head> -->
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=Lato:wght@300;400;700&display=swap" rel="stylesheet">
+
+<style>
+    body {
+        font-family: 'Lato', sans-serif;
+        background: #f9f9f9;
+        color: #222;
+        font-size: 14px;
+    }
+
+    .invoice-box {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 40px;
+        background: #fff;
+        border-radius: 8px;
+
+    }
+
+    .top-section {
+        margin-bottom: 30px;
+    }
+
+    .top-section h1 {
+        
+        font-size: 48px;
+        font-weight: 700;
+        margin-bottom: 10px;
+    }
+
+    .top-section p {
+        font-size: 13px;
+        margin: 2px 0;
+    }
+
+    .invoice-meta {
+        float: right;
+        text-align: right;
+        margin-top: 20px;
+    }
+
+    .invoice-meta h1 {
+        font-family: 'Playfair Display', serif;
+        font-size: 50px;
+        color: #444;
+    }
+
+    .section-title {
+        font-weight: bold;
+        font-size: 15px;
+        border-bottom: 1px solid #ccc;
+        padding-bottom: 5px;
+        margin-top: 10px; /* Reduced to avoid unnecessary space */
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+
+    th, td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #e0e0e0;
+        font-size: 13px;
+    }
+
+    th {
+        background-color: #f0f0f0;
+        font-weight: 600;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+        text-transform: uppercase;
+        font-size: 12px;
+    }
+
+    tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    .total-row td {
+        font-weight: bold;
+        background: #f9f9f9;
+        border-top: 2px solid #999;
+    }
+
+    .qr-code {
+        background-color: #000;
+        width: 150px;
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    .qr-code img {
+        height: 120px;
+        display: block;
+        margin: auto;
+    }
+
+    .signature img {
+        height: 60px;
+    }
+
+    .notes {
+        margin-top: 20px;
+        font-size: 13px;
+    }
+
+    .notes ol {
+        padding-left: 16px;
+    }
+
+    .payment-section {
+        margin-top: 40px;
+        display: flex;
+        justify-content: space-between;
+        flex-wrap: wrap;
+    }
+
+    .signature, .qr-sign {
+        margin-top: 20px;
+    }
+
+    .no-print {
+        text-align: center;
+        margin-top: 40px;
+    }
+
+    .btn-print {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 10px 25px;
+        font-size: 14px;
+        border-radius: 4px;
+    }
+
+    .btn-print:hover {
+        background-color: #555;
+    }
+
+    .no-break {
+    page-break-inside: avoid;
+    page-break-before: auto;
+    page-break-after: auto;
+}
+
+
+   @media print {
+    body {
+        margin: 0;
+        padding: 0;
+        font-size: 12pt;
+    }
+
+    .invoice-box {
+        padding: 10px !important;
+        margin: 0 auto;
+        width: 100%;
+        max-width: 100%;
+        box-shadow: none;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    @page {
+        size: A4 portrait;
+        margin: 1cm;
+    }
+
+    /* Remove any print-unfriendly elements */
+    .no-print {
+        display: none;
+    }
+}
+
+/* RESPONSIVE STYLES */
+@media screen and (max-width: 768px) {
+    .invoice-box {
+        padding: 20px;
+        margin: 10px;
+    }
+
+    .top-section h1 {
+        font-size: 28px;
+        text-align: center;
+    }
+
+    .invoice-meta {
+        float: none;
+        text-align: center;
+        margin-top: 10px;
+    }
+
+    .invoice-meta h1 {
+        font-size: 36px;
+    }
+
+    .top-section img {
+        height: 100px;
+        display: block;
+        margin: 0 auto 10px auto;
+    }
+
+    table th, table td {
+        font-size: 12px;
+        padding: 6px 4px;
+    }
+
+    .payment-section {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .signature, .qr-sign {
+        width: 100%;
+        text-align: center;
+    }
+
+    .qr-code {
+        margin-bottom: 20px;
+    }
+
+    .notes ol {
+        padding-left: 20px;
+        font-size: 12px;
+    }
+
+    .no-print button,
+    .no-print a {
+        display: inline-block;
+        width: 90%;
+        margin: 8px auto;
+        font-size: 15px;
+    }
+}
+
+@media print {
+    .no-print {
+        display: none !important;
+    }
+}
+
+/* Container */
+.notes-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 12px 14px;
+    margin-top: 10px;
+}
+
+/* Label */
+.notes-label {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #334155;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Textarea */
+.notes-textarea {
+    width: 100%;
+    min-height: 80px;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    margin-top: 8px;
+    resize: vertical;
+    outline: none;
+    color: #0f172a;
+    line-height: 1.4;
+}
+
+/* Focus effect */
+.notes-box:focus-within {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 2px rgba(59,130,246,0.1);
+}
+
+/* Placeholder */
+.notes-textarea::placeholder {
+    color: #94a3b8;
+}
+
+.notes-toolbar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+}
+
+.notes-toolbar button {
+    border: none;
+    background: #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: 0.2s;
+}
+
+.notes-toolbar button:hover {
+    background: #3b82f6;
+    color: white;
+}
+
+.notes-editor {
+    min-height: 100px;
+    padding: 10px;
+    border-radius: 8px;
+    background: #f8fafc;
+    outline: none;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+/* Readonly */
+.notes-editor.readonly {
+    background: #f1f5f9;
+    color: #475569;
+    pointer-events: none;
+}
+
+.notes-toolbar button.active {
+    background: #3b82f6;
+    color: white;
+}
+
+.notes-toolbar button {
+    border: none;
+    background: #e2e8f0;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+</style>
+
+
+</head>
+
+<body>
+<div class="invoice-box">
+    <div class="top-section">
+        <div class="invoice-meta">
+            <h1>INVOICE</h1>
+            <p><strong>Invoice No:</strong> {{ invoice_number }}</p>
+            <p><strong>Date:</strong> {{ invoice_date }}</p>
+        </div>
+        <img src="{% static 'images/logo.PNG' %}" alt="Company Logo" style="height: 200px; margin-top:-50px;">
+        <h1>THE ELITE DREAM BUILDERS</h1>
+        <p>NO.9, MSK BUILDING 1ST FLOOR, GANESHNAGAR, KATTUR, TRICHY-19</p>
+        <p>GSTIN: 33AKTPH2053F1ZC | www.elitedreambuilders.in</p>
+    </div>
+
+    <p class="section-title">CLIENT INFORMATION</p>
+    <p><strong>Client Name:</strong> <strong>{{ project.client_name }}</strong></p>
+
+    <p class="section-title">PROJECT SUMMARY</p>
+    <div style="overflow-x: auto;">
+        <table>
+            <thead>
+            <tr class="highlight-td">
+                <th>Description</th>
+                <th>Area</th>
+                <th>Unit</th>
+                <th>Rate/Unit</th>
+                <th>Total</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for expense in expenses %}
+                <tr>
+                    <td>{{ expense.description }}</td>
+                    <td class="rupees">{{ expense.area }}</td>
+                    <td class="rupees">{{ expense.unit }}</td>
+                    <td class="rupees">{{ expense.rate|indian_currency }}</td>
+                    <td class="rupees">{{ expense.amount|indian_currency }}</td>
+                </tr>
+            {% endfor %}
+            <tr class="total-row">
+                <td colspan="4">Total Project Budget</td>
+                <td class="rupees">{{ total_expense|indian_currency }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+    
+   <div class="no-break" style="overflow-x: auto; margin-top: 10px;">
+    <p class="section-title">PAYMENT DETAILS</p>
+        <table style="margin-top: 8px;">
+            <thead>
+            <tr class="highlight-td">
+                <th>Date</th>
+                <th>Total Amount</th>
+                <th>Previously Received</th>
+                <th>Now Received</th>
+                <th>Balance</th>
+                <th>Payment Mode</th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for row in payment_rows %}
+                <tr>
+                    <td>{{ row.date }}</td>
+                    <td class="rupees">{{ project|total_budget_with_expense|indian_currency }}</td>
+                    <td class="rupees">{% if forloop.first %}-{% else %}{{ row.cumulative_paid_before|indian_currency }}{% endif %}</td>
+                    <td class="rupees">{{ row.amount|indian_currency }}</td>
+                    <td class="rupees">{{ row.remaining_after_payment|indian_currency }}</td>
+                    <td>{{ row.payment_mode|title }}</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+            <tfoot>
+            <tr class="total-row">
+                <td colspan="4">Total Received</td>
+                <td colspan="2" class="rupees">{{ total_received|indian_currency }}</td>
+            </tr>
+            <tr class="total-row">
+                <td colspan="4">Yet to Receive</td>
+                <td colspan="2" class="rupees">{{ yet_to_receive|indian_currency|default:"N/A" }}</td>
+            </tr>
+            </tfoot>
+        </table>
+    </div>
+
+
+    
+    <div class="notes-box">
+        <div class="notes-label">Notes</div>
+
+        <div class="notes-editor readonly">
+            {{ payment.notes.first.content|safe|default:"No notes" }}
+        </div>
+    </div>
+    
+
+    <div class="payment-section d-flex justify-content-between flex-wrap">
+    
+
+    
+    <div class="qr-sign" style="text-align: left; flex: 2; min-width: 250px;">
+        
+        <div class="qr-code" style="display: inline-block;">
+            <img src="https://ik.imagekit.io/zygvxqqhx/ELITEQR.png?updatedAt=1753508775928" alt="UPI QR Code">
+        </div>
+    </div>
+    <div class="signature" style="margin-top: 20px; text-align: right; flex: 1; min-width: 200px;">
+        <p>For: <strong>THE ELITE DREAM BUILDERS</strong></p>
+        <img src="{% static 'images/xxxx.png' %}" alt="E-signature" style="height:150px;">
+        <p>Authorized Signatory</p>
+    </div>
+</div>
+
+
+<div class="text-center no-print my-4">
+    <button class="btn btn-success" onclick="window.print()">Print / Download</button>
+</div>
+<div class="text-center mt-4 no-print">
+    <a href="{% url 'client_details' project.id %}" class="btn btn-secondary" self>Back to Project</a>
+    
+</div>
+
+
+<script>
+const editor = document.getElementById("noteEditor");
+
+/* -------- FORMAT TOGGLE -------- */
+function toggleFormat(command, btn) {
+    document.execCommand(command, false, null);
+    updateToolbar(); // sync after action
+}
+
+/* -------- HIGHLIGHT TOGGLE (FIXED) -------- */
+function toggleHighlight(btn) {
+    const isActive = document.queryCommandValue("hiliteColor") === "yellow";
+
+    if (isActive) {
+        document.execCommand("hiliteColor", false, "transparent"); // remove
+    } else {
+        document.execCommand("hiliteColor", false, "yellow");
+    }
+
+    updateToolbar();
+}
+
+/* -------- LINK -------- */
+function addLink() {
+    let url = prompt("Enter URL:");
+    if (url) {
+        document.execCommand("createLink", false, url);
+    }
+}
+
+/* -------- LIVE TOOLBAR SYNC -------- */
+function updateToolbar() {
+    document.getElementById("btn-bold").classList.toggle(
+        "active",
+        document.queryCommandState("bold")
+    );
+
+    document.getElementById("btn-italic").classList.toggle(
+        "active",
+        document.queryCommandState("italic")
+    );
+
+    const highlight = document.queryCommandValue("hiliteColor");
+    document.getElementById("btn-highlight").classList.toggle(
+        "active",
+        highlight === "yellow"
+    );
+}
+
+/* -------- LISTEN TO CURSOR CHANGE -------- */
+if (editor) {
+    editor.addEventListener("keyup", updateToolbar);
+    editor.addEventListener("mouseup", updateToolbar);
+}
+</script>
+
+
+<script>
+if (editor) {
+    editor.addEventListener("keydown", function (e) {
+
+        // CTRL + B → Bold
+        if (e.ctrlKey && e.key === "b") {
+            e.preventDefault();
+            document.execCommand("bold");
+            updateToolbar();
+        }
+
+        // CTRL + I → Italic
+        if (e.ctrlKey && e.key === "i") {
+            e.preventDefault();
+            document.execCommand("italic");
+            updateToolbar();
+        }
+
+        // CTRL + H → Highlight
+        if (e.ctrlKey && e.key === "h") {
+            e.preventDefault();
+            document.execCommand("hiliteColor", false, "yellow");
+            updateToolbar();
+        }
+    });
+}
+</script>
+
+
+<script>
+{% if is_admin %}
+
+let timer;
+const noteEditor = document.getElementById("noteEditor");
+
+if (noteEditor) {
+
+    noteEditor.addEventListener("input", function () {
+        clearTimeout(timer);
+
+        let content = this.innerHTML;  // ✅ IMPORTANT CHANGE
+
+        showSavingIndicator();
+
+        timer = setTimeout(() => {
+
+            fetch("{% url 'autosave_payment_note' %}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: new URLSearchParams({
+                    payment_id: "{{ payment.id }}",
+                    content: content
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    showSavedIndicator();
+                } else {
+                    showErrorIndicator();
+                }
+            })
+            .catch(() => {
+                showErrorIndicator();
+            });
+
+        }, 800);
+    });
+}
+
+/* ---------- UI Indicators ---------- */
+
+function getStatusElement() {
+    let el = document.getElementById("saveStatus");
+
+    if (!el) {
+        el = document.createElement("div");
+        el.id = "saveStatus";
+        el.className = "save-status no-print";
+        el.style.fontSize = "12px";
+        el.style.marginTop = "5px";
+        el.style.fontWeight = "600";
+        document.querySelector(".notes-box").appendChild(el);
+    }
+
+    return el;
+}
+
+function showSavingIndicator() {
+    let el = getStatusElement();
+    el.style.color = "#f59e0b";
+    el.innerText = "Saving...";
+}
+
+function showSavedIndicator() {
+    let el = getStatusElement();
+    el.style.color = "#16a34a";
+    el.innerText = "✔ Saved";
+
+    setTimeout(() => {
+        el.innerText = "";
+    }, 2000);
+}
+
+function showErrorIndicator() {
+    let el = getStatusElement();
+    el.style.color = "#dc2626";
+    el.innerText = "⚠ Failed to save";
+}
+
+{% endif %}
+</script>
+
+
+
+
+<script>
+function downloadPDF() {
+    const element = document.querySelector('.invoice-box');
+    const opt = {
+        margin: 0.5,
+        filename: 'Invoice_{{ project.name }}.pdf',
+        image: { type: 'jpeg', quality: 0.98 },
+        html2canvas: { scale: 2 },
+        jsPDF: { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    
+
+    html2pdf().set(opt).from(element).save();
+}
+</script>
+</body>
+</html>
