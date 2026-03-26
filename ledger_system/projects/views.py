@@ -583,7 +583,8 @@ def client_details(request, project_id):
         )
 
         whatsapp_message = (
-            f"Hi {project.client_name} 👋\n\n"
+            f"Hi {project.client_name} \n\n"
+            f"Use your phone number to login and view the invoice for your recent payment of ₹{amount}.\n\n"
             f"Here is your invoice:\n{share_url}"
         )
 
