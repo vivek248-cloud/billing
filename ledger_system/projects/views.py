@@ -383,16 +383,15 @@ def logout_view(request):
 #     })
 
 
-from django.db.models import Case, When, Value, IntegerField
-from django.utils.timesince import timesince
-from .models import *
+from django.db.models import Case, When, Value, IntegerField, Q
 
 @session_login_required
 def project_billing(request):
     if not request.session.get('admin_logged_in'):
         return redirect('/admin_login/')
 
-    # Projects (completed last)
+    query = request.GET.get('q', '')  # 🔍 search input
+
     projects = (
         Project.objects
         .annotate(
@@ -402,14 +401,22 @@ def project_billing(request):
                 output_field=IntegerField()
             )
         )
-        .order_by('completed_order', '-id')
     )
 
-    today = timezone.localdate()
+    # ✅ APPLY SEARCH FILTER
+    if query:
+        projects = projects.filter(
+            Q(client_name__icontains=query) |
+            Q(name__icontains=query) |
+            Q(phone__icontains=query)
+        )
 
+    projects = projects.order_by('completed_order', '-id')
+
+    # -------- Activities (same as before) --------
+    today = timezone.localdate()
     activities = []
 
-    # 💰 Recent Payments
     recent_payments = Payment.objects.select_related('project').order_by('-date')[:5]
     for pay in recent_payments:
         activities.append({
@@ -421,7 +428,6 @@ def project_billing(request):
             'sort_time': pay.date
         })
 
-    # 🧾 Recent Expenses
     recent_expenses = Expense.objects.select_related('project').order_by('-date')[:5]
     for exp in recent_expenses:
         activities.append({
@@ -433,15 +439,12 @@ def project_billing(request):
             'sort_time': exp.date
         })
 
-    # Sort latest first
-    activities = sorted(
-        activities,
-        key=lambda x: x['sort_time'],
-        reverse=True
-    )[:5]
+    activities = sorted(activities, key=lambda x: x['sort_time'], reverse=True)[:5]
+
     return render(request, 'projects/billing.html', {
         'projects': projects,
-        'activities': activities
+        'activities': activities,
+        'query': query  # ✅ send back to template
     })
 
 

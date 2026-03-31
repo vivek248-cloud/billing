@@ -402,6 +402,73 @@
 </div>
 
 
+<div class="search-container mb-4 mt-4" data-aos="fade-down">
+    <form method="GET" id="searchForm" class="position-relative">
+        <div class="search-wrapper">
+            <div class="search-icon-box">
+                <i class="fa-solid fa-magnifying-glass search-icon"></i>
+            </div>
+            
+            <input 
+                type="text" 
+                name="q" 
+                id="searchInput"
+                value="{{ query }}" 
+                class="modern-search-input" 
+                placeholder="Search clients, projects, or phone..."
+                autocomplete="off">
+            
+            <div class="search-status">
+                <div id="searchSpinner" class="search-spinner d-none">
+                    <div class="spinner-ring"></div>
+                </div>
+                {% if query %}
+                <a href="?" class="clear-search">
+                    <i class="fa-solid fa-circle-xmark"></i>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</div>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchInput');
+    const searchForm = document.getElementById('searchForm');
+    const searchSpinner = document.getElementById('searchSpinner');
+
+    // 1. Restore focus and put cursor at the end of the text
+    if (searchInput.value.length > 0) {
+        searchInput.focus();
+        const val = searchInput.value;
+        searchInput.value = '';
+        searchInput.value = val;
+    }
+
+    let delayTimer;
+
+    searchInput.addEventListener('input', function(e) {
+        // Show the loading spinner
+        searchSpinner.classList.remove('d-none');
+        
+        clearTimeout(delayTimer);
+        
+        delayTimer = setTimeout(() => {
+            // Only submit if the value has changed (prevents reload on arrow keys)
+            searchForm.submit();
+        }, 600); // 600ms is the "Goldilocks" zone for typing speed
+    });
+
+    // 2. Clear spinner if user clears search manually
+    searchInput.addEventListener('keydown', function(e) {
+        if (e.key === "Enter") {
+            searchForm.submit();
+        }
+    });
+});
+</script>
 
 
 <div class="table-responsive">
