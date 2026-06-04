@@ -5,142 +5,837 @@
 {% block page_title %}Edit Transaction{% endblock %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="row justify-content-center">
-        <div class="col-lg-8">
-            
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'add_payment' %}" class="text-decoration-none">Ledger</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Modify Transaction #{{ payment.id }}</li>
-                </ol>
-            </nav>
 
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-dark p-4 border-0">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-box bg-white-soft text-white me-3">
-                            <i class="bi bi-pencil-square fs-4"></i>
-                        </div>
-                        <div>
-                            <h4 class="fw-bold text-white mb-0">Payment Adjustment</h4>
-                            <p class="text-white-50 small mb-0">Modify details for transaction recorded on {{ payment.date|date:"d M Y" }}</p>
-                        </div>
-                    </div>
+<div class="et-page">
+
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="et-header">
+        <div class="et-header-left">
+            <a href="{% url 'add_payment' %}" class="et-back-btn bg-primary text-white" title="Back to Ledger">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="et-header-icon">
+                <i class="bi bi-pencil-square"></i>
+                <div class="et-icon-ring"></div>
+            </div>
+            <div>
+                <div class="et-breadcrumb">
+                    <a href="{% url 'add_payment' %}">Ledger</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>Edit Transaction</span>
                 </div>
+                <h1 class="et-title">Payment Adjustment</h1>
+                <p class="et-subtitle">
+                    Transaction #{{ payment.id }} ·
+                    Recorded on {{ payment.date|date:"d M Y" }}
+                </p>
+            </div>
+        </div>
 
-                <div class="card-body p-4 p-md-5">
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
+        <!-- Transaction ID Badge -->
+        <div class="et-id-badge">
+            <i class="bi bi-receipt"></i>
+            <span>#{{ payment.id }}</span>
+        </div>
+    </div>
 
-                        <div class="mb-5">
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="text-uppercase small fw-bold text-muted letter-spacing-1">Basic Information</span>
-                                <hr class="flex-grow-1 ms-3 opacity-10">
-                            </div>
-                            
-                            <div class="form-group mb-4">
-                                <label class="form-label small fw-bold text-dark">Associated Project/Client</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted">
-                                        <i class="bi bi-person-badge"></i>
-                                    </span>
-                                    <select name="project" class="form-select form-select-lg border-start-0 custom-input" required>
-                                        {% for project in projects %}
-                                            <option value="{{ project.id }}" {% if payment.project.id == project.id %}selected{% endif %}>
-                                                {{ project.client_name }} — {{ project.name }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="mb-5">
-                            <div class="d-flex align-items-center mb-3">
-                                <span class="text-uppercase small fw-bold text-muted letter-spacing-1">Transaction Details</span>
-                                <hr class="flex-grow-1 ms-3 opacity-10">
-                            </div>
-
-                            <div class="row g-4">
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-dark">Revised Amount (₹)</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0 text-success fw-bold">₹</span>
-                                        <input type="number" name="amount" step="0.01" class="form-control form-control-lg border-start-0 custom-input fw-bold" 
-                                               required value="{{ payment.amount }}">
-                                    </div>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="form-label small fw-bold text-dark">Payment Mode</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0 text-muted">
-                                            <i class="bi bi-wallet2"></i>
-                                        </span>
-                                        <select name="payment_mode" class="form-select form-select-lg border-start-0 custom-input" required>
-                                            <option value="Cash" {% if payment.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
-                                            <option value="Bank Transfer" {% if payment.payment_mode == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
-                                            <option value="Cheque" {% if payment.payment_mode == 'Cheque' %}selected{% endif %}>Cheque</option>
-                                            <option value="UPI" {% if payment.payment_mode == 'UPI' %}selected{% endif %}>UPI / Online</option>
-                                        </select>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="d-flex flex-column flex-md-row gap-3 pt-4 border-top">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 fw-bold shadow-sm d-flex align-items-center justify-content-center">
-                                <i class="bi bi-cloud-arrow-up-fill me-2"></i> Update Transaction
-                            </button>
-                            <a href="{% url 'add_payment' %}" class="btn btn-light btn-lg px-4 rounded-3 text-muted fw-bold">
-                                Cancel
-                            </a>
-                        </div>
-
-                    </form>
+    <!-- ════════════════════════════════════════
+         TRANSACTION SUMMARY CARD
+    ════════════════════════════════════════ -->
+    <div class="et-summary-card">
+        <div class="et-summary-bg">
+            <div class="et-sum-orb et-orb-1"></div>
+            <div class="et-sum-orb et-orb-2"></div>
+        </div>
+        <div class="et-summary-content">
+            <div class="et-sum-item">
+                <div class="et-sum-icon">
+                    <i class="bi bi-person-fill"></i>
                 </div>
-
-                <div class="card-footer bg-light border-0 py-3 px-4">
-                    <div class="d-flex align-items-center text-muted small">
-                        <i class="bi bi-info-circle me-2"></i>
-                        <span>Changes will reflect immediately in the client's balance and the project matrix.</span>
-                    </div>
+                <div>
+                    <span class="et-sum-label">Client</span>
+                    <span class="et-sum-val">{{ payment.project.client_name }}</span>
+                </div>
+            </div>
+            <div class="et-sum-divider"></div>
+            <div class="et-sum-item">
+                <div class="et-sum-icon">
+                    <i class="bi bi-folder-fill"></i>
+                </div>
+                <div>
+                    <span class="et-sum-label">Project</span>
+                    <span class="et-sum-val">{{ payment.project.name }}</span>
+                </div>
+            </div>
+            <div class="et-sum-divider"></div>
+            <div class="et-sum-item">
+                <div class="et-sum-icon et-si-green">
+                    <i class="bi bi-currency-rupee"></i>
+                </div>
+                <div>
+                    <span class="et-sum-label">Current Amount</span>
+                    <span class="et-sum-val et-val-green">{{ payment.amount|indian_currency }}</span>
+                </div>
+            </div>
+            <div class="et-sum-divider"></div>
+            <div class="et-sum-item">
+                <div class="et-sum-icon">
+                    <i class="bi bi-wallet2"></i>
+                </div>
+                <div>
+                    <span class="et-sum-label">Method</span>
+                    <span class="et-sum-val">{{ payment.payment_mode }}</span>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- ════════════════════════════════════════
+         FORM CARD
+    ════════════════════════════════════════ -->
+    <div class="et-card">
+
+        <div class="et-card-accent"></div>
+
+        <form method="post" class="et-form" id="editTransactionForm" novalidate>
+            {% csrf_token %}
+
+            <!-- ─── Section 1: Client / Project ─── -->
+            <div class="et-section">
+                <div class="et-section-header">
+                    <div class="et-section-icon et-si-indigo">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+                    <div>
+                        <h6 class="et-section-title">Client & Project</h6>
+                        <p class="et-section-sub">Reassign to a different client or project</p>
+                    </div>
+                    <div class="et-section-line"></div>
+                </div>
+
+                <div class="et-field">
+                    <label class="et-label" for="project">
+                        <i class="bi bi-briefcase"></i>
+                        Client / Project
+                        <span class="et-req">*</span>
+                    </label>
+                    <div class="et-prefix-group">
+                        <span class="et-prefix-box">
+                            <i class="bi bi-person-badge-fill"></i>
+                        </span>
+                        <select name="project" id="project" class="et-select et-prefix-select" required>
+                            {% for project in projects %}
+                            <option value="{{ project.id }}"
+                                {% if payment.project.id == project.id %}selected{% endif %}>
+                                {{ project.client_name }} — {{ project.name }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                        <i class="bi bi-chevron-down et-select-arrow"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="et-divider"></div>
+
+            <!-- ─── Section 2: Transaction Details ─── -->
+            <div class="et-section">
+                <div class="et-section-header">
+                    <div class="et-section-icon et-si-emerald">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <h6 class="et-section-title">Transaction Details</h6>
+                        <p class="et-section-sub">Revise the payment amount and method</p>
+                    </div>
+                    <div class="et-section-line"></div>
+                </div>
+
+                <div class="et-fields-2">
+
+                    <!-- Amount -->
+                    <div class="et-field">
+                        <label class="et-label" for="amount">
+                            <i class="bi bi-currency-rupee"></i>
+                            Revised Amount
+                            <span class="et-req">*</span>
+                        </label>
+                        <div class="et-prefix-group">
+                            <span class="et-prefix-box et-prefix-green">₹</span>
+                            <input type="number"
+                                   name="amount"
+                                   id="amount"
+                                   step="0.01"
+                                   class="et-input et-prefix-input et-money"
+                                   value="{{ payment.amount }}"
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                        <!-- Amount in words -->
+                        <div class="et-amount-words" id="etAmountWords"></div>
+                    </div>
+
+                    <!-- Payment Mode -->
+                    <div class="et-field">
+                        <label class="et-label" for="payment_mode">
+                            <i class="bi bi-wallet2"></i>
+                            Payment Mode
+                            <span class="et-req">*</span>
+                        </label>
+                        <div class="et-prefix-group">
+                            <span class="et-prefix-box">
+                                <i class="bi bi-credit-card-2-front-fill"></i>
+                            </span>
+                            <select name="payment_mode"
+                                    id="payment_mode"
+                                    class="et-select et-prefix-select"
+                                    required>
+                                <option value="Cash"
+                                    {% if payment.payment_mode == 'Cash' %}selected{% endif %}>
+                                    💵 Cash
+                                </option>
+                                <option value="Bank Transfer"
+                                    {% if payment.payment_mode == 'Bank Transfer' %}selected{% endif %}>
+                                    🏦 Bank Transfer
+                                </option>
+                                <option value="Cheque"
+                                    {% if payment.payment_mode == 'Cheque' %}selected{% endif %}>
+                                    📄 Cheque
+                                </option>
+                                <option value="UPI"
+                                    {% if payment.payment_mode == 'UPI' %}selected{% endif %}>
+                                    📱 UPI / Online
+                                </option>
+                            </select>
+                            <i class="bi bi-chevron-down et-select-arrow"></i>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- ─── Info Note ─── -->
+            <div class="et-info-note">
+                <i class="bi bi-info-circle-fill"></i>
+                <span>
+                    Changes will reflect immediately in the client's
+                    <strong>balance</strong> and the project matrix.
+                </span>
+            </div>
+
+            <!-- ─── Form Actions ─── -->
+            <div class="et-actions">
+                <a href="{% url 'add_payment' %}" class="et-btn et-btn-ghost bg-danger text-white">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="et-btn et-btn-primary" id="etSubmitBtn">
+                    <i class="bi bi-cloud-arrow-up-fill et-btn-ico"></i>
+                    <span class="et-btn-text">Update Transaction</span>
+                    <span class="et-btn-spin d-none">
+                        <span class="et-spin-ring"></span>
+                        Saving…
+                    </span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
 </div>
 
+
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
 <style>
-    /* Dark Header Components */
-    .bg-dark { background-color: #0f172a !important; }
-    .bg-white-soft { background-color: rgba(255, 255, 255, 0.1); }
-    
-    .icon-box {
-        width: 48px; height: 48px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 12px;
-    }
 
-    /* Input Polishing */
-    .custom-input {
-        border: 1px solid #e2e8f0;
-        background-color: #f8fafc;
-        transition: all 0.2s ease;
-    }
-    .custom-input:focus {
-        background-color: #fff;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
-    }
+:root {
+    --et-indigo:    #4f46e5;
+    --et-indigo-lt: #eef2ff;
+    --et-indigo-md: #c7d2fe;
+    --et-indigo-dk: #3730a3;
+    --et-emerald:   #059669;
+    --et-emerald-lt:#ecfdf5;
+    --et-red:       #dc2626;
+    --et-red-lt:    #fef2f2;
+    --et-amber:     #d97706;
+    --et-amber-lt:  #fffbeb;
+    --et-s50:  #f8fafc;
+    --et-s100: #f1f5f9;
+    --et-s200: #e2e8f0;
+    --et-s300: #cbd5e1;
+    --et-s400: #94a3b8;
+    --et-s500: #64748b;
+    --et-s600: #475569;
+    --et-dark: #0f172a;
+    --et-r-sm: 8px;
+    --et-r-md: 12px;
+    --et-r-lg: 16px;
+    --et-r-xl: 20px;
+    --et-ease: cubic-bezier(.4,0,.2,1);
+    --et-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --et-sh-md: 0 4px 12px rgba(0,0,0,.07);
+}
 
-    .letter-spacing-1 { letter-spacing: 1px; }
-    
-    .breadcrumb-item + .breadcrumb-item::before { content: "›"; font-size: 1.2rem; line-height: 1; vertical-align: middle; }
+/* ── Page ── */
+.et-page {
+    max-width: 780px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: etSlideUp .4s ease both;
+}
 
-    /* Button Hover */
-    .btn-primary { background-color: #2563eb; border: none; transition: transform 0.2s, background-color 0.2s; }
-    .btn-primary:hover { background-color: #1d4ed8; transform: translateY(-1px); }
+@keyframes etSlideUp {
+    from { opacity:0; transform:translateY(12px); }
+    to   { opacity:1; transform:translateY(0); }
+}
+
+/* ── Header ── */
+.et-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.et-header-left { display: flex; align-items: center; gap: 13px; }
+
+.et-back-btn {
+    width: 38px; height: 38px;
+    border-radius: var(--et-r-md);
+    background: white;
+    border: 1.5px solid var(--et-s200);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--et-s500); font-size: .95rem;
+    text-decoration: none;
+    transition: all .2s var(--et-ease);
+    flex-shrink: 0;
+}
+
+.et-back-btn:hover {
+    background: var(--et-indigo);
+    color: white;
+    border-color: var(--et-indigo);
+    transform: translateX(-2px);
+}
+
+.et-header-icon {
+    position: relative;
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--et-amber), #b45309);
+    border-radius: var(--et-r-lg);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.15rem;
+    box-shadow: 0 6px 18px rgba(217,119,6,.3);
+    flex-shrink: 0;
+}
+
+.et-icon-ring {
+    position: absolute; inset: -5px;
+    border: 2px solid rgba(217,119,6,.2);
+    border-radius: calc(var(--et-r-lg) + 5px);
+    animation: etRing 2.5s ease-in-out infinite;
+}
+
+@keyframes etRing {
+    0%,100% { opacity:.4; transform:scale(1); }
+    50%     { opacity:1;  transform:scale(1.04); }
+}
+
+.et-breadcrumb {
+    display: flex; align-items: center; gap: 5px;
+    font-size: .62rem; font-weight: 600;
+    color: var(--et-s400); text-transform: uppercase;
+    letter-spacing: .05em; margin-bottom: 3px;
+}
+
+.et-breadcrumb a { color: var(--et-indigo); text-decoration: none; }
+.et-breadcrumb a:hover { text-decoration: underline; }
+.et-breadcrumb i { font-size: .52rem; }
+
+.et-title {
+    font-size: 1.25rem; font-weight: 700;
+    color: var(--et-dark); letter-spacing: -.025em;
+    margin: 0 0 2px; line-height: 1.2;
+}
+
+.et-subtitle {
+    font-size: .7rem; font-weight: 400;
+    color: var(--et-s500); margin: 0;
+}
+
+.et-id-badge {
+    display: flex; align-items: center; gap: 5px;
+    padding: 6px 14px;
+    background: var(--et-amber-lt);
+    border: 1px solid rgba(217,119,6,.2);
+    border-radius: var(--et-r-md);
+    font-size: .72rem; font-weight: 700;
+    color: var(--et-amber);
+    font-family: 'Monaco','Menlo',monospace;
+    flex-shrink: 0;
+}
+
+.et-id-badge i { font-size: .78rem; }
+
+/* ── Summary Card ── */
+.et-summary-card {
+    position: relative;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: var(--et-r-xl);
+    overflow: hidden;
+    box-shadow: 0 12px 32px -8px rgba(15,23,42,.35);
+}
+
+.et-summary-bg {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden;
+}
+
+.et-sum-orb {
+    position: absolute; border-radius: 50%;
+}
+
+.et-orb-1 {
+    width: 220px; height: 220px;
+    top: -60px; right: -40px;
+    background: radial-gradient(circle, rgba(217,119,6,.12), transparent 70%);
+    animation: etOrbFloat 8s ease-in-out infinite;
+}
+
+.et-orb-2 {
+    width: 160px; height: 160px;
+    bottom: -40px; left: -20px;
+    background: radial-gradient(circle, rgba(79,70,229,.1), transparent 70%);
+    animation: etOrbFloat 6s ease-in-out infinite reverse;
+}
+
+@keyframes etOrbFloat {
+    0%,100% { transform:translate(0,0) scale(1); }
+    50%     { transform:translate(8px,-8px) scale(1.04); }
+}
+
+.et-summary-content {
+    position: relative; z-index: 2;
+    display: flex; align-items: center;
+    padding: 20px 24px; gap: 20px;
+    flex-wrap: wrap;
+}
+
+.et-sum-item {
+    display: flex; align-items: center;
+    gap: 12px; flex: 1; min-width: 140px;
+}
+
+.et-sum-icon {
+    width: 36px; height: 36px; min-width: 36px;
+    background: rgba(255,255,255,.08);
+    border: 1px solid rgba(255,255,255,.06);
+    border-radius: var(--et-r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.6); font-size: .88rem;
+}
+
+.et-si-green { color: #6ee7b7; }
+
+.et-sum-label {
+    display: block; font-size: .55rem; font-weight: 600;
+    color: rgba(255,255,255,.4);
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 2px;
+}
+
+.et-sum-val {
+    display: block; font-size: .82rem; font-weight: 600;
+    color: white; line-height: 1.2;
+    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    max-width: 140px;
+}
+
+.et-val-green { color: #6ee7b7 !important; font-family: 'Monaco','Menlo',monospace; }
+
+.et-sum-divider {
+    width: 1px; height: 36px;
+    background: rgba(255,255,255,.1);
+    flex-shrink: 0;
+}
+
+/* ── Form Card ── */
+.et-card {
+    background: white;
+    border: 1px solid var(--et-s200);
+    border-radius: var(--et-r-xl);
+    overflow: hidden;
+    box-shadow: var(--et-sh-md);
+}
+
+.et-card-accent {
+    height: 3px;
+    background: linear-gradient(90deg, var(--et-amber), #fbbf24, var(--et-indigo));
+}
+
+/* ── Section ── */
+.et-section { padding: 22px 26px; }
+
+.et-section-header {
+    display: flex; align-items: center;
+    gap: 12px; margin-bottom: 18px;
+}
+
+.et-section-icon {
+    width: 34px; height: 34px; min-width: 34px;
+    border-radius: var(--et-r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .88rem; flex-shrink: 0;
+}
+
+.et-si-indigo  { background: var(--et-indigo-lt);  color: var(--et-indigo); }
+.et-si-emerald { background: var(--et-emerald-lt); color: var(--et-emerald); }
+
+.et-section-title {
+    font-size: .8rem; font-weight: 700;
+    color: var(--et-dark); margin: 0 0 1px;
+}
+
+.et-section-sub {
+    font-size: .62rem; font-weight: 400;
+    color: var(--et-s500); margin: 0;
+}
+
+.et-section-line {
+    flex: 1; height: 1px;
+    background: var(--et-s100);
+}
+
+.et-divider {
+    height: 1px; background: var(--et-s100);
+    margin: 0 26px;
+}
+
+/* ── Two-column grid ── */
+.et-fields-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+/* ── Field ── */
+.et-field { display: flex; flex-direction: column; gap: 6px; }
+
+.et-label {
+    display: flex; align-items: center; gap: 5px;
+    font-size: .64rem; font-weight: 600;
+    color: var(--et-s500); text-transform: uppercase;
+    letter-spacing: .06em; transition: color .18s;
+}
+
+.et-label i { color: var(--et-indigo); font-size: .7rem; }
+.et-req { color: var(--et-red); font-size: .7rem; margin-left: 1px; }
+
+/* ── Prefix Group (flexbox) ── */
+.et-prefix-group {
+    display: flex;
+    align-items: stretch;
+    position: relative;
+}
+
+.et-prefix-box {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 12px; min-width: 42px;
+    background: var(--et-s100);
+    border: 1.5px solid var(--et-s200);
+    border-right: none;
+    border-radius: var(--et-r-md) 0 0 var(--et-r-md);
+    color: var(--et-s500); font-size: .82rem;
+    font-weight: 600; flex-shrink: 0;
+    transition: all .18s var(--et-ease);
+}
+
+.et-prefix-green { color: var(--et-emerald); }
+
+/* Input next to prefix */
+.et-input {
+    flex: 1; min-width: 0;
+    padding: 10px 14px;
+    border: 1.5px solid var(--et-s200);
+    border-radius: 0 var(--et-r-md) var(--et-r-md) 0;
+    border-left: none !important;
+    font-size: .84rem; font-weight: 500;
+    color: var(--et-dark); background: var(--et-s50);
+    font-family: inherit; outline: none;
+    appearance: none; -webkit-appearance: none;
+    transition: all .18s;
+}
+
+/* Select next to prefix */
+.et-select {
+    flex: 1; min-width: 0;
+    padding: 10px 36px 10px 14px;
+    border: 1.5px solid var(--et-s200);
+    border-radius: 0 var(--et-r-md) var(--et-r-md) 0;
+    border-left: none !important;
+    font-size: .84rem; font-weight: 500;
+    color: var(--et-dark); background: var(--et-s50);
+    font-family: inherit; outline: none;
+    appearance: none; -webkit-appearance: none;
+    cursor: pointer;
+    transition: all .18s;
+}
+
+/* Full-width select (with prefix but spanning full width) */
+.et-prefix-select { }
+
+/* Chevron for selects */
+.et-select-arrow {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--et-s400); font-size: .6rem;
+    pointer-events: none;
+}
+
+/* Focus states */
+.et-input:focus,
+.et-select:focus {
+    border-color: var(--et-indigo);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.et-prefix-group:focus-within .et-prefix-box {
+    border-color: var(--et-indigo);
+    color: var(--et-indigo);
+    background: var(--et-indigo-lt);
+}
+
+/* Money */
+.et-money {
+    font-family: 'Monaco','Menlo','Consolas',monospace;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+.et-input::placeholder { color: var(--et-s400); font-weight: 400; }
+
+/* Amount in words */
+.et-amount-words {
+    font-size: .68rem; font-weight: 500;
+    color: var(--et-red); min-height: 16px;
+    transition: all .2s;
+}
+
+/* ── Info Note ── */
+.et-info-note {
+    display: flex; align-items: flex-start; gap: 8px;
+    margin: 0 26px 0;
+    padding: 10px 14px;
+    background: var(--et-s50);
+    border: 1px solid var(--et-s200);
+    border-radius: var(--et-r-md);
+    font-size: .68rem; font-weight: 400;
+    color: var(--et-s500); line-height: 1.6;
+}
+
+.et-info-note i {
+    color: var(--et-indigo); font-size: .78rem;
+    flex-shrink: 0; margin-top: 1px;
+}
+
+.et-info-note strong { color: var(--et-dark); }
+
+/* ── Actions ── */
+.et-actions {
+    display: flex; align-items: center;
+    justify-content: flex-end; gap: 10px;
+    padding: 18px 26px;
+    border-top: 1px solid var(--et-s100);
+    background: var(--et-s50);
+    margin-top: 20px;
+}
+
+.et-btn {
+    display: inline-flex; align-items: center; gap: 7px;
+    padding: 10px 22px; border-radius: var(--et-r-md);
+    font-size: .8rem; font-weight: 600; border: none;
+    cursor: pointer; transition: all .2s var(--et-ease);
+    text-decoration: none; font-family: inherit;
+    white-space: nowrap; line-height: 1;
+}
+
+.et-btn-ghost {
+    background: white; color: var(--et-s600);
+    border: 1.5px solid var(--et-s200);
+}
+
+.et-btn-ghost:hover { background: var(--et-s50); color: var(--et-dark); }
+
+.et-btn-primary {
+    background: linear-gradient(135deg, var(--et-indigo), var(--et-indigo-dk));
+    color: white;
+    box-shadow: 0 4px 12px rgba(79,70,229,.28);
+    position: relative; overflow: hidden;
+}
+
+.et-btn-primary::before {
+    content: '';
+    position: absolute; top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    transition: left .5s;
+}
+
+.et-btn-primary:hover::before { left: 100%; }
+
+.et-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(79,70,229,.38);
+    color: white;
+}
+
+.et-btn-primary:active { transform: translateY(0); }
+.et-btn-primary:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+
+/* Spinner */
+.et-btn-spin {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: .78rem;
+}
+
+.et-spin-ring {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white; border-radius: 50%;
+    animation: etSpin .65s linear infinite;
+    display: inline-block; flex-shrink: 0;
+}
+
+@keyframes etSpin { to { transform: rotate(360deg); } }
+
+/* Number spinner hide */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+    .et-section  { padding: 18px; }
+    .et-divider  { margin: 0 18px; }
+    .et-info-note { margin: 0 18px; }
+    .et-actions  { padding: 14px 18px; flex-direction: column-reverse; }
+    .et-actions .et-btn { width: 100%; justify-content: center; }
+    .et-fields-2 { grid-template-columns: 1fr; }
+    .et-summary-content { flex-direction: column; gap: 14px; }
+    .et-sum-divider { width: 100%; height: 1px; }
+}
+
+@media (max-width: 480px) {
+    .et-header { flex-direction: column; align-items: flex-start; }
+    .et-id-badge { display: none; }
+    .et-sum-val { max-width: 200px; }
+}
+
 </style>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Amount in words ── */
+    function numberToWords(num) {
+        const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+        const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+
+        function below1000(n) {
+            let s = "";
+            if (n > 99)  { s += ones[Math.floor(n/100)]  + " Hundred ";    n %= 100; }
+            if (n > 19)  { s += tens[Math.floor(n/10)]   + " ";            n %= 10; }
+            if (n > 0)   { s += ones[n] + " "; }
+            return s;
+        }
+
+        if (num === 0) return "Zero Only";
+        let r = "";
+        const cr = Math.floor(num/10000000); num %= 10000000;
+        const lk = Math.floor(num/100000);   num %= 100000;
+        const th = Math.floor(num/1000);     num %= 1000;
+        if (cr)  r += below1000(cr) + "Crore ";
+        if (lk)  r += below1000(lk) + "Lakh ";
+        if (th)  r += below1000(th) + "Thousand ";
+        if (num) r += below1000(num);
+        return r.trim() + " Only";
+    }
+
+    const amtInput = document.getElementById('amount');
+    const amtWords = document.getElementById('etAmountWords');
+
+    if (amtInput && amtWords) {
+        /* Initialize on load */
+        const initVal = parseInt(amtInput.value);
+        if (!isNaN(initVal) && initVal > 0) {
+            amtWords.textContent = numberToWords(initVal);
+        }
+
+        amtInput.addEventListener('input', function () {
+            const val = parseInt(this.value);
+            amtWords.textContent = (!isNaN(val) && val > 0)
+                ? numberToWords(val) : "";
+        });
+    }
+
+    /* ── Submit spinner ── */
+    const form      = document.getElementById('editTransactionForm');
+    const submitBtn = document.getElementById('etSubmitBtn');
+
+    if (form && submitBtn) {
+        form.addEventListener('submit', function () {
+            const btnText = submitBtn.querySelector('.et-btn-text');
+            const btnSpin = submitBtn.querySelector('.et-btn-spin');
+            const btnIco  = submitBtn.querySelector('.et-btn-ico');
+
+            submitBtn.disabled = true;
+            if (btnIco)  btnIco.style.display  = 'none';
+            if (btnText) btnText.style.display  = 'none';
+            if (btnSpin) btnSpin.classList.remove('d-none');
+        });
+    }
+
+    /* ── Changed field indicator ── */
+    const originals = {};
+    document.querySelectorAll('.et-input, .et-select').forEach(el => {
+        originals[el.name || el.id] = el.value;
+    });
+
+    document.querySelectorAll('.et-input, .et-select').forEach(el => {
+
+        el.addEventListener('focus', function () {
+            const lbl = this.closest('.et-field')?.querySelector('.et-label');
+            if (lbl) lbl.style.color = 'var(--et-indigo)';
+        });
+
+        el.addEventListener('blur', function () {
+            const lbl = this.closest('.et-field')?.querySelector('.et-label');
+            if (lbl) lbl.style.color = '';
+
+            const key     = this.name || this.id;
+            const changed = this.value !== originals[key];
+
+            this.style.borderColor = changed
+                ? 'var(--et-amber)' : '';
+            this.style.boxShadow = changed
+                ? '0 0 0 3px rgba(217,119,6,.1)' : '';
+        });
+    });
+
+});
+</script>
+
 {% endblock %}

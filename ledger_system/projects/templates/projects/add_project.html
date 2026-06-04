@@ -1,185 +1,986 @@
 {% extends 'projects/base.html' %}
+{% load extra_filters %}
+{% load indian_format %}
+
 {% load static %}
 
 {% block page_title %}Project Management{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4">
-    
-    <div class="row mb-4 g-3">
-        <div class="col-md-4 col-xl-3">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
-                <div class="d-flex align-items-center">
-                    <div class="icon-square bg-primary-soft text-primary me-3">
-                        <i class="bi bi-briefcase"></i>
+
+<div class="pm-page">
+
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="pm-header">
+        <div class="pm-header-left">
+            <div class="pm-header-icon">
+                <i class="bi bi-briefcase-fill"></i>
+                <div class="pm-icon-ring"></div>
+            </div>
+            <div>
+                <p class="pm-eyebrow">Elite Dream Builders</p>
+                <h1 class="pm-title">Project Management</h1>
+                <p class="pm-subtitle">Register and manage all client projects</p>
+            </div>
+        </div>
+        <div class="pm-header-right">
+            <div class="pm-stat-chip">
+                <div class="pm-stat-chip-icon">
+                    <i class="bi bi-layers-fill"></i>
+                </div>
+                <div>
+                    <span class="pm-stat-chip-val">{{ projects|length }}</span>
+                    <span class="pm-stat-chip-lbl">Active Projects</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         MAIN LAYOUT
+    ════════════════════════════════════════ -->
+    <div class="pm-layout">
+
+        <!-- ── LEFT: New Project Form ── -->
+        <div class="pm-form-col">
+            <div class="pm-form-card">
+
+                <div class="pm-form-header">
+                    <div class="pm-form-header-icon">
+                        <i class="bi bi-plus-circle-fill"></i>
                     </div>
                     <div>
-                        <h6 class="text-muted small mb-0">Active Portfolios</h6>
-                        <h4 class="fw-bold mb-0">{{ projects|length }}</h4>
+                        <h5 class="pm-form-title">New Project</h5>
+                        <p class="pm-form-subtitle">Register a new contract</p>
                     </div>
                 </div>
+
+                {% if error %}
+                <div class="pm-alert pm-alert-error">
+                    <i class="bi bi-exclamation-triangle-fill"></i>
+                    <span>{{ error }}</span>
+                </div>
+                {% endif %}
+
+                <form method="post" class="pm-form" novalidate>
+                    {% csrf_token %}
+
+                    <!-- Project Title -->
+                    <div class="pm-field">
+                        <label class="pm-field-label" for="name">
+                            <i class="bi bi-folder"></i> Project Title
+                        </label>
+                        <div class="pm-input-wrap">
+                            <input type="text"
+                                   name="name"
+                                   id="name"
+                                   class="pm-input"
+                                   placeholder="e.g. Villa Interior – Phase 1"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Client Name -->
+                    <div class="pm-field">
+                        <label class="pm-field-label" for="client_name">
+                            <i class="bi bi-person"></i> Client Name
+                        </label>
+                        <div class="pm-input-wrap">
+                            <input type="text"
+                                   name="client_name"
+                                   id="client_name"
+                                   class="pm-input"
+                                   placeholder="e.g. Rajesh Kumar"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="pm-field">
+                        <label class="pm-field-label" for="phone">
+                            <i class="bi bi-telephone"></i> Phone Number
+                        </label>
+                        <div class="pm-input-wrap">
+                            <input type="tel"
+                                   name="phone"
+                                   id="phone"
+                                   class="pm-input"
+                                   placeholder="e.g. 9876543210"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Budget -->
+                    <div class="pm-field">
+                        <label class="pm-field-label" for="budget">
+                            <i class="bi bi-currency-rupee"></i> Initial Budget
+                        </label>
+                        <div class="pm-input-wrap pm-input-currency">
+                            <span class="pm-currency-symbol">₹</span>
+                            <input type="number"
+                                   step="0.01"
+                                   name="budget"
+                                   id="budget"
+                                   class="pm-input pm-input-has-prefix"
+                                   placeholder="0.00">
+                        </div>
+                        <p class="pm-field-hint">
+                            <i class="bi bi-info-circle me-1"></i>
+                            Enter ₹0.00 if budget is not finalized
+                        </p>
+                    </div>
+
+                    <button type="submit" class="pm-submit-btn">
+                        <i class="bi bi-plus-circle-dotted"></i>
+                        <span>Create Project</span>
+                    </button>
+                </form>
+
             </div>
         </div>
-    </div>
 
-    <div class="row g-4">
-        <div class="col-lg-4 col-xl-3 position-relative">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-top border-primary border-4 sticky-top" style="top: 20px; z-index: 10;">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <h5 class="fw-bold text-dark mb-1">New Project</h5>
-                    <p class="text-muted small">Quick register new contract.</p>
-                </div>
-                
-                <div class="card-body px-4 pb-4">
-                    {% if error %}
-                    <div class="alert alert-danger border-0 shadow-sm d-flex align-items-center mb-4" role="alert">
-                        <i class="bi bi-x-circle-fill me-2"></i>
-                        <div class="small fw-bold">{{ error }}</div>
+        <!-- ── RIGHT: Project Table ── -->
+        <div class="pm-table-col">
+            <div class="pm-table-card">
+
+                <!-- Table Header -->
+                <div class="pm-table-header">
+                    <div class="pm-table-header-left">
+                        <div class="pm-tbl-icon">
+                            <i class="bi bi-table"></i>
+                        </div>
+                        <div>
+                            <span class="pm-tbl-title">Project Directory</span>
+                            <span class="pm-tbl-count">{{ projects|length }} projects</span>
+                        </div>
                     </div>
-                    {% endif %}
 
-                    <form method="post" class="needs-validation" novalidate>
-                        {% csrf_token %}
-                        
-                        <div class="form-floating mb-3">
-                            <input type="text" name="name" id="name" class="form-control border-0 bg-light rounded-3 shadow-none" placeholder="Reference" required>
-                            <label for="name" class="text-muted small">Project Title</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="text" name="client_name" id="client_name" class="form-control border-0 bg-light rounded-3 shadow-none" placeholder="Client" required>
-                            <label for="client_name" class="text-muted small">Client Name</label>
-                        </div>
-
-                        <div class="form-floating mb-3">
-                            <input type="tel" name="phone" id="phone" class="form-control border-0 bg-light rounded-3 shadow-none" placeholder="Phone" required>
-                            <label for="phone" class="text-muted small">Phone Number</label>
-                        </div>
-
-                        <div class="form-floating mb-4">
-                            <input type="number" step="0.01" name="budget" id="budget" class="form-control border-0 bg-light rounded-3 shadow-none fw-bold text-success" placeholder="Budget">
-                            <label for="budget" class="text-muted small">Initial Budget should be (₹0.00)</label>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary w-100 py-3 rounded-3 shadow-sm d-flex align-items-center justify-content-center gap-2 hover-lift">
-                            <i class="bi bi-plus-circle-dotted fs-5"></i>
-                            <span class="fw-bold">Create Project</span>
-                        </button>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-8 col-xl-9">
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden border-top border-primary border-4 sticky-top" style="top: 20px;">
-                <div class="card-header bg-white border-0 py-4 px-4">
-                    <div class="row align-items-center">
-                        <div class="col-md-6">
-                            <h5 class="fw-bold text-dark mb-0">Project Directory</h5>
-                        </div>
-                        <div class="col-md-6 mt-3 mt-md-0">
-                            <div class="input-group bg-light rounded-pill px-3 py-1">
-                                <span class="input-group-text bg-transparent border-0 text-muted">
-                                    <i class="bi bi-search"></i>
-                                </span>
-                                <input type="text" id="projectSearch" class="form-control bg-transparent border-0 shadow-none" 
-                                       placeholder="Search projects...">
-                            </div>
+                    <!-- Search -->
+                    <div class="pm-search-wrap">
+                        <i class="bi bi-search pm-search-icon"></i>
+                        <input type="text"
+                               id="projectSearch"
+                               class="pm-search-input"
+                               placeholder="Search projects…"
+                               autocomplete="off">
+                        <div id="pmSearchClear" class="pm-search-clear" style="display:none;">
+                            <i class="bi bi-x-circle-fill"></i>
                         </div>
                     </div>
                 </div>
 
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light text-muted extra-small text-uppercase">
-                                <tr>
-                                    <th class="border-0 px-4 py-3">Project & Client</th>
-                                    <th class="border-0 py-3">Total Budget</th>
-                                    <th class="border-0 py-3">Status</th>
-                                    <th class="border-0 px-4 py-3 text-end">Action</th>
-                                </tr>
-                            </thead>
-                            <tbody id="projectTableBody">
-                                {% for project in projects %}
-                                <tr class="project-item transition-all border-bottom border-light">
-                                    <td class="px-4">
-                                        <div class="d-flex align-items-center">
-                                            <div class="avatar-sm bg-primary-soft text-primary fw-bold me-3 rounded-2 d-flex align-items-center justify-content-center">
-                                                {{ project.name|slice:":1"|upper }}
-                                            </div>
-                                            <div>
-                                                <div class="fw-bold text-dark mb-0">{{ project.name }}</div>
-                                                <div class="text-muted extra-small">{{ project.client_name }} • {{ project.phone }}</div>
+                <!-- Table -->
+                <div class="pm-table-scroll">
+                    <table class="pm-table">
+                        <thead>
+                            <tr>
+                                <th class="pm-th-sno">#</th>
+                                <th>
+                                    <div class="pm-th">
+                                        <i class="bi bi-folder"></i> Project & Client
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="pm-th">
+                                        <i class="bi bi-calculator"></i> Budget
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="pm-th">
+                                        <i class="bi bi-calculator"></i> Current Budget
+                                    </div>
+                                </th>
+                                <th>
+                                    <div class="pm-th">
+                                        <i class="bi bi-flag"></i> Status
+                                    </div>
+                                </th>
+                                <th class="text-end">
+                                    <div class="pm-th pm-th-end">
+                                        <i class="bi bi-gear"></i> Actions
+                                    </div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody id="projectTableBody">
+                            {% for project in projects %}
+                            <tr class="pm-tr project-item"
+                                style="animation-delay: {{ forloop.counter0 }}0ms">
+
+                                <!-- Serial -->
+                                <td>
+                                    <span class="pm-sno">{{ forloop.counter }}</span>
+                                </td>
+
+                                <!-- Project + Client -->
+                                <td>
+                                    <div class="pm-proj-cell">
+                                        <div class="pm-proj-av pm-av-{% cycle 'indigo' 'emerald' 'amber' 'violet' 'teal' %}">
+                                            {{ project.name|slice:":2"|upper }}
+                                        </div>
+                                        <div>
+                                            <span class="pm-proj-name">{{ project.name }}</span>
+                                            <span class="pm-proj-meta">
+                                                <i class="bi bi-person"></i> {{ project.client_name }}
+                                                &nbsp;·&nbsp;
+                                                <i class="bi bi-telephone"></i> {{ project.phone }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Budget -->
+                                <td>
+                                    <span class="pm-budget">
+                                        ₹{{ project.budget|default:"0.00" }}
+                                    </span>
+                                </td>
+
+                                <!-- current Budget -->
+                                <td>
+                                    <span class="pm-budget">
+                                        {{ project|total_budget_with_expense|indian_currency }}
+                                    </span>
+                                </td>
+
+
+                                <!-- Status -->
+                                <td>
+                                    <span class="pm-status-badge
+                                        {% if project.status == 'Ongoing' %}pm-st-amber
+                                        {% elif project.status == 'Completed' %}pm-st-emerald
+                                        {% elif project.status == 'On Hold' %}pm-st-slate
+                                        {% else %}pm-st-slate{% endif %}">
+                                        <span class="pm-st-dot"></span>
+                                        {{ project.status|default:"Pending" }}
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-end">
+                                    <div class="pm-action-group">
+                                        <a href="{% url 'edit_project' project.id %}"
+                                           class="pm-action-btn pm-action-edit"
+                                           title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a href="{% url 'delete_project' project.id %}"
+                                           class="pm-action-btn pm-action-delete delete-btn"
+                                           title="Delete">
+                                            <i class="bi bi-trash3"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr id="emptyRow">
+                                <td colspan="5">
+                                    <div class="pm-empty">
+                                        <div class="pm-empty-art">
+                                            <div class="pm-ea-ring pm-ear-1"></div>
+                                            <div class="pm-ea-ring pm-ear-2"></div>
+                                            <div class="pm-ea-icon">
+                                                <i class="bi bi-briefcase"></i>
                                             </div>
                                         </div>
-                                    </td>
-                                    <td>
-                                        <span class="fw-bold text-dark">₹{{ project.budget|default:"0.00" }}</span>
-                                    </td>
-                                    <td>
-                                        {% if project.status == 'Ongoing' %}
-                                            <span class="badge rounded-pill bg-warning-soft text-warning px-3 py-2">Ongoing</span>
-                                        {% elif project.status == 'Completed' %}
-                                            <span class="badge rounded-pill bg-success-soft text-success px-3 py-2">Completed</span>
-                                        {% elif project.status == 'On Hold' %}
-                                            <span class="badge rounded-pill bg-secondary-soft text-secondary px-3 py-2">On Hold</span>
-                                        {% else %}
-                                            <span class="badge rounded-pill bg-light text-muted px-3 py-2">{{ project.status|default:"Pending" }}</span>
-                                        {% endif %}
-                                    </td>
-                                    <td class="px-4 text-end">
-                                        <a href="{% url 'edit_project' project.id %}" class="btn btn-sm btn-outline-primary border-0 rounded-2">
-                                            <i class="bi bi-pencil-square"></i> Edit
-                                        </a>
-                                        <a href="{% url 'delete_project' project.id %}" 
-                                        class="btn btn-sm btn-outline-danger delete-btn">
-                                        <i class="bi bi-trash"></i> Delete
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="4" class="text-center py-5">
-                                        <div class="text-muted">
-                                            <i class="bi bi-layers display-6 d-block mb-3"></i>
-                                            No projects registered yet.
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                        <h5>No Projects Yet</h5>
+                                        <p>Create your first project using the form on the left</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
                 </div>
+
+                <!-- No results row (hidden by default) -->
+                <div id="pmNoResults" class="pm-no-results" style="display:none;">
+                    <i class="bi bi-search"></i>
+                    <span>No projects match your search</span>
+                </div>
+
             </div>
         </div>
+
     </div>
+
 </div>
 
 
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
+<style>
+
+/* ══════════════════════════════
+   TOKENS
+══════════════════════════════ */
+:root {
+    --pm-indigo:    #4f46e5;
+    --pm-indigo-lt: #eef2ff;
+    --pm-indigo-md: #c7d2fe;
+    --pm-indigo-dk: #3730a3;
+    --pm-emerald:   #059669;
+    --pm-emerald-lt:#ecfdf5;
+    --pm-amber:     #d97706;
+    --pm-amber-lt:  #fffbeb;
+    --pm-red:       #dc2626;
+    --pm-red-lt:    #fef2f2;
+    --pm-violet:    #7c3aed;
+    --pm-violet-lt: #f5f3ff;
+    --pm-teal:      #0d9488;
+    --pm-teal-lt:   #f0fdfa;
+    --pm-s50:  #f8fafc;
+    --pm-s100: #f1f5f9;
+    --pm-s200: #e2e8f0;
+    --pm-s300: #cbd5e1;
+    --pm-s400: #94a3b8;
+    --pm-s500: #64748b;
+    --pm-s600: #475569;
+    --pm-dark: #0f172a;
+    --pm-r-sm: 8px;
+    --pm-r-md: 12px;
+    --pm-r-lg: 16px;
+    --pm-r-xl: 20px;
+    --pm-ease: cubic-bezier(.4,0,.2,1);
+    --pm-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --pm-sh-md: 0 4px 12px rgba(0,0,0,.07);
+    --pm-sh-lg: 0 12px 32px rgba(0,0,0,.1);
+}
+
+/* ══════════════════════════════
+   PAGE
+══════════════════════════════ */
+.pm-page {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+}
+
+/* ══════════════════════════════
+   PAGE HEADER
+══════════════════════════════ */
+.pm-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.pm-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.pm-header-icon {
+    position: relative;
+    width: 50px; height: 50px;
+    background: linear-gradient(135deg, var(--pm-indigo), var(--pm-indigo-dk));
+    border-radius: var(--pm-r-lg);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.2rem;
+    box-shadow: 0 6px 18px rgba(79,70,229,.28);
+    flex-shrink: 0;
+}
+
+.pm-icon-ring {
+    position: absolute; inset: -5px;
+    border: 2px solid rgba(79,70,229,.18);
+    border-radius: calc(var(--pm-r-lg) + 5px);
+    animation: pmRing 2.5s ease-in-out infinite;
+}
+
+@keyframes pmRing {
+    0%,100% { opacity:.4; transform:scale(1); }
+    50%     { opacity:1;  transform:scale(1.04); }
+}
+
+.pm-eyebrow {
+    font-size: .6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .09em;
+    color: var(--pm-indigo); margin: 0 0 2px;
+}
+
+.pm-title {
+    font-size: 1.3rem; font-weight: 700;
+    color: var(--pm-dark); letter-spacing: -.025em;
+    margin: 0 0 2px; line-height: 1.2;
+}
+
+.pm-subtitle {
+    font-size: .72rem; font-weight: 400;
+    color: var(--pm-s500); margin: 0;
+}
+
+/* Stat Chip */
+.pm-stat-chip {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 18px;
+    background: white; border: 1px solid var(--pm-s200);
+    border-radius: var(--pm-r-lg);
+    box-shadow: var(--pm-sh-sm);
+}
+
+.pm-stat-chip-icon {
+    width: 38px; height: 38px;
+    background: var(--pm-indigo-lt);
+    border-radius: var(--pm-r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pm-indigo); font-size: .95rem;
+}
+
+.pm-stat-chip-val {
+    display: block;
+    font-size: 1.1rem; font-weight: 700;
+    color: var(--pm-dark); line-height: 1.1;
+}
+
+.pm-stat-chip-lbl {
+    display: block;
+    font-size: .62rem; font-weight: 500;
+    color: var(--pm-s500); text-transform: uppercase;
+    letter-spacing: .05em; margin-top: 1px;
+}
+
+/* ══════════════════════════════
+   MAIN LAYOUT
+══════════════════════════════ */
+.pm-layout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ══════════════════════════════
+   FORM CARD
+══════════════════════════════ */
+.pm-form-col {
+    position: sticky;
+    top: 20px;
+    z-index: 5;
+}
+
+.pm-form-card {
+    background: white;
+    border: 1px solid var(--pm-s200);
+    border-radius: var(--pm-r-xl);
+    overflow: hidden;
+    box-shadow: var(--pm-sh-md);
+    position: relative;
+}
+
+/* Top accent */
+.pm-form-card::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pm-indigo), #818cf8, #06b6d4);
+}
+
+.pm-form-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 20px 0;
+}
+
+.pm-form-header-icon {
+    width: 36px; height: 36px;
+    background: var(--pm-indigo-lt);
+    border-radius: var(--pm-r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pm-indigo); font-size: .92rem;
+    flex-shrink: 0;
+}
+
+.pm-form-title {
+    font-size: .88rem; font-weight: 700;
+    color: var(--pm-dark); margin: 0 0 2px;
+}
+
+.pm-form-subtitle {
+    font-size: .65rem; font-weight: 400;
+    color: var(--pm-s500); margin: 0;
+}
+
+/* Alert */
+.pm-alert {
+    display: flex; align-items: center; gap: 8px;
+    padding: 10px 14px; border-radius: var(--pm-r-md);
+    font-size: .74rem; font-weight: 500;
+    margin: 14px 20px 0;
+}
+
+.pm-alert-error {
+    background: var(--pm-red-lt);
+    color: var(--pm-red);
+    border: 1px solid rgba(220,38,38,.15);
+}
+
+.pm-alert i { flex-shrink: 0; font-size: .82rem; }
+
+/* Form */
+.pm-form { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
+
+.pm-field { display: flex; flex-direction: column; gap: 5px; }
+
+.pm-field-label {
+    display: flex; align-items: center; gap: 5px;
+    font-size: .66rem; font-weight: 600;
+    color: var(--pm-s500); text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.pm-field-label i { color: var(--pm-indigo); font-size: .72rem; }
+
+.pm-input-wrap { position: relative; }
+.pm-input-currency { position: relative; }
+
+.pm-currency-symbol {
+    position: absolute; left: 12px; top: 50%;
+    transform: translateY(-50%);
+    font-size: .84rem; font-weight: 600;
+    color: var(--pm-s500); pointer-events: none; z-index: 1;
+}
+
+.pm-input {
+    width: 100%; padding: 10px 12px;
+    border: 1.5px solid var(--pm-s200);
+    border-radius: var(--pm-r-md);
+    font-size: .82rem; font-weight: 400;
+    color: var(--pm-dark); background: var(--pm-s50);
+    font-family: inherit;
+    transition: all .2s var(--pm-ease);
+    appearance: none;
+}
+
+.pm-input-has-prefix { padding-left: 28px; }
+
+.pm-input::placeholder { color: var(--pm-s400); font-weight: 400; }
+
+.pm-input:focus {
+    outline: none;
+    border-color: var(--pm-indigo);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.pm-field-hint {
+    font-size: .6rem; font-weight: 400;
+    color: var(--pm-s400); margin: 2px 0 0;
+    display: flex; align-items: center;
+}
+
+/* Submit */
+.pm-submit-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; width: 100%; padding: 12px;
+    background: linear-gradient(135deg, var(--pm-indigo), var(--pm-indigo-dk));
+    color: white; border: none; border-radius: var(--pm-r-md);
+    font-size: .82rem; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all .2s var(--pm-ease);
+    box-shadow: 0 4px 12px rgba(79,70,229,.28);
+    margin-top: 4px;
+}
+
+.pm-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(79,70,229,.38);
+}
+
+.pm-submit-btn:active { transform: translateY(0); }
+
+.pm-submit-btn i { font-size: 1rem; }
+
+/* ══════════════════════════════
+   TABLE CARD
+══════════════════════════════ */
+.pm-table-card {
+    background: white;
+    border: 1px solid var(--pm-s200);
+    border-radius: var(--pm-r-xl);
+    overflow: hidden;
+    box-shadow: var(--pm-sh-md);
+    position: relative;
+}
+
+/* Top accent */
+.pm-table-card::before {
+    content: '';
+    display: block;
+    height: 3px;
+    background: linear-gradient(90deg, var(--pm-indigo), #818cf8, #06b6d4);
+}
+
+/* Table Header */
+.pm-table-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--pm-s100);
+    background: var(--pm-s50);
+    gap: 12px; flex-wrap: wrap;
+}
+
+.pm-table-header-left {
+    display: flex; align-items: center; gap: 10px;
+}
+
+.pm-tbl-icon {
+    width: 30px; height: 30px;
+    background: var(--pm-indigo-lt);
+    border-radius: var(--pm-r-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pm-indigo); font-size: .75rem;
+}
+
+.pm-tbl-title {
+    display: block;
+    font-size: .82rem; font-weight: 600;
+    color: var(--pm-dark); line-height: 1.2;
+}
+
+.pm-tbl-count {
+    display: block;
+    font-size: .6rem; font-weight: 500;
+    color: var(--pm-s400); margin-top: 1px;
+}
+
+/* Search */
+.pm-search-wrap {
+    position: relative;
+    flex: 1; max-width: 280px;
+}
+
+.pm-search-icon {
+    position: absolute; left: 11px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--pm-s400); font-size: .78rem;
+    pointer-events: none;
+}
+
+.pm-search-input {
+    width: 100%; padding: 8px 32px 8px 32px;
+    border: 1.5px solid var(--pm-s200);
+    border-radius: var(--pm-r-md);
+    font-size: .78rem; font-weight: 400;
+    color: var(--pm-dark); background: white;
+    font-family: inherit;
+    transition: all .2s var(--pm-ease);
+}
+
+.pm-search-input::placeholder { color: var(--pm-s400); }
+
+.pm-search-input:focus {
+    outline: none;
+    border-color: var(--pm-indigo);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.pm-search-clear {
+    position: absolute; right: 10px; top: 50%;
+    transform: translateY(-50%);
+    color: var(--pm-s400); font-size: .78rem;
+    cursor: pointer; transition: color .15s;
+}
+
+.pm-search-clear:hover { color: var(--pm-red); }
+
+/* Table Scroll */
+.pm-table-scroll { overflow-x: auto; max-height: 62vh; }
+.pm-table-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+.pm-table-scroll::-webkit-scrollbar-thumb { background: var(--pm-s200); border-radius: 10px; }
+
+/* Table */
+.pm-table {
+    width: 100%; border-collapse: collapse;
+    font-size: .78rem;
+}
+
+.pm-table thead {
+    position: sticky; top: 0; z-index: 10;
+}
+
+.pm-table thead tr {
+    background: var(--pm-s50);
+    border-bottom: 2px solid var(--pm-s200);
+}
+
+.pm-table thead th {
+    padding: 10px 12px; border: none;
+    background: var(--pm-s50); white-space: nowrap;
+    font-weight: normal;
+}
+
+.pm-th {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: .58rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: .07em;
+    color: var(--pm-s400);
+}
+
+.pm-th-end { justify-content: flex-end; width: 100%; }
+
+.pm-th-sno { width: 40px; text-align: center; }
+
+.pm-table tbody tr {
+    border-bottom: 1px solid var(--pm-s100);
+    transition: background .12s var(--pm-ease);
+    animation: pmRowFade .3s var(--pm-ease) both;
+}
+
+@keyframes pmRowFade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.pm-table tbody tr:last-child { border-bottom: none; }
+.pm-table tbody tr:hover { background: var(--pm-s50); }
+
+.pm-table tbody td {
+    padding: 12px; vertical-align: middle;
+    border: none; color: var(--pm-dark);
+}
+
+/* Serial */
+.pm-sno {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 26px; height: 26px;
+    background: var(--pm-s100); border-radius: 7px;
+    font-size: .62rem; font-weight: 600; color: var(--pm-s500);
+}
+
+/* Project Cell */
+.pm-proj-cell { display: flex; align-items: center; gap: 10px; }
+
+.pm-proj-av {
+    width: 36px; height: 36px; min-width: 36px;
+    border-radius: var(--pm-r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .6rem; font-weight: 700; letter-spacing: .5px;
+    flex-shrink: 0;
+}
+
+.pm-av-indigo  { background: var(--pm-indigo-lt);  color: var(--pm-indigo); }
+.pm-av-emerald { background: var(--pm-emerald-lt); color: var(--pm-emerald); }
+.pm-av-amber   { background: var(--pm-amber-lt);   color: var(--pm-amber); }
+.pm-av-violet  { background: var(--pm-violet-lt);  color: var(--pm-violet); }
+.pm-av-teal    { background: var(--pm-teal-lt);    color: var(--pm-teal); }
+
+.pm-proj-name {
+    display: block;
+    font-size: .78rem; font-weight: 600;
+    color: var(--pm-dark); line-height: 1.2;
+}
+
+.pm-proj-meta {
+    display: flex; align-items: center; gap: 3px;
+    font-size: .62rem; font-weight: 400;
+    color: var(--pm-s500); margin-top: 2px;
+}
+
+.pm-proj-meta i { font-size: .56rem; }
+
+/* Budget */
+.pm-budget {
+    font-size: 1.12rem; font-weight: 600;
+    color: var(--pm-dark);
+    font-family: 'Monaco','Menlo',monospace;
+    letter-spacing: -.01em;
+}
+
+/* Status Badges */
+.pm-status-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 4px 10px; border-radius: 20px;
+    font-size: .62rem; font-weight: 500;
+    border: 1px solid transparent;
+}
+
+.pm-st-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+
+.pm-st-amber  { background: var(--pm-amber-lt);   color: var(--pm-amber);   border-color: rgba(217,119,6,.15); }
+.pm-st-amber  .pm-st-dot { background: var(--pm-amber); }
+
+.pm-st-emerald { background: var(--pm-emerald-lt); color: var(--pm-emerald); border-color: rgba(5,150,105,.15); }
+.pm-st-emerald .pm-st-dot { background: var(--pm-emerald); }
+
+.pm-st-slate  { background: var(--pm-s100);       color: var(--pm-s600);    border-color: var(--pm-s200); }
+.pm-st-slate  .pm-st-dot { background: var(--pm-s400); }
+
+/* Action Buttons */
+.pm-action-group { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+
+.pm-action-btn {
+    width: 30px; height: 30px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: var(--pm-r-sm); border: 1px solid var(--pm-s200);
+    background: white; color: var(--pm-s400);
+    font-size: .78rem; text-decoration: none;
+    transition: all .18s var(--pm-ease);
+}
+
+.pm-action-edit:hover {
+    background: var(--pm-indigo-lt);
+    color: var(--pm-indigo);
+    border-color: var(--pm-indigo-md);
+    transform: translateY(-1px);
+}
+
+.pm-action-delete:hover {
+    background: var(--pm-red-lt);
+    color: var(--pm-red);
+    border-color: rgba(220,38,38,.2);
+    transform: translateY(-1px);
+}
+
+/* No Results */
+.pm-no-results {
+    padding: 24px;
+    text-align: center;
+    color: var(--pm-s400);
+    font-size: .76rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    border-top: 1px solid var(--pm-s100);
+}
+
+/* Empty State */
+.pm-empty { text-align: center; padding: 52px 24px; }
+
+.pm-empty-art {
+    position: relative; width: 72px; height: 72px;
+    margin: 0 auto 18px;
+}
+
+.pm-ea-ring { position: absolute; border-radius: 50%; opacity: .06; }
+.pm-ear-1   { inset: 0; background: var(--pm-indigo); animation: pmEcP 3s ease-in-out infinite; }
+.pm-ear-2   { inset: 10px; background: var(--pm-emerald); animation: pmEcP 3s ease-in-out infinite .5s; }
+
+@keyframes pmEcP {
+    0%,100% { transform: scale(.95); opacity: .05; }
+    50%     { transform: scale(1.06); opacity: .12; }
+}
+
+.pm-ea-icon {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem; color: var(--pm-s400);
+    background: var(--pm-s100); border-radius: 50%;
+}
+
+.pm-empty h5 { font-size: .9rem; font-weight: 600; color: var(--pm-dark); margin-bottom: 6px; }
+.pm-empty p  { font-size: .74rem; font-weight: 400; color: var(--pm-s500); margin: 0; }
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 1024px) {
+    .pm-layout { grid-template-columns: 1fr; }
+    .pm-form-col { position: static; }
+}
+
+@media (max-width: 768px) {
+    .pm-header { flex-direction: column; align-items: flex-start; }
+    .pm-search-wrap { max-width: 100%; flex: 1; }
+    .pm-table-header { flex-direction: column; align-items: flex-start; }
+}
+
+@media (max-width: 480px) {
+    .pm-stat-chip { display: none; }
+    .pm-proj-meta { display: none; }
+}
+
+</style>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
 
-    // ✅ DELETE CONFIRMATION
-    document.querySelectorAll('.delete-btn').forEach(button => {
-        button.addEventListener('click', function (e) {
+    /* ── Row animation delays ── */
+    document.querySelectorAll('.pm-tr').forEach((row, idx) => {
+        row.style.animationDelay = `${idx * 20}ms`;
+    });
+
+    /* ════════════════════════════
+       SEARCH FILTER
+    ════════════════════════════ */
+    const searchInput = document.getElementById('projectSearch');
+    const searchClear = document.getElementById('pmSearchClear');
+    const rows        = document.querySelectorAll('#projectTableBody .project-item');
+    const noResults   = document.getElementById('pmNoResults');
+
+    function doSearch() {
+        const q = searchInput.value.toLowerCase().trim();
+
+        searchClear.style.display = q ? 'block' : 'none';
+
+        let visible = 0;
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            const show = text.includes(q);
+            row.style.display = show ? '' : 'none';
+            if (show) visible++;
+        });
+
+        if (noResults) {
+            noResults.style.display = (visible === 0 && q !== '') ? 'flex' : 'none';
+        }
+    }
+
+    if (searchInput) {
+        searchInput.addEventListener('input', doSearch);
+    }
+
+    if (searchClear) {
+        searchClear.addEventListener('click', function () {
+            searchInput.value = '';
+            doSearch();
+            searchInput.focus();
+        });
+    }
+
+    /* ════════════════════════════
+       DELETE CONFIRMATION
+    ════════════════════════════ */
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
             e.preventDefault();
 
             const url = this.getAttribute('href');
 
             Swal.fire({
-                title: "Are you sure?",
-                text: "This project will be permanently deleted!",
-                icon: "warning",
+                title: '<div style="font-size:1rem;font-weight:700;color:#0f172a;">Delete Project?</div>',
+                html: '<p style="font-size:.82rem;color:#64748b;font-weight:400;margin:6px 0 0;">This project will be <strong>permanently removed</strong>. This action cannot be undone.</p>',
+                icon: 'warning',
                 showCancelButton: true,
-                confirmButtonColor: "#d33",
-                cancelButtonColor: "#3085d6",
-                confirmButtonText: "Yes, delete it!",
-                cancelButtonText: "Cancel"
-            }).then((result) => {
+                confirmButtonText: '<i class="bi bi-trash3 me-1"></i> Delete',
+                cancelButtonText:  'Cancel',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor:  '#e2e8f0',
+                customClass: {
+                    popup:         'rounded-4 border-0 shadow-lg',
+                    confirmButton: 'fw-600 px-4',
+                    cancelButton:  'fw-600 px-4 text-dark',
+                },
+                padding: '1.5rem',
+                background: '#ffffff',
+            }).then(result => {
                 if (result.isConfirmed) {
                     window.location.href = url;
                 }
@@ -187,64 +988,50 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     });
 
-    // ✅ DJANGO MESSAGES (SUCCESS / ERROR)
+    /* ════════════════════════════
+       DJANGO MESSAGES
+    ════════════════════════════ */
     {% if messages %}
         {% for message in messages %}
-        Swal.fire({
-            icon: "{{ message.tags }}",
-            title: "{{ message.tags|capfirst }}",
-            text: "{{ message|escapejs }}",
-            confirmButtonColor: "#3085d6",
-            timer: 2000,
-            showConfirmButton: false
+        Swal.mixin({
+            toast:             true,
+            position:          'top-end',
+            showConfirmButton: false,
+            timer:             3000,
+            timerProgressBar:  true,
+            customClass:       { popup: 'rounded-3' }
+        }).fire({
+            icon:  '{{ message.tags }}',
+            title: '{{ message|escapejs }}'
         });
         {% endfor %}
     {% endif %}
 
+    /* ════════════════════════════
+       FORM INPUT FOCUS EFFECTS
+    ════════════════════════════ */
+    document.querySelectorAll('.pm-input').forEach(input => {
+        input.addEventListener('focus', function () {
+            this.closest('.pm-field')
+                ?.querySelector('.pm-field-label')
+                ?.classList.add('pm-label-active');
+        });
+
+        input.addEventListener('blur', function () {
+            this.closest('.pm-field')
+                ?.querySelector('.pm-field-label')
+                ?.classList.remove('pm-label-active');
+        });
+    });
+
 });
 </script>
 
-
+<!-- Label active state (JS-driven) -->
 <style>
-    /* Status Badge Soft Colors */
-    .bg-warning-soft { background-color: #fff3cd; }
-    .bg-success-soft { background-color: #d1e7dd; }
-    .bg-secondary-soft { background-color: #e2e3e5; }
-    .bg-primary-soft { background-color: rgba(13, 110, 253, 0.1); }
-
-    .avatar-sm { width: 38px; height: 38px; font-size: 0.9rem; }
-    .extra-small { font-size: 0.75rem; letter-spacing: 0.3px; }
-    
-    .icon-square {
-        width: 48px; height: 48px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 12px; font-size: 1.4rem;
-    }
-
-    /* Input Focus Effects */
-    .form-floating > .form-control:focus {
-        background-color: #fff !important;
-        border: 1px solid #0d6efd !important;
-    }
-
-    .hover-lift { transition: transform 0.2s ease; }
-    .hover-lift:hover { transform: translateY(-2px); }
-    .transition-all { transition: all 0.2s ease-in-out; }
-
-    /* For Sticky Form on Scroll */
-    .sticky-top { transition: all 0.3s ease; }
+.pm-label-active {
+    color: var(--pm-indigo) !important;
+}
 </style>
 
-<script>
-    // Advanced Search Filter
-    document.getElementById('projectSearch').addEventListener('input', function(e) {
-        const searchTerm = e.target.value.toLowerCase();
-        const rows = document.querySelectorAll('#projectTableBody .project-item');
-        
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(searchTerm) ? '' : 'none';
-        });
-    });
-</script>
 {% endblock %}

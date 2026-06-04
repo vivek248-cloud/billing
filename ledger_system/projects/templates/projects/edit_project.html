@@ -1,135 +1,926 @@
 {% extends 'projects/base.html' %}
 {% load static %}
 
-{% block page_title %}Edit Project Settings{% endblock %}
+{% block page_title %}Edit Project{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-    <div class="row justify-content-center">
-        <div class="col-lg-10 col-xl-8">
-            
-            <nav aria-label="breadcrumb" class="mb-4">
-                <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="{% url 'billing' %}" class="text-decoration-none">Dashboard</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Edit {{ project.name }}</li>
-                </ol>
-            </nav>
 
-            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                <div class="card-header bg-dark p-4 border-0">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-box bg-white-soft text-white me-3">
-                            <i class="bi bi-pencil-square"></i>
-                        </div>
-                        <div>
-                            <h4 class="fw-bold mb-0 text-white">Project Configuration</h4>
-                            <p class="text-white-50 small mb-0">Modify details for Project ID: #{{ project.id|default:"N/A" }}</p>
-                        </div>
-                    </div>
-                </div>
+<div class="ep-page">
 
-                <div class="card-body p-4 p-md-5">
-                    {% if error %}
-                    <div class="alert alert-danger d-flex align-items-center rounded-3 shadow-sm mb-4">
-                        <i class="bi bi-exclamation-octagon-fill fs-5 me-2"></i>
-                        <div>{{ error }}</div>
-                    </div>
-                    {% endif %}
-
-                    <form method="post" class="needs-validation">
-                        {% csrf_token %}
-
-                        <h6 class="text-uppercase fw-bold text-muted extra-small mb-4 pb-2 border-bottom">Basic Information</h6>
-                        
-                        <div class="row g-4 mb-5">
-                            <div class="col-md-12">
-                                <label class="form-label fw-bold small">Project Title</label>
-                                <input type="text" name="name" class="form-control form-control-lg custom-field" 
-                                       value="{{ project.name }}" placeholder="Enter project name" required>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Client Name</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-person text-muted"></i></span>
-                                    <input type="text" name="client_name" class="form-control border-start-0 custom-field" 
-                                           value="{{ project.client_name }}" placeholder="Full name">
-                                </div>
-                            </div>
-
-                            <div class="col-md-6">
-                                <label class="form-label fw-bold small">Contact Phone</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0"><i class="bi bi-telephone text-muted"></i></span>
-                                    <input type="text" name="phone" class="form-control border-start-0 custom-field" 
-                                           value="{{ project.phone }}" placeholder="+91 XXXX">
-                                </div>
-                            </div>
-                        </div>
-
-                        <h6 class="text-uppercase fw-bold text-muted extra-small mb-4 pb-2 border-bottom">Financials & Status</h6>
-
-                        <div class="row g-4 mb-4">
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold small">Total Budget (₹)</label>
-                                <input type="number" step="0.01" name="budget" class="form-control custom-field fw-bold text-success" 
-                                       value="{{ project.budget }}" placeholder="0.00">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold small">Est. Cost (₹)</label>
-                                <input type="number" step="0.01" name="estimated_cost" class="form-control custom-field" 
-                                       value="{{ project.estimated_cost }}" placeholder="0.00">
-                            </div>
-
-                            <div class="col-md-4">
-                                <label class="form-label fw-bold small">Project Status</label>
-                                <select name="status" class="form-select custom-field">
-                                    {% for key, label in statuses %}
-                                      <option value="{{ key }}" {% if project.status == key %}selected{% endif %}>
-                                        {{ label }}
-                                      </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-actions d-flex flex-column flex-md-row gap-3 mt-5 pt-4 border-top">
-                            <button type="submit" class="btn btn-primary btn-lg px-5 rounded-3 fw-bold shadow-sm">
-                                <i class="bi bi-cloud-arrow-up me-2"></i> Update Project
-                            </button>
-                            <a href="{% url 'billing' %}" class="btn btn-light btn-lg px-5 rounded-3 text-muted border">
-                                Cancel
-                            </a>
-                        </div>
-                    </form>
-                </div>
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="ep-header">
+        <div class="ep-header-left">
+            <a href="{% url 'billing' %}" class="ep-back-btn bg-primary text-white" title="Back to Dashboard">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="ep-header-icon">
+                <i class="bi bi-pencil-square"></i>
+                <div class="ep-icon-ring"></div>
             </div>
-            
-            <div class="mt-4 text-center">
-                <p class="text-muted small">
-                    <i class="bi bi-info-circle me-1"></i> 
-                    Updating the budget will automatically recalculate the "Yet to Receive" totals in your ledger.
+            <div>
+                <div class="ep-breadcrumb">
+                    <a href="{% url 'billing' %}">Dashboard</a>
+                    <i class="bi bi-chevron-right"></i>
+                    <span>Edit Project</span>
+                </div>
+                <h1 class="ep-title">{{ project.name }}</h1>
+                <p class="ep-subtitle">
+                    Project ID #{{ project.id|default:"N/A" }} · Update configuration
                 </p>
             </div>
         </div>
+        <div class="ep-id-badge">
+            <i class="bi bi-hash"></i>
+            <span>{{ project.id }}</span>
+        </div>
     </div>
+
+    <!-- ════════════════════════════════════════
+         ERROR ALERT
+    ════════════════════════════════════════ -->
+    {% if error %}
+    <div class="ep-alert">
+        <div class="ep-alert-icon">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+        </div>
+        <div class="ep-alert-body">
+            <span class="ep-alert-title">Something went wrong</span>
+            <span class="ep-alert-msg">{{ error }}</span>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ════════════════════════════════════════
+         MAIN FORM CARD
+    ════════════════════════════════════════ -->
+    <div class="ep-card">
+
+        <div class="ep-card-accent"></div>
+
+        <form method="post" class="ep-form" id="editProjectForm" novalidate>
+            {% csrf_token %}
+
+            <!-- ─── Section 1: Basic Info ─── -->
+            <div class="ep-section">
+                <div class="ep-section-header">
+                    <div class="ep-section-icon ep-si-indigo">
+                        <i class="bi bi-person-vcard"></i>
+                    </div>
+                    <div>
+                        <h6 class="ep-section-title">Basic Information</h6>
+                        <p class="ep-section-sub">Project identity and client contact</p>
+                    </div>
+                    <div class="ep-section-line"></div>
+                </div>
+
+                <div class="ep-fields-grid">
+
+                    <!-- Project Title -->
+                    <div class="ep-field ep-field-full">
+                        <label class="ep-label" for="name">
+                            <i class="bi bi-folder"></i>
+                            Project Title
+                            <span class="ep-req">*</span>
+                        </label>
+                        <input type="text"
+                               name="name"
+                               id="name"
+                               class="ep-input ep-input-lg"
+                               value="{{ project.name }}"
+                               placeholder="e.g. Villa Interior – Phase 1"
+                               required>
+                    </div>
+
+                    <!-- Client Name -->
+                    <div class="ep-field">
+                        <label class="ep-label" for="client_name">
+                            <i class="bi bi-person"></i>
+                            Client Name
+                        </label>
+                        <div class="ep-prefix-group">
+                            <span class="ep-prefix-box">
+                                <i class="bi bi-person-fill"></i>
+                            </span>
+                            <input type="text"
+                                   name="client_name"
+                                   id="client_name"
+                                   class="ep-input ep-prefix-input"
+                                   value="{{ project.client_name }}"
+                                   placeholder="Full client name">
+                        </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="ep-field">
+                        <label class="ep-label" for="phone">
+                            <i class="bi bi-telephone"></i>
+                            Contact Phone
+                        </label>
+                        <div class="ep-prefix-group">
+                            <span class="ep-prefix-box">
+                                <i class="bi bi-telephone-fill"></i>
+                            </span>
+                            <input type="text"
+                                   name="phone"
+                                   id="phone"
+                                   class="ep-input ep-prefix-input"
+                                   value="{{ project.phone }}"
+                                   placeholder="+91 XXXXX XXXXX">
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="ep-divider"></div>
+
+            <!-- ─── Section 2: Financials & Status ─── -->
+            <div class="ep-section">
+                <div class="ep-section-header">
+                    <div class="ep-section-icon ep-si-emerald">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div>
+                        <h6 class="ep-section-title">Financials & Status</h6>
+                        <p class="ep-section-sub">Budget, cost estimates and project stage</p>
+                    </div>
+                    <div class="ep-section-line"></div>
+                </div>
+
+                <div class="ep-fields-grid ep-fields-3">
+
+                    <!-- Budget -->
+                    <div class="ep-field">
+                        <label class="ep-label" for="budget">
+                            <i class="bi bi-currency-rupee"></i>
+                            Total Budget
+                        </label>
+                        <div class="ep-prefix-group">
+                            <span class="ep-prefix-box ep-prefix-green">₹</span>
+                            <input type="number"
+                                   step="0.01"
+                                   name="budget"
+                                   id="budget"
+                                   class="ep-input ep-prefix-input ep-money"
+                                   value="{{ project.budget }}"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Estimated Cost -->
+                    <div class="ep-field">
+                        <label class="ep-label" for="estimated_cost">
+                            <i class="bi bi-calculator"></i>
+                            Est. Cost
+                        </label>
+                        <div class="ep-prefix-group">
+                            <span class="ep-prefix-box">₹</span>
+                            <input type="number"
+                                   step="0.01"
+                                   name="estimated_cost"
+                                   id="estimated_cost"
+                                   class="ep-input ep-prefix-input ep-money"
+                                   value="{{ project.estimated_cost }}"
+                                   placeholder="0.00">
+                        </div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="ep-field">
+                        <label class="ep-label" for="status">
+                            <i class="bi bi-flag"></i>
+                            Project Status
+                        </label>
+                        <div class="ep-select-wrap">
+                            <select name="status" id="status" class="ep-select">
+                                {% for key, label in statuses %}
+                                <option value="{{ key }}"
+                                    {% if project.status == key %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <i class="bi bi-chevron-down ep-select-arrow"></i>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Budget Note -->
+                <div class="ep-budget-note">
+                    <i class="bi bi-info-circle-fill"></i>
+                    <span>
+                        Updating the budget will automatically recalculate
+                        <strong>Yet to Receive</strong> totals in your ledger.
+                    </span>
+                </div>
+            </div>
+
+            <!-- ─── Form Actions ─── -->
+            <div class="ep-actions">
+                <a href="{% url 'billing' %}" class="ep-btn ep-btn-ghost bg-danger text-white">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="ep-btn ep-btn-primary" id="epSubmitBtn">
+                    <i class="bi bi-cloud-arrow-up ep-btn-ico"></i>
+                    <span class="ep-btn-text">Update Project</span>
+                    <span class="ep-btn-spin d-none">
+                        <span class="ep-spin-ring"></span>
+                        Saving…
+                    </span>
+                </button>
+            </div>
+
+        </form>
+    </div>
+
 </div>
 
+
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
+<style>
+
+/* ══════════════════════════════
+   TOKENS
+══════════════════════════════ */
+:root {
+    --ep-indigo:    #4f46e5;
+    --ep-indigo-lt: #eef2ff;
+    --ep-indigo-md: #c7d2fe;
+    --ep-indigo-dk: #3730a3;
+    --ep-emerald:   #059669;
+    --ep-emerald-lt:#ecfdf5;
+    --ep-red:       #dc2626;
+    --ep-red-lt:    #fef2f2;
+    --ep-amber:     #d97706;
+    --ep-amber-lt:  #fffbeb;
+    --ep-s50:  #f8fafc;
+    --ep-s100: #f1f5f9;
+    --ep-s200: #e2e8f0;
+    --ep-s300: #cbd5e1;
+    --ep-s400: #94a3b8;
+    --ep-s500: #64748b;
+    --ep-s600: #475569;
+    --ep-dark: #0f172a;
+    --ep-r-sm: 8px;
+    --ep-r-md: 12px;
+    --ep-r-lg: 16px;
+    --ep-r-xl: 20px;
+    --ep-ease: cubic-bezier(.4,0,.2,1);
+    --ep-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --ep-sh-md: 0 4px 12px rgba(0,0,0,.07);
+}
+
+/* ══════════════════════════════
+   PAGE
+══════════════════════════════ */
+.ep-page {
+    max-width: 800px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    animation: epSlideUp .4s ease both;
+}
+
+@keyframes epSlideUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════
+   HEADER
+══════════════════════════════ */
+.ep-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.ep-header-left {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+}
+
+.ep-back-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--ep-r-md);
+    background: white;
+    border: 1.5px solid var(--ep-s200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ep-s500);
+    font-size: .95rem;
+    text-decoration: none;
+    transition: all .2s var(--ep-ease);
+    flex-shrink: 0;
+}
+
+.ep-back-btn:hover {
+    background: var(--ep-indigo);
+    color: white;
+    border-color: var(--ep-indigo);
+    transform: translateX(-2px);
+}
+
+.ep-header-icon {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--ep-indigo), var(--ep-indigo-dk));
+    border-radius: var(--ep-r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.2rem;
+    box-shadow: 0 6px 18px rgba(79,70,229,.28);
+    flex-shrink: 0;
+}
+
+.ep-icon-ring {
+    position: absolute;
+    inset: -5px;
+    border: 2px solid rgba(79,70,229,.18);
+    border-radius: calc(var(--ep-r-lg) + 5px);
+    animation: epRing 2.5s ease-in-out infinite;
+}
+
+@keyframes epRing {
+    0%,100% { opacity:.4; transform:scale(1); }
+    50%     { opacity:1;  transform:scale(1.04); }
+}
+
+.ep-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .62rem;
+    font-weight: 600;
+    color: var(--ep-s400);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    margin-bottom: 3px;
+}
+
+.ep-breadcrumb a { color: var(--ep-indigo); text-decoration: none; }
+.ep-breadcrumb a:hover { text-decoration: underline; }
+.ep-breadcrumb i { font-size: .52rem; }
+
+.ep-title {
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: var(--ep-dark);
+    letter-spacing: -.025em;
+    margin: 0 0 2px;
+    line-height: 1.2;
+}
+
+.ep-subtitle {
+    font-size: .7rem;
+    font-weight: 400;
+    color: var(--ep-s500);
+    margin: 0;
+}
+
+.ep-id-badge {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 14px;
+    background: var(--ep-s100);
+    border: 1px solid var(--ep-s200);
+    border-radius: var(--ep-r-md);
+    font-size: .72rem;
+    font-weight: 700;
+    color: var(--ep-s500);
+    font-family: 'Monaco','Menlo',monospace;
+    flex-shrink: 0;
+}
+
+.ep-id-badge i { font-size: .8rem; color: var(--ep-s400); }
+
+/* ══════════════════════════════
+   ALERT
+══════════════════════════════ */
+.ep-alert {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 18px;
+    background: var(--ep-red-lt);
+    border: 1px solid rgba(220,38,38,.2);
+    border-radius: var(--ep-r-lg);
+}
+
+.ep-alert-icon {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    background: rgba(220,38,38,.1);
+    border-radius: var(--ep-r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ep-red);
+    font-size: .9rem;
+}
+
+.ep-alert-body { display: flex; flex-direction: column; gap: 2px; }
+.ep-alert-title { font-size: .78rem; font-weight: 700; color: var(--ep-red); }
+.ep-alert-msg   { font-size: .72rem; font-weight: 400; color: #b91c1c; }
+
+/* ══════════════════════════════
+   CARD
+══════════════════════════════ */
+.ep-card {
+    background: white;
+    border: 1px solid var(--ep-s200);
+    border-radius: var(--ep-r-xl);
+    overflow: hidden;
+    box-shadow: var(--ep-sh-md);
+}
+
+.ep-card-accent {
+    height: 3px;
+    background: linear-gradient(90deg, var(--ep-indigo), #818cf8, #06b6d4);
+}
+
+/* ══════════════════════════════
+   SECTION
+══════════════════════════════ */
+.ep-section { padding: 24px 28px; }
+
+.ep-section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.ep-section-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: var(--ep-r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .88rem;
+    flex-shrink: 0;
+}
+
+.ep-si-indigo  { background: var(--ep-indigo-lt);  color: var(--ep-indigo); }
+.ep-si-emerald { background: var(--ep-emerald-lt); color: var(--ep-emerald); }
+
+.ep-section-title {
+    font-size: .8rem;
+    font-weight: 700;
+    color: var(--ep-dark);
+    margin: 0 0 1px;
+}
+
+.ep-section-sub {
+    font-size: .62rem;
+    font-weight: 400;
+    color: var(--ep-s500);
+    margin: 0;
+}
+
+.ep-section-line {
+    flex: 1;
+    height: 1px;
+    background: var(--ep-s100);
+}
+
+.ep-divider {
+    height: 1px;
+    background: var(--ep-s100);
+    margin: 0 28px;
+}
+
+/* ══════════════════════════════
+   FIELDS GRID
+══════════════════════════════ */
+.ep-fields-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.ep-fields-3   { grid-template-columns: 1fr 1fr 1fr; }
+.ep-field-full { grid-column: 1 / -1; }
+.ep-field      { display: flex; flex-direction: column; gap: 6px; }
+
+/* ══════════════════════════════
+   LABELS
+══════════════════════════════ */
+.ep-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .64rem;
+    font-weight: 600;
+    color: var(--ep-s500);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    transition: color .18s;
+}
+
+.ep-label i  { color: var(--ep-indigo); font-size: .7rem; }
+.ep-req      { color: var(--ep-red); font-size: .7rem; margin-left: 1px; }
+
+/* ══════════════════════════════
+   BASE INPUT
+══════════════════════════════ */
+.ep-input {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--ep-s200);
+    border-radius: var(--ep-r-md);
+    font-size: .84rem;
+    font-weight: 500;
+    color: var(--ep-dark);
+    background: var(--ep-s50);
+    font-family: inherit;
+    line-height: 1.4;
+    transition: border-color .18s, box-shadow .18s, background .18s;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+}
+
+/* Large variant */
+.ep-input-lg {
+    padding: 12px 14px;
+    font-size: .9rem;
+    font-weight: 600;
+}
+
+/* Money input */
+.ep-money {
+    font-family: 'Monaco','Menlo','Consolas',monospace;
+    font-weight: 600;
+    letter-spacing: -.01em;
+}
+
+/* Placeholder */
+.ep-input::placeholder {
+    color: var(--ep-s400);
+    font-weight: 400;
+}
+
+/* Focus */
+.ep-input:focus {
+    border-color: var(--ep-indigo);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+/* ══════════════════════════════
+   PREFIX GROUP
+   (flexbox — NO absolute positioning)
+══════════════════════════════ */
+.ep-prefix-group {
+    display: flex;
+    align-items: stretch;
+}
+
+/* The icon/text prefix box */
+.ep-prefix-box {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 12px;
+    min-width: 42px;
+    background: var(--ep-s100);
+    border: 1.5px solid var(--ep-s200);
+    border-right: none;
+    border-radius: var(--ep-r-md) 0 0 var(--ep-r-md);
+    color: var(--ep-s500);
+    font-size: .82rem;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: all .18s var(--ep-ease);
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.ep-prefix-green { color: var(--ep-emerald); }
+
+/* Input that sits after the prefix box */
+.ep-prefix-input {
+    flex: 1;
+    min-width: 0;
+    border-radius: 0 var(--ep-r-md) var(--ep-r-md) 0;
+    /* border-left already removed by prefix-box having border-right:none */
+    border-left: none !important;
+    padding-left: 12px;
+}
+
+/* When the prefixed input is focused — highlight entire group */
+.ep-prefix-group:focus-within .ep-prefix-box {
+    border-color: var(--ep-indigo);
+    background: var(--ep-indigo-lt);
+    color: var(--ep-indigo);
+}
+
+.ep-prefix-group:focus-within .ep-prefix-input {
+    border-color: var(--ep-indigo);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+/* ══════════════════════════════
+   SELECT
+══════════════════════════════ */
+.ep-select-wrap { position: relative; }
+
+.ep-select {
+    width: 100%;
+    padding: 10px 36px 10px 14px;
+    border: 1.5px solid var(--ep-s200);
+    border-radius: var(--ep-r-md);
+    font-size: .84rem;
+    font-weight: 500;
+    color: var(--ep-dark);
+    background: var(--ep-s50);
+    font-family: inherit;
+    appearance: none;
+    -webkit-appearance: none;
+    outline: none;
+    cursor: pointer;
+    transition: border-color .18s, box-shadow .18s, background .18s;
+}
+
+.ep-select:focus {
+    border-color: var(--ep-indigo);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.ep-select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--ep-s400);
+    font-size: .65rem;
+    pointer-events: none;
+}
+
+/* ══════════════════════════════
+   BUDGET NOTE
+══════════════════════════════ */
+.ep-budget-note {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    margin-top: 16px;
+    padding: 10px 14px;
+    background: var(--ep-indigo-lt);
+    border: 1px solid var(--ep-indigo-md);
+    border-radius: var(--ep-r-md);
+    font-size: .68rem;
+    font-weight: 400;
+    color: var(--ep-s500);
+    line-height: 1.6;
+}
+
+.ep-budget-note i {
+    color: var(--ep-indigo);
+    font-size: .78rem;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+
+.ep-budget-note strong { color: var(--ep-dark); }
+
+/* ══════════════════════════════
+   FORM ACTIONS
+══════════════════════════════ */
+.ep-actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 18px 28px;
+    border-top: 1px solid var(--ep-s100);
+    background: var(--ep-s50);
+}
+
+.ep-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    border-radius: var(--ep-r-md);
+    font-size: .8rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all .2s var(--ep-ease);
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.ep-btn-ghost {
+    background: white;
+    color: var(--ep-s600);
+    border: 1.5px solid var(--ep-s200);
+}
+
+.ep-btn-ghost:hover {
+    background: var(--ep-s50);
+    color: var(--ep-dark);
+    border-color: var(--ep-s300);
+}
+
+.ep-btn-primary {
+    background: linear-gradient(135deg, var(--ep-indigo), var(--ep-indigo-dk));
+    color: white;
+    box-shadow: 0 4px 12px rgba(79,70,229,.28);
+    position: relative;
+    overflow: hidden;
+}
+
+.ep-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    transition: left .5s;
+}
+
+.ep-btn-primary:hover::before { left: 100%; }
+
+.ep-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(79,70,229,.38);
+    color: white;
+}
+
+.ep-btn-primary:active { transform: translateY(0); }
+
+.ep-btn-primary:disabled {
+    opacity: .65;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Spinner */
+.ep-btn-spin {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .78rem;
+}
+
+.ep-spin-ring {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: epSpin .65s linear infinite;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+@keyframes epSpin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════
+   NUMBER INPUT — HIDE SPINNERS
+══════════════════════════════ */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ══════════════════════════════
+   RESPONSIVE
+══════════════════════════════ */
+@media (max-width: 768px) {
+    .ep-section { padding: 18px; }
+    .ep-divider { margin: 0 18px; }
+    .ep-actions { padding: 14px 18px; flex-direction: column-reverse; }
+    .ep-actions .ep-btn { width: 100%; justify-content: center; }
+    .ep-fields-3 { grid-template-columns: 1fr 1fr; }
+}
+
+@media (max-width: 540px) {
+    .ep-fields-grid { grid-template-columns: 1fr; }
+    .ep-fields-3    { grid-template-columns: 1fr; }
+    .ep-field-full  { grid-column: 1; }
+    .ep-header      { flex-direction: column; align-items: flex-start; }
+    .ep-id-badge    { display: none; }
+    .ep-header-icon { width: 42px; height: 42px; font-size: 1rem; }
+}
+
+</style>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener('DOMContentLoaded', function () {
 
+    /* ── Submit spinner ── */
+    const form      = document.getElementById('editProjectForm');
+    const submitBtn = document.getElementById('epSubmitBtn');
+
+    if (form && submitBtn) {
+        form.addEventListener('submit', function () {
+            const btnText = submitBtn.querySelector('.ep-btn-text');
+            const btnSpin = submitBtn.querySelector('.ep-btn-spin');
+            const btnIco  = submitBtn.querySelector('.ep-btn-ico');
+
+            submitBtn.disabled = true;
+            if (btnIco)  btnIco.style.display  = 'none';
+            if (btnText) btnText.style.display  = 'none';
+            if (btnSpin) btnSpin.classList.remove('d-none');
+        });
+    }
+
+    /* ── Track original values ── */
+    const originals = {};
+
+    document.querySelectorAll('.ep-input, .ep-select').forEach(el => {
+        originals[el.name || el.id] = el.value;
+    });
+
+    /* ── Focus: label highlight ── */
+    document.querySelectorAll('.ep-input, .ep-select').forEach(el => {
+
+        el.addEventListener('focus', function () {
+            const label = this.closest('.ep-field')?.querySelector('.ep-label');
+            if (label) label.style.color = 'var(--ep-indigo)';
+        });
+
+        el.addEventListener('blur', function () {
+            const label = this.closest('.ep-field')?.querySelector('.ep-label');
+            if (label) label.style.color = '';
+
+            /* Amber border if value changed */
+            const key     = this.name || this.id;
+            const changed = this.value !== originals[key];
+
+            if (!changed) {
+                this.style.borderColor = '';
+                this.style.boxShadow   = '';
+            } else {
+                /* Don't override focus style — will apply after blur */
+                this.style.borderColor = 'var(--ep-amber)';
+                this.style.boxShadow   = '0 0 0 3px rgba(217,119,6,.1)';
+            }
+        });
+
+        el.addEventListener('input', function () {
+            const key     = this.name || this.id;
+            const changed = this.value !== originals[key];
+
+            if (!this.matches(':focus')) return;
+
+            /* While focused, just use indigo */
+            this.style.borderColor = 'var(--ep-indigo)';
+            this.style.boxShadow   = '0 0 0 3px rgba(79,70,229,.1)';
+
+            /* Store to apply amber on blur */
+            this._changed = changed;
+        });
+    });
+
+    /* ── Django Messages Toast ── */
     {% if messages %}
         {% for message in messages %}
-        Swal.fire({
-            icon: "{{ message.tags }}",
-            title: "{{ message.tags|capfirst }}",
-            text: "{{ message|escapejs }}",
-            confirmButtonColor: "#3085d6",
-            timer: 2000,
-            showConfirmButton: false
+        Swal.mixin({
+            toast:             true,
+            position:          'top-end',
+            showConfirmButton: false,
+            timer:             3000,
+            timerProgressBar:  true,
+            customClass: { popup: 'rounded-3' }
+        }).fire({
+            icon:  '{{ message.tags }}',
+            title: '{{ message|escapejs }}'
         });
         {% endfor %}
     {% endif %}
@@ -137,51 +928,4 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-
-<style>
-    /* Custom Styling for the Edit Page */
-    .bg-dark { background-color: #0f172a !important; }
-    
-    .icon-box {
-        width: 48px; height: 48px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 12px; font-size: 1.5rem;
-    }
-    .bg-white-soft { background-color: rgba(255, 255, 255, 0.1); }
-    
-    .extra-small { font-size: 0.75rem; letter-spacing: 1px; }
-
-    .custom-field {
-        padding: 0.75rem 1rem;
-        border: 1px solid #e2e8f0;
-        border-radius: 8px;
-        background-color: #fcfcfc;
-        transition: all 0.2s ease;
-    }
-
-    .custom-field:focus {
-        background-color: #fff;
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.08);
-    }
-
-    .form-label {
-        color: #475569;
-        margin-bottom: 0.5rem;
-    }
-
-    .breadcrumb-item + .breadcrumb-item::before {
-        content: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8'%3E%3Cpath d='M2.5 0L1 1.5 3.5 4 1 6.5 2.5 8l4-4-4-4z' fill='currentColor'/%3E%3C/svg%3E");
-    }
-
-    /* Animation */
-    .card {
-        animation: slideUp 0.4s ease-out;
-    }
-
-    @keyframes slideUp {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
 {% endblock %}

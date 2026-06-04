@@ -1,236 +1,692 @@
 {% extends 'projects/base.html' %}
 {% load indian_format %}
 
+{% block page_title %}Expenses{% endblock %}
+
 {% block content %}
 
-<style>
-/* ---------- Layout ---------- */
-.expense-wrapper {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 24px;
-}
+<div class="ex-page">
 
-.expense-card {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(15,23,42,.08);
-  padding: 28px;
-  margin-bottom: 28px;
-}
-
-/* ---------- Header ---------- */
-.expense-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.expense-header h2 {
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-/* ---------- Form ---------- */
-.expense-form {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 16px;
-}
-
-.expense-form label {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-}
-
-.expense-form input,
-.expense-form select {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  font-size: 14px;
-}
-
-.expense-form input:focus,
-.expense-form select:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: #ffffff;
-}
-
-/* ---------- Button ---------- */
-.btn-submit {
-  grid-column: 1 / -1;
-  margin-top: 10px;
-  background: #2563eb;
-  color: #fff;
-  border: none;
-  padding: 12px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-.btn-submit:hover {
-  background: #1d4ed8;
-}
-
-/* ---------- Table ---------- */
-.expense-table-card {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(15,23,42,.08);
-  padding: 20px;
-}
-
-.table thead th {
-  background: #f1f5f9;
-  font-size: 13px;
-}
-
-.table td {
-  font-size: 14px;
-}
-
-.total-row {
-  background: #ecfeff;
-  font-weight: 700;
-}
-
-/* ---------- Responsive ---------- */
-@media (max-width: 576px) {
-  .table th,
-  .table td {
-    font-size: 12px;
-    white-space: nowrap;
-  }
-}
-</style>
-
-<div class="expense-wrapper">
-
-  <!-- ================= Add Expense ================= -->
-  <div class="expense-card">
-
-    <div class="expense-header">
-      <h2>Add Budget / Expense</h2>
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="ex-header">
+        <div class="ex-header-left">
+            <div class="ex-header-icon">
+                <i class="bi bi-receipt-cutoff"></i>
+                
+            </div>
+            <div>
+                <p class="ex-eyebrow">Financial Management</p>
+                <h1 class="ex-title">Budget & Expenses</h1>
+                <p class="ex-subtitle">Record and track project costs</p>
+            </div>
+        </div>
+        <div class="ex-header-right">
+            {% if selected_project_id %}
+            <div class="ex-stat-chip">
+                <div class="ex-stat-chip-icon">
+                    <i class="bi bi-cash-stack"></i>
+                </div>
+                <div>
+                    <span class="ex-stat-chip-val">{{ total_expense|indian_currency }}</span>
+                    <span class="ex-stat-chip-lbl">Total Expenses</span>
+                </div>
+            </div>
+            {% endif %}
+        </div>
     </div>
 
-    {% if success %}
-      <div class="alert alert-success">
-        Expense added successfully!
-      </div>
-    {% endif %}
+    <!-- ════════════════════════════════════════
+         MAIN LAYOUT
+    ════════════════════════════════════════ -->
+    <div class="ex-layout">
 
-    <form method="POST" action="{% url 'add_expense' %}" class="expense-form">
-      {% csrf_token %}
+        <!-- ── LEFT: Add Expense Form ── -->
+        <div class="ex-form-col">
+            <div class="ex-form-card">
 
-      <div>
-        <label>Project</label>
-        <select name="project" required onchange="this.form.submit()">
-          <option value="" disabled {% if not selected_project_id %}selected{% endif %}>Select Project</option>
-          {% for project in projects %}
-            <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
-              {{ project.name }} ({{ project.client_name }})
-            </option>
-          {% endfor %}
-        </select>
-      </div>
+                <div class="ex-form-header">
+                    <div class="ex-form-hdr-icon">
+                        <i class="bi bi-plus-circle-fill"></i>
+                    </div>
+                    <div>
+                        <h5 class="ex-form-title">Add Expense</h5>
+                        <p class="ex-form-sub">Record a new cost entry</p>
+                    </div>
+                </div>
 
-      <div>
-        <label>Description</label>
-        <input type="text" name="description" required>
-      </div>
+                <form method="POST"
+                      action="{% url 'add_expense' %}"
+                      class="ex-form"
+                      id="expenseForm">
+                    {% csrf_token %}
 
-      <div>
-        <label>Area</label>
-        <input type="number" step="0.01" name="area" required>
-      </div>
+                    <!-- Project Selector -->
+                    <div class="ex-field ex-field-full">
+                        <label class="ex-label" for="project">
+                            <i class="bi bi-folder"></i> Project
+                        </label>
+                        <div class="ex-select-wrap">
+                            <div class="ex-select-icon"><i class="bi bi-briefcase"></i></div>
+                            <select name="project"
+                                    id="project"
+                                    class="ex-select"
+                                    required
+                                    onchange="this.form.submit()">
+                                <option value="" disabled
+                                    {% if not selected_project_id %}selected{% endif %}>
+                                    Select Project…
+                                </option>
+                                {% for project in projects %}
+                                <option value="{{ project.id }}"
+                                    {% if project.id == selected_project_id %}selected{% endif %}>
+                                    {{ project.name }} ({{ project.client_name }})
+                                </option>
+                                {% endfor %}
+                            </select>
+                            <i class="bi bi-chevron-down ex-select-arrow"></i>
+                        </div>
+                    </div>
 
-      <div>
-        <label>Unit</label>
-        <input type="text" name="unit" required>
-      </div>
+                    <!-- Description -->
+                    <div class="ex-field ex-field-full">
+                        <label class="ex-label" for="description">
+                            <i class="bi bi-card-text"></i> Description
+                        </label>
+                        <input type="text"
+                               name="description"
+                               id="description"
+                               class="ex-input"
+                               placeholder="e.g. Wardrobe – Master Bedroom"
+                               required>
+                    </div>
 
-      <div>
-        <label>Rate</label>
-        <input type="number" step="0.01" name="rate" required>
-      </div>
+                    <!-- Area + Unit -->
+                    <div class="ex-field-row">
+                        <div class="ex-field">
+                            <label class="ex-label" for="area">
+                                <i class="bi bi-rulers"></i> Area 
+                            </label>
+                            <input type="number"
+                                   step="0.01"
+                                   name="area"
+                                   id="area"
+                                   class="ex-input"
+                                   placeholder="e.g. 120"
+                                   required>
+                        </div>
+                        <div class="ex-field">
+                            <label class="ex-label" for="unit">
+                                <i class="bi bi-aspect-ratio"></i> Unit
+                            </label>
+                            <input type="text"
+                                   name="unit"
+                                   id="unit"
+                                   class="ex-input"
+                                   placeholder="sqft, rft, nos…"
+                                   required>
+                        </div>
+                    </div>
 
-      <div>
-        <label>Date</label>
-        <input type="date" name="date" required>
-      </div>
+                    <!-- Rate + Date -->
+                    <div class="ex-field-row">
+                        <div class="ex-field">
+                            <label class="ex-label" for="rate">
+                                <i class="bi bi-currency-rupee"></i> Rate
+                            </label>
+                            <div class="ex-input-wrap ex-input-currency">
+                                <span class="ex-currency">₹</span>
+                                <input type="number"
+                                       step="0.01"
+                                       name="rate"
+                                       id="rate"
+                                       class="ex-input ex-input-prefix"
+                                       placeholder="0.00"
+                                       required>
+                            </div>
+                        </div>
+                        <div class="ex-field">
+                            <label class="ex-label" for="date">
+                                <i class="bi bi-calendar3"></i> Date
+                            </label>
+                            <input type="date"
+                                   name="date"
+                                   id="date"
+                                   class="ex-input"
+                                   required>
+                        </div>
+                    </div>
 
-      <button type="submit" name="add_expense" class="btn-submit">
-        <i class="bi bi-plus-circle"></i> Add Expense
-      </button>
-    </form>
-  </div>
+                    <!-- Live Preview -->
+                    <div class="ex-preview" id="exPreview" style="display:none;">
+                        <span class="ex-preview-label">Estimated Amount</span>
+                        <span class="ex-preview-value" id="exPreviewVal">₹ 0.00</span>
+                    </div>
 
-  <!-- ================= Expense List ================= -->
-  <div class="expense-table-card">
+                    <button type="submit" name="add_expense" class="ex-submit-btn">
+                        <i class="bi bi-plus-circle-dotted"></i>
+                        <span>Add Expense</span>
+                    </button>
 
-    <h4 class="mb-3">
-      Expenses for
-      {% for project in projects %}
-        {% if project.id == selected_project_id %}
-          {{ project.client_name }}
-        {% endif %}
-      {% endfor %}
-    </h4>
+                </form>
 
-    <div class="table-responsive">
-      <table class="table table-bordered table-hover align-middle">
-        <thead class="text-center">
-          <tr class="total-row">
-            <th colspan="7">Total Expenses: ₹{{ total_expense|default:"0.00" }}</th>
-          </tr>
-          <tr>
-            <th>Date</th>
-            <th>Description</th>
-            <th>Area</th>
-            <th>Unit</th>
-            <th>Rate</th>
-            <th>Amount</th>
-            <th>Actions</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for expense in expenses %}
-          <tr>
-            <td>{{ expense.date }}</td>
-            <td>{{ expense.description }}</td>
-            <td>{{ expense.area }}</td>
-            <td>{{ expense.unit }}</td>
-            <td>₹{{ expense.rate }}</td>
-            <td>₹{{ expense.amount }}</td>
-            <td class="text-center">
-              <a href="{% url 'edit_expense' expense.id %}" class="btn btn-sm btn-primary">Edit</a>
-              <a href="{% url 'delete_expense' expense.id %}"
-                 class="btn btn-sm btn-danger"
-                 onclick="return confirm('Delete this expense?');">
-                 Delete
-              </a>
-            </td>
-          </tr>
-          {% empty %}
-          <tr>
-            <td colspan="7" class="text-center text-muted">
-              No expenses added yet.
-            </td>
-          </tr>
-          {% endfor %}
-        </tbody>
-      </table>
+            </div>
+        </div>
+
+        <!-- ── RIGHT: Expense Table ── -->
+        <div class="ex-table-col">
+            <div class="ex-table-card">
+
+                <!-- Table Header -->
+                <div class="ex-table-header">
+                    <div class="ex-tbl-hdr-left">
+                        <div class="ex-tbl-icon">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div>
+                            <span class="ex-tbl-title">
+                                Expenses
+                                {% if selected_project_id %}
+                                    {% for project in projects %}
+                                        {% if project.id == selected_project_id %}
+                                            — {{ project.client_name }}
+                                        {% endif %}
+                                    {% endfor %}
+                                {% endif %}
+                            </span>
+                            <span class="ex-tbl-count">{{ total_count }} entries</span>
+                        </div>
+                    </div>
+                    {% if total_count %}
+                    <div class="ex-tbl-total-badge">
+                        <i class="bi bi-calculator-fill"></i>
+                        <span>Total: <strong>{{ total_expense|indian_currency }}</strong></span>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Showing Info -->
+                {% if total_count %}
+                <div class="ex-showing-bar">
+                    <span>
+                        Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+                        of <strong>{{ total_count }}</strong>
+                    </span>
+                    <span>
+                        Page <strong>{{ page_obj.number }}</strong>
+                        of <strong>{{ paginator.num_pages }}</strong>
+                    </span>
+                </div>
+                {% endif %}
+
+                <!-- Table -->
+                <div class="ex-table-scroll">
+                    <table class="ex-table">
+                        <thead>
+                            <tr>
+                                <th class="ex-th-sno">#</th>
+                                <th>
+                                    <div class="ex-th"><i class="bi bi-calendar3"></i> Date</div>
+                                </th>
+                                <th>
+                                    <div class="ex-th"><i class="bi bi-card-text"></i> Description</div>
+                                </th>
+                                <th>
+                                    <div class="ex-th"><i class="bi bi-rulers"></i> Area</div>
+                                </th>
+                                <th>
+                                    <div class="ex-th"><i class="bi bi-aspect-ratio"></i> Unit</div>
+                                </th>
+                                <th class="text-end">
+                                    <div class="ex-th ex-th-end"><i class="bi bi-currency-rupee"></i> Rate</div>
+                                </th>
+                                <th class="text-end">
+                                    <div class="ex-th ex-th-end"><i class="bi bi-cash-stack"></i> Amount</div>
+                                </th>
+                                <th class="text-center">
+                                    <div class="ex-th" style="justify-content:center;"><i class="bi bi-gear"></i> Actions</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for expense in expenses %}
+                            <tr class="ex-tr" style="animation-delay:{{ forloop.counter0 }}0ms">
+
+                                <td>
+                                    <span class="ex-sno">
+                                        {{ page_obj.start_index|add:forloop.counter0 }}
+                                    </span>
+                                </td>
+
+                                <!-- Date -->
+                                <td>
+                                    <div class="ex-date-cell">
+                                        <div class="ex-date-icon">
+                                            <i class="bi bi-calendar3"></i>
+                                        </div>
+                                        <div>
+                                            <span class="ex-date-main">{{ expense.date|date:"d M Y" }}</span>
+                                            <span class="ex-date-day">{{ expense.date|date:"l" }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Description -->
+                                <td>
+                                    <span class="ex-desc">{{ expense.description }}</span>
+                                </td>
+
+                                <!-- Area -->
+                                <td>
+                                    <span class="ex-area">{{ expense.area }}</span>
+                                </td>
+
+                                <!-- Unit -->
+                                <td>
+                                    <span class="ex-unit-badge">{{ expense.unit }}</span>
+                                </td>
+
+                                <!-- Rate -->
+                                <td class="text-end">
+                                    <span class="ex-money">{{ expense.rate|indian_currency }}</span>
+                                </td>
+
+                                <!-- Amount -->
+                                <td class="text-end">
+                                    <span class="ex-money ex-money-primary">{{ expense.amount|indian_currency }}</span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-center">
+                                    <div class="ex-action-group">
+                                        <a href="{% url 'edit_expense' expense.id %}"
+                                           class="ex-action-btn ex-act-edit" title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <a href="{% url 'delete_expense' expense.id %}"
+                                           class="ex-action-btn ex-act-delete delete-btn" title="Delete">
+                                            <i class="bi bi-trash3"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="8">
+                                    <div class="ex-empty">
+                                        <div class="ex-empty-art">
+                                            <div class="ex-ea-ring ex-ear-1"></div>
+                                            <div class="ex-ea-ring ex-ear-2"></div>
+                                            <div class="ex-ea-icon">
+                                                <i class="bi bi-receipt"></i>
+                                            </div>
+                                        </div>
+                                        <h5>No Expenses Yet</h5>
+                                        <p>
+                                            {% if selected_project_id %}
+                                                Add your first expense using the form
+                                            {% else %}
+                                                Select a project to view expenses
+                                            {% endif %}
+                                        </p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- ═══════════════════════════
+                     PAGINATION
+                ═══════════════════════════ -->
+                {% if page_obj.has_other_pages %}
+                <div class="ex-pag-wrap">
+
+                    <span class="ex-pag-info">
+                        <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+                        of <strong>{{ total_count }}</strong>
+                    </span>
+
+                    <nav class="ex-pag-nav">
+
+                        {% if page_obj.has_previous %}
+                        <a href="?project={{ selected_project_id }}&page=1"
+                           class="ex-pb ex-pb-nav"><i class="bi bi-chevron-double-left"></i></a>
+                        <a href="?project={{ selected_project_id }}&page={{ page_obj.previous_page_number }}"
+                           class="ex-pb ex-pb-nav"><i class="bi bi-chevron-left"></i></a>
+                        {% else %}
+                        <span class="ex-pb ex-pb-off"><i class="bi bi-chevron-double-left"></i></span>
+                        <span class="ex-pb ex-pb-off"><i class="bi bi-chevron-left"></i></span>
+                        {% endif %}
+
+                        <div class="ex-pag-nums">
+                        {% for num in paginator.page_range %}
+                            {% if page_obj.number == num %}
+                                <span class="ex-pb ex-pb-on">{{ num }}</span>
+                            {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                                <a href="?project={{ selected_project_id }}&page={{ num }}"
+                                   class="ex-pb">{{ num }}</a>
+                            {% elif num == 1 or num == paginator.num_pages %}
+                                <a href="?project={{ selected_project_id }}&page={{ num }}"
+                                   class="ex-pb">{{ num }}</a>
+                            {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                                <span class="ex-pag-dots">•••</span>
+                            {% endif %}
+                        {% endfor %}
+                        </div>
+
+                        {% if page_obj.has_next %}
+                        <a href="?project={{ selected_project_id }}&page={{ page_obj.next_page_number }}"
+                           class="ex-pb ex-pb-nav"><i class="bi bi-chevron-right"></i></a>
+                        <a href="?project={{ selected_project_id }}&page={{ paginator.num_pages }}"
+                           class="ex-pb ex-pb-nav"><i class="bi bi-chevron-double-right"></i></a>
+                        {% else %}
+                        <span class="ex-pb ex-pb-off"><i class="bi bi-chevron-right"></i></span>
+                        <span class="ex-pb ex-pb-off"><i class="bi bi-chevron-double-right"></i></span>
+                        {% endif %}
+
+                    </nav>
+
+                    <span class="ex-pag-info">
+                        Page <strong>{{ page_obj.number }}</strong> of <strong>{{ paginator.num_pages }}</strong>
+                    </span>
+
+                </div>
+                {% endif %}
+
+            </div>
+        </div>
+
     </div>
-
-  </div>
 
 </div>
+
+
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
+<style>
+
+:root {
+    --ex-indigo:    #4f46e5;
+    --ex-indigo-lt: #eef2ff;
+    --ex-indigo-md: #c7d2fe;
+    --ex-indigo-dk: #3730a3;
+    --ex-emerald:   #059669;
+    --ex-emerald-lt:#ecfdf5;
+    --ex-amber:     #d97706;
+    --ex-amber-lt:  #fffbeb;
+    --ex-red:       #dc2626;
+    --ex-red-lt:    #fef2f2;
+    --ex-violet:    #7c3aed;
+    --ex-violet-lt: #f5f3ff;
+    --ex-s50:  #f8fafc;
+    --ex-s100: #f1f5f9;
+    --ex-s200: #e2e8f0;
+    --ex-s300: #cbd5e1;
+    --ex-s400: #94a3b8;
+    --ex-s500: #64748b;
+    --ex-s600: #475569;
+    --ex-dark: #0f172a;
+    --ex-r-sm: 8px;
+    --ex-r-md: 12px;
+    --ex-r-lg: 16px;
+    --ex-r-xl: 20px;
+    --ex-ease: cubic-bezier(.4,0,.2,1);
+    --ex-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --ex-sh-md: 0 4px 12px rgba(0,0,0,.07);
+}
+
+/* ── Page ── */
+.ex-page { display:flex; flex-direction:column; gap:22px; max-width:1440px; margin:0 auto; padding-bottom:48px; }
+
+/* ── Header ── */
+.ex-header { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.ex-header-left { display:flex; align-items:center; gap:14px; }
+.ex-header-icon { position:relative; width:50px; height:50px; background:linear-gradient(135deg,var(--ex-indigo),var(--ex-indigo-dk)); border-radius:var(--ex-r-lg); display:flex; align-items:center; justify-content:center; color:white; font-size:1.2rem; box-shadow:0 6px 18px rgba(79,70,229,.28); flex-shrink:0; }
+.ex-icon-ring { position:absolute; inset:-5px; border:2px solid rgba(79,70,229,.18); border-radius:calc(var(--ex-r-lg)+5px); animation:exRing 2.5s ease-in-out infinite; }
+@keyframes exRing { 0%,100%{opacity:.4;transform:scale(1);} 50%{opacity:1;transform:scale(1.04);} }
+.ex-eyebrow { font-size:.6rem; font-weight:600; text-transform:uppercase; letter-spacing:.09em; color:var(--ex-indigo); margin:0 0 2px; }
+.ex-title { font-size:1.3rem; font-weight:700; color:var(--ex-dark); letter-spacing:-.025em; margin:0 0 2px; line-height:1.2; }
+.ex-subtitle { font-size:.72rem; font-weight:400; color:var(--ex-s500); margin:0; }
+
+/* Stat Chip */
+.ex-stat-chip { display:flex; align-items:center; gap:12px; padding:12px 18px; background:white; border:1px solid var(--ex-s200); border-radius:var(--ex-r-lg); box-shadow:var(--ex-sh-sm); }
+.ex-stat-chip-icon { width:38px; height:38px; background:var(--ex-emerald-lt); border-radius:var(--ex-r-md); display:flex; align-items:center; justify-content:center; color:var(--ex-emerald); font-size:.95rem; }
+.ex-stat-chip-val { display:block; font-size:1rem; font-weight:700; color:var(--ex-emerald); font-family:'Monaco','Menlo',monospace; line-height:1.1; }
+.ex-stat-chip-lbl { display:block; font-size:.58rem; font-weight:500; color:var(--ex-s500); text-transform:uppercase; letter-spacing:.05em; }
+
+/* ── Layout ── */
+.ex-layout { display:grid; grid-template-columns:340px 1fr; gap:20px; align-items:start; }
+
+/* ── Form Card ── */
+.ex-form-col { position:sticky; top:20px; z-index:5; }
+.ex-form-card { background:white; border:1px solid var(--ex-s200); border-radius:var(--ex-r-xl); overflow:hidden; box-shadow:var(--ex-sh-md); }
+.ex-form-card::before { content:''; display:block; height:3px; background:linear-gradient(90deg,var(--ex-indigo),#818cf8,#06b6d4); }
+
+.ex-form-header { display:flex; align-items:center; gap:12px; padding:18px 20px 0; }
+.ex-form-hdr-icon { width:36px; height:36px; background:var(--ex-indigo-lt); border-radius:var(--ex-r-md); display:flex; align-items:center; justify-content:center; color:var(--ex-indigo); font-size:.92rem; flex-shrink:0; }
+.ex-form-title { font-size:.86rem; font-weight:700; color:var(--ex-dark); margin:0 0 2px; }
+.ex-form-sub { font-size:.64rem; font-weight:400; color:var(--ex-s500); margin:0; }
+
+/* Form */
+.ex-form { padding:16px 20px 20px; display:flex; flex-direction:column; gap:12px; }
+.ex-field { display:flex; flex-direction:column; gap:5px; }
+.ex-field-full { grid-column:1/-1; }
+.ex-field-row { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+
+.ex-label { display:flex; align-items:center; gap:5px; font-size:.64rem; font-weight:600; color:var(--ex-s500); text-transform:uppercase; letter-spacing:.06em; }
+.ex-label i { color:var(--ex-indigo); font-size:.7rem; }
+
+.ex-select-wrap { position:relative; }
+.ex-select-icon { position:absolute; left:10px; top:50%; transform:translateY(-50%); color:var(--ex-s400); font-size:.78rem; pointer-events:none; z-index:1; }
+.ex-select { width:100%; padding:9px 30px 9px 32px; border:1.5px solid var(--ex-s200); border-radius:var(--ex-r-md); font-size:.78rem; font-weight:500; color:var(--ex-dark); background:var(--ex-s50); appearance:none; font-family:inherit; transition:all .2s var(--ex-ease); }
+.ex-select:focus { outline:none; border-color:var(--ex-indigo); background:white; box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+.ex-select-arrow { position:absolute; right:10px; top:50%; transform:translateY(-50%); color:var(--ex-s400); font-size:.6rem; pointer-events:none; }
+
+.ex-input-wrap { position:relative; }
+.ex-input-currency { position:relative; }
+.ex-currency { position:absolute; left:12px; top:50%; transform:translateY(-50%); font-size:.82rem; font-weight:600; color:var(--ex-s500); pointer-events:none; z-index:1; }
+
+.ex-input { width:100%; padding:9px 12px; border:1.5px solid var(--ex-s200); border-radius:var(--ex-r-md); font-size:.78rem; font-weight:400; color:var(--ex-dark); background:var(--ex-s50); font-family:inherit; transition:all .2s var(--ex-ease); appearance:none; }
+.ex-input-prefix { padding-left:26px; }
+.ex-input::placeholder { color:var(--ex-s400); }
+.ex-input:focus { outline:none; border-color:var(--ex-indigo); background:white; box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+
+/* Preview */
+.ex-preview { display:flex; align-items:center; justify-content:space-between; padding:10px 14px; background:var(--ex-emerald-lt); border:1px solid rgba(5,150,105,.15); border-radius:var(--ex-r-md); }
+.ex-preview-label { font-size:.66rem; font-weight:600; color:var(--ex-emerald); text-transform:uppercase; letter-spacing:.05em; }
+.ex-preview-value { font-size:.88rem; font-weight:700; color:var(--ex-emerald); font-family:'Monaco','Menlo',monospace; }
+
+/* Submit */
+.ex-submit-btn { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:12px; background:linear-gradient(135deg,var(--ex-indigo),var(--ex-indigo-dk)); color:white; border:none; border-radius:var(--ex-r-md); font-size:.82rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s var(--ex-ease); box-shadow:0 4px 12px rgba(79,70,229,.28); margin-top:4px; }
+.ex-submit-btn:hover { transform:translateY(-2px); box-shadow:0 8px 22px rgba(79,70,229,.38); }
+.ex-submit-btn:active { transform:translateY(0); }
+.ex-submit-btn i { font-size:1rem; }
+
+/* ── Table Card ── */
+.ex-table-card { background:white; border:1px solid var(--ex-s200); border-radius:var(--ex-r-xl); overflow:hidden; box-shadow:var(--ex-sh-md); }
+.ex-table-card::before { content:''; display:block; height:3px; background:linear-gradient(90deg,var(--ex-indigo),#818cf8,#06b6d4); }
+
+.ex-table-header { display:flex; align-items:center; justify-content:space-between; padding:16px 20px; border-bottom:1px solid var(--ex-s100); background:var(--ex-s50); flex-wrap:wrap; gap:10px; }
+.ex-tbl-hdr-left { display:flex; align-items:center; gap:10px; }
+.ex-tbl-icon { width:30px; height:30px; background:var(--ex-indigo-lt); border-radius:var(--ex-r-sm); display:flex; align-items:center; justify-content:center; color:var(--ex-indigo); font-size:.75rem; }
+.ex-tbl-title { display:block; font-size:.82rem; font-weight:600; color:var(--ex-dark); line-height:1.2; }
+.ex-tbl-count { display:block; font-size:.6rem; font-weight:500; color:var(--ex-s400); margin-top:1px; }
+.ex-tbl-total-badge { display:flex; align-items:center; gap:6px; padding:6px 14px; background:var(--ex-emerald-lt); border:1px solid rgba(5,150,105,.15); border-radius:var(--ex-r-md); font-size:.72rem; font-weight:600; color:var(--ex-emerald); }
+.ex-tbl-total-badge strong { font-family:'Monaco','Menlo',monospace; }
+
+/* Showing bar */
+.ex-showing-bar { display:flex; align-items:center; justify-content:space-between; padding:8px 20px; font-size:.68rem; font-weight:400; color:var(--ex-s500); border-bottom:1px solid var(--ex-s100); }
+.ex-showing-bar strong { font-weight:600; color:var(--ex-dark); }
+
+/* Table */
+.ex-table-scroll { overflow-x:auto; max-height:60vh; }
+.ex-table-scroll::-webkit-scrollbar { width:4px; height:4px; }
+.ex-table-scroll::-webkit-scrollbar-thumb { background:var(--ex-s200); border-radius:10px; }
+
+.ex-table { width:100%; border-collapse:collapse; font-size:.78rem; }
+.ex-table thead { position:sticky; top:0; z-index:10; }
+.ex-table thead tr { background:var(--ex-s50); border-bottom:2px solid var(--ex-s200); }
+.ex-table thead th { padding:10px 12px; border:none; background:var(--ex-s50); white-space:nowrap; font-weight:normal; }
+.ex-th { display:inline-flex; align-items:center; gap:5px; font-size:.58rem; font-weight:700; text-transform:uppercase; letter-spacing:.07em; color:var(--ex-s400); }
+.ex-th-end { justify-content:flex-end; width:100%; }
+.ex-th-sno { width:40px; text-align:center; }
+
+.ex-table tbody tr { border-bottom:1px solid var(--ex-s100); transition:background .12s var(--ex-ease); animation:exRowFade .3s var(--ex-ease) both; }
+@keyframes exRowFade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+.ex-table tbody tr:last-child { border-bottom:none; }
+.ex-table tbody tr:hover { background:var(--ex-s50); }
+.ex-table tbody td { padding:11px 12px; vertical-align:middle; border:none; color:var(--ex-dark); }
+
+.ex-sno { display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; background:var(--ex-s100); border-radius:7px; font-size:.62rem; font-weight:600; color:var(--ex-s500); }
+
+/* Date cell */
+.ex-date-cell { display:flex; align-items:center; gap:8px; }
+.ex-date-icon { width:28px; height:28px; background:var(--ex-s100); border-radius:7px; display:flex; align-items:center; justify-content:center; color:var(--ex-s500); font-size:.72rem; flex-shrink:0; }
+.ex-date-main { display:block; font-size:.76rem; font-weight:600; color:var(--ex-dark); white-space:nowrap; }
+.ex-date-day { display:block; font-size:.58rem; font-weight:400; color:var(--ex-s400); }
+
+.ex-desc { font-size:.76rem; font-weight:500; color:var(--ex-dark); }
+.ex-area { font-size:.78rem; font-weight:600; color:var(--ex-dark); font-family:'Monaco','Menlo',monospace; }
+.ex-unit-badge { display:inline-flex; padding:3px 8px; background:var(--ex-s100); border-radius:6px; font-size:.62rem; font-weight:600; color:var(--ex-s600); text-transform:uppercase; }
+
+.ex-money { font-size:.89rem; font-weight:500; color:var(--ex-dark); font-family:'Monaco','Menlo',monospace; }
+.ex-money-primary { font-weight:600; color:var(--ex-indigo); }
+
+/* Actions */
+.ex-action-group { display:flex; align-items:center; justify-content:center; gap:5px; }
+.ex-action-btn { width:30px; height:30px; display:inline-flex; align-items:center; justify-content:center; border-radius:var(--ex-r-sm); border:1px solid var(--ex-s200); background:white; color:var(--ex-s400); font-size:.78rem; text-decoration:none; transition:all .18s var(--ex-ease); }
+.ex-act-edit:hover { background:var(--ex-indigo-lt); color:var(--ex-indigo); border-color:var(--ex-indigo-md); transform:translateY(-1px); }
+.ex-act-delete:hover { background:var(--ex-red-lt); color:var(--ex-red); border-color:rgba(220,38,38,.2); transform:translateY(-1px); }
+
+/* ── Pagination ── */
+.ex-pag-wrap { display:flex; align-items:center; justify-content:space-between; padding:12px 20px; border-top:1px solid var(--ex-s100); background:var(--ex-s50); gap:12px; flex-wrap:wrap; }
+.ex-pag-info { font-size:.72rem; font-weight:400; color:var(--ex-s500); }
+.ex-pag-info strong { font-weight:600; color:var(--ex-dark); }
+.ex-pag-nav { display:flex; align-items:center; gap:4px; }
+.ex-pag-nums { display:flex; align-items:center; gap:4px; }
+.ex-pb { min-width:32px; height:32px; padding:0 7px; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--ex-s200); border-radius:var(--ex-r-sm); font-size:.75rem; font-weight:500; color:var(--ex-s600); background:white; text-decoration:none; transition:all .18s var(--ex-ease); cursor:pointer; }
+.ex-pb:hover { background:var(--ex-indigo-lt); border-color:var(--ex-indigo-md); color:var(--ex-indigo); transform:translateY(-1px); }
+.ex-pb-on { background:linear-gradient(135deg,var(--ex-indigo),var(--ex-indigo-dk)); border-color:var(--ex-indigo-dk); color:white!important; box-shadow:0 3px 10px rgba(79,70,229,.25); pointer-events:none; }
+.ex-pb-off { opacity:.3; pointer-events:none; background:var(--ex-s50); }
+.ex-pag-dots { display:inline-flex; align-items:center; justify-content:center; width:28px; height:32px; font-size:.55rem; color:var(--ex-s400); letter-spacing:.1em; }
+
+/* ── Empty ── */
+.ex-empty { text-align:center; padding:52px 24px; }
+.ex-empty-art { position:relative; width:72px; height:72px; margin:0 auto 18px; }
+.ex-ea-ring { position:absolute; border-radius:50%; opacity:.06; }
+.ex-ear-1 { inset:0; background:var(--ex-indigo); animation:exEcP 3s ease-in-out infinite; }
+.ex-ear-2 { inset:10px; background:var(--ex-emerald); animation:exEcP 3s ease-in-out infinite .5s; }
+@keyframes exEcP { 0%,100%{transform:scale(.95);opacity:.05;} 50%{transform:scale(1.06);opacity:.12;} }
+.ex-ea-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.7rem; color:var(--ex-s400); background:var(--ex-s100); border-radius:50%; }
+.ex-empty h5 { font-size:.9rem; font-weight:600; color:var(--ex-dark); margin-bottom:6px; }
+.ex-empty p { font-size:.74rem; font-weight:400; color:var(--ex-s500); margin:0; }
+
+/* ── Responsive ── */
+@media (max-width:1024px) { .ex-layout{grid-template-columns:1fr;} .ex-form-col{position:static;} }
+@media (max-width:768px) { .ex-header{flex-direction:column;align-items:flex-start;} .ex-table-header{flex-direction:column;align-items:flex-start;} .ex-pag-wrap{justify-content:center;} .ex-pag-info:last-child{display:none;} }
+@media (max-width:480px) { .ex-field-row{grid-template-columns:1fr;} .ex-stat-chip{display:none;} }
+
+</style>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Row animation delays ── */
+    document.querySelectorAll('.ex-tr').forEach((row, idx) => {
+        row.style.animationDelay = `${idx * 20}ms`;
+    });
+
+    /* ── Live Preview (Area × Rate) ── */
+    const areaInput    = document.getElementById('area');
+    const rateInput    = document.getElementById('rate');
+    const preview      = document.getElementById('exPreview');
+    const previewVal   = document.getElementById('exPreviewVal');
+
+    function updatePreview() {
+        const area = parseFloat(areaInput?.value) || 0;
+        const rate = parseFloat(rateInput?.value) || 0;
+        const total = area * rate;
+
+        if (total > 0) {
+            preview.style.display = 'flex';
+            previewVal.textContent = '₹ ' + total.toLocaleString('en-IN', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            });
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    if (areaInput) areaInput.addEventListener('input', updatePreview);
+    if (rateInput) rateInput.addEventListener('input', updatePreview);
+
+    /* ── Delete Confirmation ── */
+    document.querySelectorAll('.delete-btn').forEach(btn => {
+        btn.addEventListener('click', function (e) {
+            e.preventDefault();
+            const url = this.getAttribute('href');
+
+            Swal.fire({
+                title: '<div style="font-size:1rem;font-weight:700;color:#0f172a;">Delete Expense?</div>',
+                html: '<p style="font-size:.82rem;color:#64748b;font-weight:400;">This expense will be <strong>permanently removed</strong>.</p>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-trash3 me-1"></i> Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#e2e8f0',
+                customClass: {
+                    popup: 'rounded-4 border-0 shadow-lg',
+                    cancelButton: 'text-dark',
+                },
+                padding: '1.5rem',
+            }).then(result => {
+                if (result.isConfirmed) window.location.href = url;
+            });
+        });
+    });
+
+    /* ── Django Messages ── */
+    {% if messages %}
+        {% for message in messages %}
+        Swal.mixin({
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            customClass: { popup: 'rounded-3' }
+        }).fire({
+            icon: '{{ message.tags }}',
+            title: '{{ message|escapejs }}'
+        });
+        {% endfor %}
+    {% endif %}
+
+    /* ── Label focus effect ── */
+    document.querySelectorAll('.ex-input, .ex-select').forEach(inp => {
+        inp.addEventListener('focus', function () {
+            const lbl = this.closest('.ex-field, .ex-field-full')?.querySelector('.ex-label');
+            if (lbl) lbl.style.color = 'var(--ex-indigo)';
+        });
+        inp.addEventListener('blur', function () {
+            const lbl = this.closest('.ex-field, .ex-field-full')?.querySelector('.ex-label');
+            if (lbl) lbl.style.color = '';
+        });
+    });
+
+});
+</script>
 
 {% endblock %}

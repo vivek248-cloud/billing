@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
+from openai import project
 from .models import*
 from datetime import datetime
 from django.http import HttpResponse
@@ -836,6 +837,14 @@ def add_project(request):
         budget = request.POST.get('budget', '0.00')
         estimated_cost = request.POST.get('estimated_cost', '0.00')
 
+
+        Activity.objects.create(
+                title="Project Created",
+                description=f"Project '{name}' created with budget ₹{budget}",
+                action="create",
+                project=project
+        )
+        
         # Check duplicate project name
         if Project.objects.filter(name=name).exists():
             messages.error(request, f"A project with name '{name}' already exists.")
@@ -869,9 +878,8 @@ def add_project(request):
 
 # edit_project
 
-from django.contrib import messages
-from decimal import Decimal
-from django.shortcuts import get_object_or_404, redirect, render
+# from decimal import Decimal
+from django.urls import reverse
 
 def edit_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
@@ -892,6 +900,14 @@ def edit_project(request, pk):
 
         else:
             try:
+                # Store old values
+                old_name = project.name
+                old_client = project.client_name
+                old_phone = project.phone
+                old_budget = project.budget
+                old_status = project.status
+
+                # Update values
                 project.name = name
                 project.client_name = client_name
                 project.phone = phone
@@ -899,12 +915,49 @@ def edit_project(request, pk):
                 project.status = status
 
                 project.save()
-
-                # ✅ Recalculate automatically
                 project.update_estimated_cost()
 
+                # Build change summary
+                changes = []
+
+                if old_name != project.name:
+                    changes.append(
+                        f"Project renamed from '{old_name}' to '{project.name}'"
+                    )
+
+                if old_client != project.client_name:
+                    changes.append(
+                        f"Client changed from '{old_client}' to '{project.client_name}'"
+                    )
+
+                if old_phone != project.phone:
+                    changes.append(
+                        f"Phone updated from {old_phone} to {project.phone}"
+                    )
+
+                if old_budget != project.budget:
+                    changes.append(
+                        f"Budget changed from ₹{old_budget:,.0f} to ₹{project.budget:,.0f}"
+                    )
+
+                if old_status != project.status:
+                    changes.append(
+                        f"Status changed from '{old_status}' to '{project.status}'"
+                    )
+
+                # Activity Log
+                Activity.objects.create(
+                    title=f"Project Updated • {project.name}",
+                    description=" | ".join(changes) if changes else "Project information updated",
+                    action="update",
+                    project=project
+                )
+
                 messages.success(request, "Project updated successfully!")
-                return redirect('edit_project', pk=project.id)
+
+                return redirect(
+                    f"{reverse('add_project')}?project={project.id}"
+                )
 
             except Exception:
                 messages.error(request, "Invalid budget value.")
@@ -915,18 +968,34 @@ def edit_project(request, pk):
     })
 
 
-
-from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect
-
 def delete_project(request, pk):
     project = get_object_or_404(Project, pk=pk)
 
+    # Store details before deletion
+    project_name = project.name
+    client_name = project.client_name
+    phone = project.phone
+    budget = project.budget
+    status = project.status
+
+    # Activity Log
+    Activity.objects.create(
+        title=f"Project Deleted • {project_name}",
+        description=(
+            f"Client: {client_name} | "
+            f"Phone: {phone} | "
+            f"Budget: ₹{budget:,.0f} | "
+            f"Status: {status}"
+        ),
+        action="delete",
+        project=project
+    )
+
     project.delete()
-    messages.success(request, "Project deleted successfully!")
+
+    messages.success(request, f"Project '{project_name}' deleted successfully!")
 
     return redirect('add_project')
-
 
 
 # add_expense
@@ -946,6 +1015,14 @@ from .models import Project, Expense, Activity
 from .forms import ExpenseForm2
 
 
+
+
+
+
+
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
 def add_expense(request, project_id=None):
     selected_project_id = None
     total_expense = Decimal('0.00')
@@ -963,7 +1040,6 @@ def add_expense(request, project_id=None):
             expense.amount = form.cleaned_data['area'] * form.cleaned_data['rate']
             expense.save()
 
-            # ✅ Activity log
             Activity.objects.create(
                 title="Expense Added",
                 description=f"{expense.description} - ₹{expense.amount} added to {project.name}",
@@ -971,10 +1047,7 @@ def add_expense(request, project_id=None):
                 project=project
             )
 
-            # ✅ SweetAlert
             messages.success(request, f"₹{expense.amount} expense added successfully!")
-
-            # ✅ Keep same project selected after redirect
             return redirect(f"{request.path}?project={project.id}")
 
         else:
@@ -986,37 +1059,113 @@ def add_expense(request, project_id=None):
 
     # Fetch expenses
     if selected_project_id:
-        expenses = Expense.objects.filter(project_id=selected_project_id).order_by('-date')
-        total_expense = expenses.aggregate(Sum('amount'))['amount__sum'] or Decimal('0.00')
+        expenses_qs = Expense.objects.filter(
+            project_id=selected_project_id
+        ).order_by('-date')
+        total_expense = expenses_qs.aggregate(
+            Sum('amount')
+        )['amount__sum'] or Decimal('0.00')
     else:
-        expenses = Expense.objects.none()
+        expenses_qs = Expense.objects.none()
+
+    # Pagination — 15 per page
+    page_num  = request.GET.get('page', 1)
+    paginator = Paginator(expenses_qs, 15)
+
+    try:
+        page_obj = paginator.page(page_num)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
 
     projects = Project.objects.all()
 
     return render(request, 'projects/add_expense.html', {
-        'projects': projects,
-        'form': form,
-        'expenses': expenses,
-        'total_expense': total_expense,
+        'projects':            projects,
+        'form':                form,
+        'expenses':            page_obj,
+        'page_obj':            page_obj,
+        'paginator':           paginator,
+        'total_expense':       total_expense,
+        'total_count':         paginator.count,
         'selected_project_id': int(selected_project_id) if selected_project_id else None,
     })
+
+
+
 
 from django.contrib import messages
 
 @session_login_required
+
+
 
 def edit_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
     projects = Project.objects.all()
 
     if request.method == 'POST':
+
+        # Store old values before update
+        old_description = expense.description
+        old_amount = expense.amount
+        old_area = expense.area
+        old_rate = expense.rate
+        old_project = expense.project
+
         form = ExpenseForm(request.POST, instance=expense)
+
         if form.is_valid():
-            form.save()
+            updated_expense = form.save()
 
-            messages.success(request, "Expense updated successfully!")
+            # Build audit trail
+            changes = []
 
-            return redirect('client_details', project_id=expense.project.id)
+            if old_description != updated_expense.description:
+                changes.append(
+                    f"Description changed from '{old_description}' to '{updated_expense.description}'"
+                )
+
+            if old_amount != updated_expense.amount:
+                changes.append(
+                    f"Amount changed from ₹{old_amount} to ₹{updated_expense.amount}"
+                )
+
+            if old_area != updated_expense.area:
+                changes.append(
+                    f"Area changed from {old_area} to {updated_expense.area}"
+                )
+
+            if old_rate != updated_expense.rate:
+                changes.append(
+                    f"Rate changed from ₹{old_rate} to ₹{updated_expense.rate}"
+                )
+
+            if old_project != updated_expense.project:
+                changes.append(
+                    f"Project changed from '{old_project.name}' to '{updated_expense.project.name}'"
+                )
+
+            Activity.objects.create(
+                title=f"Expense Updated • {updated_expense.description}",
+                description=" | ".join(changes) if changes else "Expense information updated",
+                action="update",
+                project=updated_expense.project
+            )
+
+            redirect_url = request.POST.get(
+                'redirect_url',
+                f"{reverse('add_expense')}?project={updated_expense.project.id}"
+            )
+
+            messages.success(
+                request,
+                f"Expense '{updated_expense.description}' updated successfully!"
+            )
+
+            return redirect(redirect_url)
+
         else:
             messages.error(request, "Invalid data. Please check the fields.")
 
@@ -1031,19 +1180,43 @@ def edit_expense(request, expense_id):
 
 
 
-
 from django.contrib import messages
 
 def delete_expense(request, expense_id):
     expense = get_object_or_404(Expense, id=expense_id)
-    project_id = expense.project.id
+
+    project = expense.project
+    project_id = project.id
+
+    # Store values before deletion
+    description = expense.description
+    amount = expense.amount
+    area = expense.area
+    rate = expense.rate
+    expense_date = expense.date
+
+    # Activity Log
+    Activity.objects.create(
+        title=f"Expense Deleted • {description}",
+        description=(
+            f"Expense '{description}' was removed. "
+            f"Amount: ₹{amount}, "
+            f"Area: {area}, "
+            f"Rate: ₹{rate}, "
+            f"Date: {expense_date.strftime('%d-%m-%Y')}"
+        ),
+        action="delete",
+        project=project
+    )
 
     expense.delete()
 
-    messages.success(request, "Expense deleted successfully!")
+    messages.success(
+        request,
+        f"Expense '{description}' deleted successfully!"
+    )
 
     return redirect('client_details', project_id=project_id)
-
 
 
 # remove_expense
@@ -1144,119 +1317,82 @@ def invoice_view(request, project_id):
     return render(request, 'projects/invoice.html', context)
 
 
-# download_invoice
-# def download_invoice(request, project_id):
-#     print(f"Download invoice called for project_id: {project_id}")
 
-#     project = get_object_or_404(Project, id=project_id)
-#     print(f"Project found: {project.name}")
-
-#     latest_payment = Payment.objects.filter(project=project).order_by('-date').first()
-
-#     if latest_payment:
-#         invoice_number = f"INV-{project.id}-{latest_payment.id}-{latest_payment.date.strftime('%Y%m%d')}"
-#         invoice_date = latest_payment.date.strftime('%d-%m-%Y')
-#     else:
-#         invoice_number = f"INV-{project.id}-0000"
-#         invoice_date = datetime.now().strftime('%d-%m-%Y')
-
-#     # Check permissions
-#     if request.user.is_authenticated and request.user.is_staff:
-#         allowed = True
-#         print(f"User {request.user.username} is staff, allowed to download.")
-#     else:
-#         # Check client session
-#         session_project_id = request.session.get('client_project_id')
-#         allowed = (session_project_id == project.id)
-#         print(f"Session project id: {session_project_id}, Allowed: {allowed}")
-
-#     if not allowed:
-#         print("Access denied.")
-#         return HttpResponse("Access Denied", status=403)
-
-#     logo_url = request.build_absolute_uri(static('images/logo.PNG'))
-
-#     # Query expenses
-#     expense_rows = Expense.objects.filter(project=project)
-#     total_expense = Decimal(expense_rows.aggregate(Sum('amount'))['amount__sum'] or 0)
-#     print(f"Total expense: {total_expense}")
-
-#     # Query payments
-#     raw_payments = Payment.objects.filter(project=project).order_by('date')
-#     total_received = Decimal(raw_payments.aggregate(Sum('amount'))['amount__sum'] or 0)
-
-#     cumulative_paid = Decimal('0.00')
-#     cumulative_paid_before = Decimal('0.00')
-#     payment_rows = []
-
-#     for payment in raw_payments:
-#         payment_amount = Decimal(str(payment.amount))
-#         cumulative_paid += payment_amount
-#         row = {
-#             'date': payment.date,
-#             'amount': payment_amount,
-#             'payment_mode': payment.payment_mode,
-#             'cumulative_paid_before': cumulative_paid_before,
-#             'remaining_after_payment': (Decimal(project.budget) + total_expense) - cumulative_paid
-#         }
-#         cumulative_paid_before = cumulative_paid
-#         payment_rows.append(row)
-
-#     yet_to_receive = (Decimal(project.budget) + total_expense) - cumulative_paid
-#     current_date = datetime.now().strftime('%Y-%m-%d')
-
-#     context = {
-#         'project': project,
-#         'expenses': expense_rows,
-#         'payment_rows': payment_rows,
-#         'total_expense': total_expense,
-#         'total_received': total_received,
-#         'yet_to_receive': yet_to_receive,
-#         'date': current_date,
-#         'logo_url': logo_url,
-#         'invoice_number': invoice_number,
-#         'invoice_date': invoice_date,
-#     }
-
-#     template = get_template('projects/invoice.html')
-#     html_content = template.render(context)
-
-#     response = HttpResponse(content_type='application/pdf')
-#     response['Content-Disposition'] = f'attachment; filename="invoice_{project.client_name}.pdf"'
-
-#     pisa_status = pisa.CreatePDF(html_content, dest=response)
-
-#     if pisa_status.err:
-#         print("PDF generation error")
-#         return HttpResponse('Error generating PDF', status=500)
-
-#     return response
 
 # edit_payment
 def edit_payment(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
     projects = Project.objects.all()
-    
+
     if request.method == 'POST':
         amount = request.POST.get('amount')
-        payment_method = request.POST.get('payment_mode')
+        payment_mode = request.POST.get('payment_mode')
         project_id = request.POST.get('project')
 
-        if amount and payment_method:
+        if amount and payment_mode:
             try:
-                payment.amount = float(amount)
-                payment.payment_method = payment_method
+                # Store old values
+                old_amount = Decimal(str(payment.amount))
+                old_mode = payment.payment_mode
+                old_project = payment.project
 
-                if project_id and int(project_id) != payment.project.id:
+                # Update values
+                payment.amount = Decimal(amount)
+                payment.payment_mode = payment_mode
+
+                if project_id:
                     payment.project = Project.objects.get(id=project_id)
 
                 payment.save()
-                messages.success(request, "Payment updated successfully.")
-                return redirect('client_details' , project_id=payment.project.id)
+
+                # Build activity details
+                changes = []
+
+                if old_amount != payment.amount:
+                    changes.append(
+                        f"Amount: ₹{old_amount:,.0f} → ₹{payment.amount:,.0f}"
+                    )
+
+                if old_mode != payment.payment_mode:
+                    changes.append(
+                        f"Mode: {old_mode.upper()} → {payment.payment_mode.upper()}"
+                    )
+
+                if old_project != payment.project:
+                    changes.append(
+                        f"Project: {old_project.name} → {payment.project.name}"
+                    )
+
+                Activity.objects.create(
+                    title=f"Payment Updated • #{payment.id}",
+                    description=(
+                        " | ".join(changes)
+                        if changes
+                        else f"Payment #{payment.id} was saved without changes."
+                    ),
+                    action="update",
+                    project=payment.project
+                )
+
+                messages.success(
+                    request,
+                    f"Payment ₹{payment.amount:,.0f} updated successfully."
+                )
+
+                return redirect(
+                    f"{reverse('add_payment')}?project={payment.project.id}"
+                )
+
             except (ValueError, Project.DoesNotExist):
-                messages.error(request, "Invalid input. Please check again.")
+                messages.error(
+                    request,
+                    "Invalid input. Please check again."
+                )
         else:
-            messages.error(request, "Amount and payment method are required.")
+            messages.error(
+                request,
+                "Amount and payment method are required."
+            )
 
     return render(request, 'projects/edit_payment.html', {
         'payment': payment,
@@ -1264,13 +1400,49 @@ def edit_payment(request, payment_id):
     })
 
 
+
+
+
 # delete_payment
 def delete_payment(request, payment_id):
     payment = get_object_or_404(Payment, id=payment_id)
+
     if request.method == 'POST':
+
+        project = payment.project
+
+        # Store values before delete
+        amount = payment.amount
+        payment_mode = payment.payment_mode
+        payment_date = payment.date
+
+        Activity.objects.create(
+            title=f"Payment Deleted • ₹{amount:,.0f}",
+            description=(
+                f"Payment of ₹{amount:,.0f} via "
+                f"{payment_mode.upper()} was removed from "
+                f"project '{project.name}'. "
+                f"Payment Date: {payment_date.strftime('%d-%m-%Y')}"
+            ),
+            action="delete",
+            project=project
+        )
+
         payment.delete()
-        messages.success(request, "Payment deleted successfully.")
+
+        messages.success(
+            request,
+            f"Payment of ₹{amount:,.0f} deleted successfully."
+        )
+
+        return redirect(
+            f"{reverse('add_payment')}?project={project.id}"
+        )
+
     return redirect('add_payment')
+
+
+
 
 
 from decimal import Decimal
@@ -1319,11 +1491,30 @@ def add_payment(request):
 
                 messages.success(request, f'Payment of ₹{amount_decimal} added successfully for project "{project.name}".')
 
-                # Recalculate total and remaining
-                total_paid_raw = project.payments.aggregate(total=Sum('amount'))['total']
-                total_paid = Decimal(str(total_paid_raw)) if total_paid_raw is not None else Decimal('0')
-                budget = project.budget or Decimal('0')
-                amount_remaining = budget - total_paid
+               # Calculate updated totals
+                total_paid_raw = project.payments.aggregate(
+                    total=Sum('amount')
+                )['total']
+
+                total_paid = Decimal(str(total_paid_raw)) if total_paid_raw else Decimal('0')
+
+                remaining_amount = (
+                    Decimal(project.budget)
+                    + Decimal(project.total_expenses)
+                    - total_paid
+                )
+
+                Activity.objects.create(
+                    title=f"Payment Received • ₹{amount_decimal:,.0f}",
+                    description=(
+                        f"Received ₹{amount_decimal:,.0f} via "
+                        f"{payment_mode.upper()} for project "
+                        f"'{project.name}'. "
+                        f"Remaining balance: ₹{remaining_amount:,.0f}"
+                    ),
+                    action="create",
+                    project=project
+                )
 
                 return redirect(f"{request.path}?project={project.id}")
 
@@ -1576,38 +1767,7 @@ def daily_statistics(request):
 
 
 
-# def add_custom_project(request):
-#     if request.method == 'POST':
-#         name = request.POST.get('name')
-#         client_name = request.POST.get('client_name')
-#         budget = request.POST.get('budget')
 
-#         # Safely convert budget to Decimal if provided
-#         try:
-#             budget = Decimal(budget) if budget else Decimal('0.00')
-#         except:
-#             budget = Decimal('0.00')  # fallback in case of error
-
-#         project = Project.objects.create(name=name, budget=budget, client_name=client_name)
-#         return redirect('daily_expense')  # or wherever you want
-
-#     return render(request, 'projects/add_project.html')
-
-
-
-# update_project_status
-# def update_project_status(request, project_id):
-#     project = get_object_or_404(Project, id=project_id)
-
-#     if request.method == 'POST':
-#         status = request.POST.get('status')
-#         if status in dict(Project.STATUS_CHOICES):
-#             project.status = status
-#             project.save()
-#             messages.success(request, "Project status updated successfully!")
-#             return redirect('billing')
-
-#     return render(request, 'projects/update_status.html', {'project': project})
 
 
 from django.contrib import messages
@@ -1620,18 +1780,46 @@ def update_project_status(request, project_id):
         status = request.POST.get('status')
 
         if status in dict(Project.STATUS_CHOICES):
-            
-            # 🔥 Check previous status
+
+            # Store old status
             old_status = project.status
 
+            # Update status
             project.status = status
             project.save()
 
-            # 🎉 ONLY trigger when becoming completed (not already completed)
+            # Activity Log
+            Activity.objects.create(
+                title=f"Project Status Updated • {project.name}",
+                description=(
+                    f"Status changed from "
+                    f"'{old_status}' → '{status}'"
+                ),
+                action="update",
+                project=project
+            )
+
+            # Special Completed Event
             if status == "Completed" and old_status != "Completed":
+
+                Activity.objects.create(
+                    title=f"Project Completed 🎉 • {project.name}",
+                    description=(
+                        f"Project '{project.name}' has been marked "
+                        f"as Completed successfully."
+                    ),
+                    action="update",
+                    project=project
+                )
+
                 messages.success(request, "PROJECT_COMPLETED")
+
             else:
-                messages.success(request, "Project status updated successfully!")
+                messages.success(
+                    request,
+                    f"Project status updated from "
+                    f"{old_status} to {status}."
+                )
 
             return redirect('billing')
 
@@ -1793,14 +1981,19 @@ def custom_sitemap_view(request):
 
 from django.db.models import Q
 
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
+
 def activity_page(request):
-    query = request.GET.get('q', '')
-    from_date = request.GET.get('from_date')
-    to_date = request.GET.get('to_date')
+    query      = request.GET.get('q', '').strip()
+    from_date  = request.GET.get('from_date', '')
+    to_date    = request.GET.get('to_date', '')
+    action_filter = request.GET.get('action', '')
+    page_num   = request.GET.get('page', 1)
 
-    activities = Activity.objects.all().order_by('-created_at')
+    activities = Activity.objects.select_related('project').order_by('-created_at')
 
-    # 🔍 Search
+    # ── Search ──
     if query:
         activities = activities.filter(
             Q(title__icontains=query) |
@@ -1808,24 +2001,47 @@ def activity_page(request):
             Q(action__icontains=query)
         )
 
-    # 📅 Date filter
+    # ── Date filter ──
     if from_date:
         activities = activities.filter(created_at__date__gte=from_date)
 
     if to_date:
         activities = activities.filter(created_at__date__lte=to_date)
 
-    # 🔥 Critical = delete + update
-    critical_count = activities.filter(action__in=['delete', 'update']).count()
+    # ── Action filter ──
+    if action_filter in ['create', 'update', 'delete']:
+        activities = activities.filter(action=action_filter)
 
-    activities = activities[:50]
+    # ── Counts (on full filtered queryset) ──
+    total_count    = activities.count()
+    create_count   = activities.filter(action='create').count()
+    update_count   = activities.filter(action='update').count()
+    delete_count   = activities.filter(action='delete').count()
+    critical_count = update_count + delete_count
+
+    # ── Pagination — 20 per page ──
+    paginator = Paginator(activities, 20)
+
+    try:
+        page_obj = paginator.page(page_num)
+    except PageNotAnInteger:
+        page_obj = paginator.page(1)
+    except EmptyPage:
+        page_obj = paginator.page(paginator.num_pages)
 
     return render(request, 'projects/activity.html', {
-        'activities': activities,
-        'query': query,
-        'from_date': from_date,
-        'to_date': to_date,
-        'critical_count': critical_count   # ✅ send to template
+        'activities':     page_obj,
+        'page_obj':       page_obj,
+        'paginator':      paginator,
+        'total_count':    total_count,
+        'create_count':   create_count,
+        'update_count':   update_count,
+        'delete_count':   delete_count,
+        'critical_count': critical_count,
+        'query':          query,
+        'from_date':      from_date,
+        'to_date':        to_date,
+        'action_filter':  action_filter,
     })
 
 
@@ -1852,12 +2068,87 @@ def superuser_required(view_func):
 import re
 from datetime import datetime
 
+import os
+import re
+import json
+import platform
+import psutil
+import django
+from datetime import datetime, timedelta
+from collections import defaultdict
+
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.db import connection
+from django.conf import settings
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
+
+BACKUP_DIR = getattr(settings, 'BACKUP_DIR', os.path.join(settings.BASE_DIR, 'backups'))
+
+
+def get_db_size():
+    """Get database size in MB."""
+    try:
+        db_engine = settings.DATABASES['default']['ENGINE']
+        with connection.cursor() as cursor:
+            if 'postgresql' in db_engine:
+                cursor.execute("SELECT pg_database_size(current_database());")
+                size_bytes = cursor.fetchone()[0]
+            elif 'mysql' in db_engine:
+                db_name = settings.DATABASES['default']['NAME']
+                cursor.execute(
+                    "SELECT SUM(data_length + index_length) "
+                    "FROM information_schema.tables WHERE table_schema = %s;",
+                    [db_name]
+                )
+                size_bytes = cursor.fetchone()[0] or 0
+            elif 'sqlite' in db_engine:
+                db_path = settings.DATABASES['default']['NAME']
+                size_bytes = os.path.getsize(db_path) if os.path.exists(db_path) else 0
+            else:
+                size_bytes = 0
+        return round(size_bytes / (1024 * 1024), 2)
+    except Exception:
+        return 0
+
+
+def get_system_metrics():
+    """Gather system-level metrics."""
+    try:
+        cpu_percent = psutil.cpu_percent(interval=0.5)
+        memory = psutil.virtual_memory()
+        disk = psutil.disk_usage('/')
+        return {
+            "cpu_usage": cpu_percent,
+            "memory_total": round(memory.total / (1024 ** 3), 2),
+            "memory_used": round(memory.used / (1024 ** 3), 2),
+            "memory_percent": memory.percent,
+            "disk_total": round(disk.total / (1024 ** 3), 2),
+            "disk_used": round(disk.used / (1024 ** 3), 2),
+            "disk_percent": disk.percent,
+        }
+    except Exception:
+        return {
+            "cpu_usage": 0,
+            "memory_total": 0,
+            "memory_used": 0,
+            "memory_percent": 0,
+            "disk_total": 0,
+            "disk_used": 0,
+            "disk_percent": 0,
+        }
+
+
 @superuser_required
 def settings_page(request):
 
     files_data = []
     total_size = 0
     latest_backup_time = None
+    backup_sizes_over_time = defaultdict(float)
+    backup_count_by_month = defaultdict(int)
 
     if os.path.exists(BACKUP_DIR):
         files = sorted(os.listdir(BACKUP_DIR), reverse=True)
@@ -1867,14 +2158,16 @@ def settings_page(request):
                 continue
 
             file_path = os.path.join(BACKUP_DIR, file)
-            stat = os.stat(file_path)
+
+            try:
+                stat = os.stat(file_path)
+            except OSError:
+                continue
 
             file_size = stat.st_size
             total_size += file_size
 
-            # ✅ Extract datetime from filename
             match = re.search(r'(\d{4}-\d{2}-\d{2}_\d{2}-\d{2})', file)
-
             if match:
                 created_time = datetime.strptime(match.group(1), "%Y-%m-%d_%H-%M")
             else:
@@ -1883,28 +2176,103 @@ def settings_page(request):
             if not latest_backup_time or created_time > latest_backup_time:
                 latest_backup_time = created_time
 
+            # Aggregate for charts
+            month_key = created_time.strftime("%b %Y")
+            backup_sizes_over_time[month_key] += round(file_size / 1024, 2)
+            backup_count_by_month[month_key] += 1
+
+            # Time-ago helper
+            delta = datetime.now() - created_time
+            if delta.days > 0:
+                time_ago = f"{delta.days}d ago"
+            elif delta.seconds >= 3600:
+                time_ago = f"{delta.seconds // 3600}h ago"
+            elif delta.seconds >= 60:
+                time_ago = f"{delta.seconds // 60}m ago"
+            else:
+                time_ago = "Just now"
+
             files_data.append({
                 "name": file,
                 "size": round(file_size / 1024, 2),
-                "date": created_time.strftime("%d %b %Y %I:%M %p")
+                "size_mb": round(file_size / (1024 * 1024), 2),
+                "date": created_time.strftime("%d %b %Y %I:%M %p"),
+                "time_ago": time_ago,
+                "timestamp": created_time.isoformat(),
             })
 
-    # Backup Health Check
+    # Backup health
     backup_status = "healthy"
+    backup_message = "All systems operational"
     if latest_backup_time:
-        if latest_backup_time < datetime.now() - timedelta(days=2):
+        hours_since = (datetime.now() - latest_backup_time).total_seconds() / 3600
+        if hours_since > 48:
             backup_status = "warning"
+            backup_message = f"Last backup was {int(hours_since)}h ago"
+        elif hours_since > 168:
+            backup_status = "danger"
+            backup_message = "Backup critically overdue"
     else:
         backup_status = "danger"
+        backup_message = "No backups found"
+
+    # Format storage intelligently
+    if total_size >= 1024 * 1024:
+        storage_display = f"{round(total_size / (1024 * 1024), 2)} MB"
+    elif total_size >= 1024:
+        storage_display = f"{round(total_size / 1024, 2)} KB"
+    else:
+        storage_display = f"{total_size} B"
+
+    # Chart data
+    chart_labels = list(backup_sizes_over_time.keys())[-12:]
+    chart_sizes = [backup_sizes_over_time[k] for k in chart_labels]
+    chart_counts = [backup_count_by_month[k] for k in chart_labels]
+
+    # System info
+    system_metrics = get_system_metrics()
+    db_size = get_db_size()
 
     context = {
         "admin_user": request.user,
         "files": files_data,
+        "total_backup_count": len(files_data),
         "total_storage": round(total_size / 1024, 2),
+        "storage_display": storage_display,
         "backup_status": backup_status,
+        "backup_message": backup_message,
+        "latest_backup": latest_backup_time.strftime("%d %b %Y %I:%M %p") if latest_backup_time else "Never",
+        "latest_backup_ago": files_data[0]["time_ago"] if files_data else "N/A",
+
+        # Charts
+        "chart_labels": json.dumps(chart_labels),
+        "chart_sizes": json.dumps(chart_sizes),
+        "chart_counts": json.dumps(chart_counts),
+
+        # System
+        "system_metrics": system_metrics,
+        "db_size": db_size,
+        "django_version": django.get_version(),
+        "python_version": platform.python_version(),
+        "server_os": f"{platform.system()} {platform.release()}",
+        "total_users": User.objects.count(),
+        "db_engine": settings.DATABASES['default']['ENGINE'].split('.')[-1],
     }
 
     return render(request, "projects/settings.html", context)
+
+
+@superuser_required
+def api_system_health(request):
+    """AJAX endpoint for real-time health polling."""
+    metrics = get_system_metrics()
+    metrics["db_size"] = get_db_size()
+    metrics["timestamp"] = datetime.now().isoformat()
+    return JsonResponse(metrics)
+
+
+
+
 
 
 @superuser_required

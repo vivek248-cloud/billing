@@ -1,127 +1,619 @@
 {% extends 'projects/base.html' %}
 
+{% block page_title %}Edit Expense{% endblock %}
+
 {% block content %}
 
-<style>
-/* ---------- Wrapper ---------- */
-.edit-expense-wrapper {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: 30px 20px;
-}
+<div class="ee-page">
 
-/* ---------- Card ---------- */
-.edit-expense-card {
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 20px 40px rgba(15, 23, 42, 0.08);
-  padding: 28px;
-}
-
-/* ---------- Header ---------- */
-.edit-expense-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 22px;
-}
-
-.edit-expense-header h2 {
-  font-weight: 700;
-  color: #0f172a;
-  margin: 0;
-}
-
-/* ---------- Form ---------- */
-.edit-expense-form p {
-  margin-bottom: 16px;
-}
-
-.edit-expense-form label {
-  display: block;
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
-  margin-bottom: 6px;
-}
-
-.edit-expense-form input,
-.edit-expense-form select,
-.edit-expense-form textarea {
-  width: 100%;
-  padding: 10px 12px;
-  border-radius: 10px;
-  border: 1px solid #cbd5e1;
-  background: #f8fafc;
-  font-size: 14px;
-}
-
-.edit-expense-form input:focus,
-.edit-expense-form select:focus,
-.edit-expense-form textarea:focus {
-  outline: none;
-  border-color: #2563eb;
-  background: #ffffff;
-}
-
-/* ---------- Actions ---------- */
-.edit-expense-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
-  margin-top: 24px;
-}
-
-.btn-update {
-  background: #16a34a;
-  color: #ffffff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 12px;
-  font-weight: 600;
-}
-
-.btn-update:hover {
-  background: #15803d;
-}
-
-.btn-cancel {
-  background: #64748b;
-  color: #ffffff;
-  padding: 10px 20px;
-  border-radius: 12px;
-  text-decoration: none;
-}
-
-.btn-cancel:hover {
-  background: #475569;
-}
-</style>
-
-<div class="edit-expense-wrapper">
-
-  <div class="edit-expense-card">
-
-    <div class="edit-expense-header">
-      <h2>Edit Expense</h2>
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="ee-header">
+        <div class="ee-header-left">
+            <a href="javascript:history.back()" class="ee-back-btn bg-primary text-white" title="Go back">
+                <i class="bi bi-arrow-left"></i>
+            </a>
+            <div class="ee-header-icon">
+                <i class="bi bi-pencil-square"></i>
+                <div class="ee-icon-ring"></div>
+            </div>
+            <div>
+                <p class="ee-eyebrow">Expense Management</p>
+                <h1 class="ee-title">Edit Expense</h1>
+                <p class="ee-subtitle">Update the details of this cost entry</p>
+            </div>
+        </div>
     </div>
 
-    <form method="post" class="edit-expense-form">
-      {% csrf_token %}
-      {{ form.as_p }}
+    <!-- ════════════════════════════════════════
+         FORM CARD
+    ════════════════════════════════════════ -->
+    <div class="ee-card">
 
-      <div class="edit-expense-actions">
-        <a href="javascript:history.back()" class="btn-cancel">
-          Cancel
-        </a>
-        <button type="submit" class="btn-update">
-          Update Expense
-        </button>
-      </div>
-    </form>
+        <!-- Card accent -->
+        <div class="ee-card-accent"></div>
 
-  </div>
+        <!-- Card Header -->
+        <div class="ee-card-header">
+            <div class="ee-card-hdr-icon">
+                <i class="bi bi-receipt-cutoff"></i>
+            </div>
+            <div>
+                <h5 class="ee-card-title">Expense Details</h5>
+                <p class="ee-card-sub">Modify the fields below and save changes</p>
+            </div>
+        </div>
+
+        <!-- Info Banner -->
+        <div class="ee-info-banner">
+            <i class="bi bi-info-circle-fill"></i>
+            <span>Amount is automatically calculated as <strong>Area × Rate</strong></span>
+        </div>
+
+        <!-- Form -->
+        <form method="post" class="ee-form" id="editExpenseForm">
+            {% csrf_token %}
+
+            <div class="ee-form-grid">
+                {% for field in form %}
+                <div class="ee-field {% if field.field.widget.attrs.class == 'full' or field.name == 'description' %}ee-field-full{% endif %}">
+                    <label class="ee-label" for="{{ field.id_for_label }}">
+                        <span class="ee-label-dot"></span>
+                        {{ field.label }}
+                        {% if field.field.required %}
+                        <span class="ee-req">*</span>
+                        {% endif %}
+                    </label>
+                    <div class="ee-input-wrap">
+                        {{ field }}
+                        {% if field.name == 'rate' or field.name == 'area' or field.name == 'amount' %}
+                        <span class="ee-input-suffix">
+                            {% if field.name == 'rate' or field.name == 'amount' %}₹{% else %}units{% endif %}
+                        </span>
+                        {% endif %}
+                    </div>
+                    {% if field.errors %}
+                    <div class="ee-field-error">
+                        <i class="bi bi-exclamation-circle-fill"></i>
+                        {{ field.errors|join:", " }}
+                    </div>
+                    {% endif %}
+                    {% if field.help_text %}
+                    <span class="ee-field-hint">{{ field.help_text }}</span>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Actions -->
+            <div class="ee-actions">
+                <a href="javascript:history.back()" class="ee-btn ee-btn-ghost bg-danger text-white">
+                    <i class="bi bi-x-circle"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="ee-btn ee-btn-primary" id="ee-submit">
+                    <i class="bi bi-check2-circle"></i>
+                    <span>Update Expense</span>
+                    <span class="ee-submit-spinner d-none">
+                        <span class="ee-spin-ring"></span>
+                    </span>
+                </button>
+            </div>
+
+        </form>
+    </div>
 
 </div>
+
+
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
+<style>
+
+/* ══════════════════════════════
+   TOKENS
+══════════════════════════════ */
+:root {
+    --ee-indigo:    #4f46e5;
+    --ee-indigo-lt: #eef2ff;
+    --ee-indigo-md: #c7d2fe;
+    --ee-indigo-dk: #3730a3;
+    --ee-emerald:   #059669;
+    --ee-emerald-lt:#ecfdf5;
+    --ee-red:       #dc2626;
+    --ee-red-lt:    #fef2f2;
+    --ee-amber:     #d97706;
+    --ee-amber-lt:  #fffbeb;
+    --ee-s50:  #f8fafc;
+    --ee-s100: #f1f5f9;
+    --ee-s200: #e2e8f0;
+    --ee-s300: #cbd5e1;
+    --ee-s400: #94a3b8;
+    --ee-s500: #64748b;
+    --ee-s600: #475569;
+    --ee-dark: #0f172a;
+    --ee-r-sm: 8px;
+    --ee-r-md: 12px;
+    --ee-r-lg: 16px;
+    --ee-r-xl: 20px;
+    --ee-ease: cubic-bezier(.4,0,.2,1);
+    --ee-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --ee-sh-md: 0 4px 12px rgba(0,0,0,.07);
+    --ee-sh-lg: 0 12px 32px rgba(0,0,0,.1);
+}
+
+/* ── Page ── */
+.ee-page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* ── Header ── */
+.ee-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.ee-header-left {
+    display: flex;
+    align-items: center;
+    gap: 13px;
+    flex: 1;
+}
+
+.ee-back-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: var(--ee-r-md);
+    background: white;
+    border: 1.5px solid var(--ee-s200);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ee-s500);
+    font-size: .95rem;
+    text-decoration: none;
+    transition: all .2s var(--ee-ease);
+    flex-shrink: 0;
+}
+
+.ee-back-btn:hover {
+    background: var(--ee-indigo);
+    color: white;
+    border-color: var(--ee-indigo);
+    transform: translateX(-2px);
+}
+
+.ee-header-icon {
+    position: relative;
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--ee-amber), #b45309);
+    border-radius: var(--ee-r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.15rem;
+    box-shadow: 0 6px 18px rgba(217,119,6,.3);
+    flex-shrink: 0;
+}
+
+.ee-icon-ring {
+    position: absolute;
+    inset: -5px;
+    border: 2px solid rgba(217,119,6,.2);
+    border-radius: calc(var(--ee-r-lg) + 5px);
+    animation: eeRing 2.5s ease-in-out infinite;
+}
+
+@keyframes eeRing {
+    0%,100% { opacity:.4; transform: scale(1); }
+    50%     { opacity:1;  transform: scale(1.04); }
+}
+
+.ee-eyebrow {
+    font-size: .6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--ee-amber);
+    margin: 0 0 2px;
+}
+
+.ee-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--ee-dark);
+    letter-spacing: -.025em;
+    margin: 0 0 2px;
+    line-height: 1.2;
+}
+
+.ee-subtitle {
+    font-size: .7rem;
+    font-weight: 400;
+    color: var(--ee-s500);
+    margin: 0;
+}
+
+/* ── Card ── */
+.ee-card {
+    background: white;
+    border: 1px solid var(--ee-s200);
+    border-radius: var(--ee-r-xl);
+    overflow: hidden;
+    box-shadow: var(--ee-sh-md);
+}
+
+.ee-card-accent {
+    height: 3px;
+    background: linear-gradient(90deg, var(--ee-amber), #fbbf24, var(--ee-indigo));
+}
+
+.ee-card-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 24px 0;
+}
+
+.ee-card-hdr-icon {
+    width: 36px;
+    height: 36px;
+    background: var(--ee-amber-lt);
+    border-radius: var(--ee-r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--ee-amber);
+    font-size: .9rem;
+    flex-shrink: 0;
+}
+
+.ee-card-title {
+    font-size: .86rem;
+    font-weight: 700;
+    color: var(--ee-dark);
+    margin: 0 0 2px;
+}
+
+.ee-card-sub {
+    font-size: .64rem;
+    font-weight: 400;
+    color: var(--ee-s500);
+    margin: 0;
+}
+
+/* Info Banner */
+.ee-info-banner {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 16px 24px 0;
+    padding: 10px 14px;
+    background: var(--ee-indigo-lt);
+    border: 1px solid var(--ee-indigo-md);
+    border-radius: var(--ee-r-md);
+    font-size: .72rem;
+    font-weight: 500;
+    color: var(--ee-indigo);
+}
+
+.ee-info-banner i { font-size: .82rem; flex-shrink: 0; }
+
+/* ── Form ── */
+.ee-form { padding: 20px 24px 24px; }
+
+.ee-form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.ee-field { display: flex; flex-direction: column; gap: 5px; }
+
+.ee-field-full { grid-column: 1 / -1; }
+
+.ee-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .66rem;
+    font-weight: 600;
+    color: var(--ee-s500);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.ee-label-dot {
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: var(--ee-amber);
+    flex-shrink: 0;
+}
+
+.ee-req {
+    color: var(--ee-red);
+    font-size: .7rem;
+    margin-left: 1px;
+}
+
+.ee-input-wrap { position: relative; }
+
+/* Django form field styling override */
+.ee-form input[type="text"],
+.ee-form input[type="number"],
+.ee-form input[type="date"],
+.ee-form input[type="email"],
+.ee-form input[type="tel"],
+.ee-form select,
+.ee-form textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1.5px solid var(--ee-s200);
+    border-radius: var(--ee-r-md);
+    font-size: .82rem;
+    font-weight: 400;
+    color: var(--ee-dark);
+    background: var(--ee-s50);
+    font-family: inherit;
+    transition: all .2s var(--ee-ease);
+    appearance: none;
+    outline: none;
+}
+
+.ee-form select {
+    padding-right: 32px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24'%3E%3Cpath fill='%2394a3b8' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+}
+
+.ee-form textarea {
+    min-height: 80px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.ee-form input[type="text"]:focus,
+.ee-form input[type="number"]:focus,
+.ee-form input[type="date"]:focus,
+.ee-form input[type="email"]:focus,
+.ee-form input[type="tel"]:focus,
+.ee-form select:focus,
+.ee-form textarea:focus {
+    border-color: var(--ee-indigo);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.ee-form input[type="text"]::placeholder,
+.ee-form input[type="number"]::placeholder,
+.ee-form textarea::placeholder {
+    color: var(--ee-s400);
+    font-weight: 400;
+}
+
+/* Input suffix */
+.ee-input-suffix {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: .72rem;
+    font-weight: 600;
+    color: var(--ee-s400);
+    pointer-events: none;
+    background: white;
+    padding-left: 4px;
+}
+
+/* Field error */
+.ee-field-error {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .64rem;
+    font-weight: 500;
+    color: var(--ee-red);
+    margin-top: 3px;
+}
+
+.ee-field-error i { font-size: .7rem; flex-shrink: 0; }
+
+/* Field hint */
+.ee-field-hint {
+    font-size: .6rem;
+    font-weight: 400;
+    color: var(--ee-s400);
+    margin-top: 2px;
+}
+
+/* ── Actions ── */
+.ee-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding-top: 20px;
+    border-top: 1px solid var(--ee-s100);
+}
+
+.ee-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    border-radius: var(--ee-r-md);
+    font-size: .8rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all .2s var(--ee-ease);
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.ee-btn-ghost {
+    background: white;
+    color: var(--ee-s600);
+    border: 1.5px solid var(--ee-s200);
+}
+
+.ee-btn-ghost:hover {
+    background: var(--ee-s50);
+    color: var(--ee-dark);
+    border-color: var(--ee-s300);
+}
+
+.ee-btn-primary {
+    background: linear-gradient(135deg, var(--ee-emerald), #047857);
+    color: white;
+    box-shadow: 0 4px 12px rgba(5,150,105,.28);
+    position: relative;
+    overflow: hidden;
+}
+
+.ee-btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 100%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.12), transparent);
+    transition: left .5s;
+}
+
+.ee-btn-primary:hover::before { left: 100%; }
+
+.ee-btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(5,150,105,.38);
+    color: white;
+}
+
+.ee-btn-primary:active { transform: translateY(0); }
+
+/* Submit spinner */
+.ee-submit-spinner {
+    display: inline-flex;
+    align-items: center;
+    margin-left: 2px;
+}
+
+.ee-spin-ring {
+    width: 14px; height: 14px;
+    border: 2px solid rgba(255,255,255,.3);
+    border-top-color: white;
+    border-radius: 50%;
+    animation: eeSpin .65s linear infinite;
+    display: inline-block;
+}
+
+@keyframes eeSpin { to { transform: rotate(360deg); } }
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+    .ee-page { padding-bottom: 32px; }
+    .ee-form-grid { grid-template-columns: 1fr; }
+    .ee-field-full { grid-column: 1; }
+    .ee-actions { flex-direction: column-reverse; }
+    .ee-actions .ee-btn { width: 100%; justify-content: center; }
+    .ee-card-header { padding: 16px 16px 0; }
+    .ee-info-banner { margin: 12px 16px 0; }
+    .ee-form { padding: 16px; }
+}
+
+</style>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Submit spinner ── */
+    const form    = document.getElementById('editExpenseForm');
+    const submitBtn = document.getElementById('ee-submit');
+
+    if (form && submitBtn) {
+        form.addEventListener('submit', function () {
+            const spinner = submitBtn.querySelector('.ee-submit-spinner');
+            const icon    = submitBtn.querySelector('.bi');
+            const text    = submitBtn.querySelector('span:not(.ee-submit-spinner)');
+
+            submitBtn.disabled = true;
+            if (icon)    icon.style.display    = 'none';
+            if (text)    text.textContent       = 'Saving…';
+            if (spinner) spinner.classList.remove('d-none');
+        });
+    }
+
+    /* ── Label focus highlight ── */
+    document.querySelectorAll(
+        '.ee-form input, .ee-form select, .ee-form textarea'
+    ).forEach(el => {
+        el.addEventListener('focus', function () {
+            const label = this.closest('.ee-field')?.querySelector('.ee-label');
+            if (label) label.style.color = 'var(--ee-indigo)';
+
+            const dot = this.closest('.ee-field')?.querySelector('.ee-label-dot');
+            if (dot) dot.style.background = 'var(--ee-indigo)';
+        });
+
+        el.addEventListener('blur', function () {
+            const label = this.closest('.ee-field')?.querySelector('.ee-label');
+            if (label) label.style.color = '';
+
+            const dot = this.closest('.ee-field')?.querySelector('.ee-label-dot');
+            if (dot) dot.style.background = '';
+        });
+    });
+
+    /* ── Highlight changed fields ── */
+    document.querySelectorAll(
+        '.ee-form input, .ee-form select, .ee-form textarea'
+    ).forEach(el => {
+        const original = el.value;
+
+        el.addEventListener('input', function () {
+            if (this.value !== original) {
+                this.style.borderColor = 'var(--ee-amber)';
+                this.style.boxShadow   = '0 0 0 3px rgba(217,119,6,.1)';
+            } else {
+                this.style.borderColor = '';
+                this.style.boxShadow   = '';
+            }
+        });
+
+        el.addEventListener('focus', function () {
+            this.style.borderColor = 'var(--ee-indigo)';
+            this.style.boxShadow   = '0 0 0 3px rgba(79,70,229,.1)';
+        });
+
+        el.addEventListener('blur', function () {
+            if (this.value !== original) {
+                this.style.borderColor = 'var(--ee-amber)';
+                this.style.boxShadow   = '0 0 0 3px rgba(217,119,6,.1)';
+            } else {
+                this.style.borderColor = '';
+                this.style.boxShadow   = '';
+            }
+        });
+    });
+
+});
+</script>
 
 {% endblock %}

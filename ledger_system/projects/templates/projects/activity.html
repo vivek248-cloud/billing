@@ -1,428 +1,670 @@
 {% extends 'projects/base.html' %}
 {% load static %}
 
-{% block page_title %}System Intelligence{% endblock %}
+{% block page_title %}Activity Log{% endblock %}
 
 {% block content %}
 
-<div id="activity-container">
-<div class="container-fluid px-4 py-4 bg-dashboard-subtle">
+<div class="ac-page">
 
-    <!-- 🔥 STATS -->
-    <div class="row g-3 mb-5">
-        <div class="col-md-3">
-            <div class="card stats-card p-3">
-                <small class="text-muted fw-bold text-uppercase ls-1">Total Operations</small>
-                <div class="d-flex justify-content-between mt-2">
-                    <h3 class="fw-bold mb-0">{{ activities.count }}</h3>
-                    <div class="icon-circle bg-primary-soft text-primary">
-                        <i class="bi bi-cpu"></i>
-                    </div>
-                </div>
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="ac-header">
+        <div class="ac-header-left">
+            <div class="ac-header-icon">
+                <i class="bi bi-activity"></i>
+            </div>
+            <div>
+                <p class="ac-eyebrow">System</p>
+                <h1 class="ac-title">Activity Log</h1>
+                <p class="ac-subtitle">Track all project events, edits & deletions</p>
             </div>
         </div>
-
-        <div class="col-md-3">
-            <div class="card stats-card p-3">
-                <small class="text-muted fw-bold text-uppercase ls-1">Critical Changes</small>
-                <div class="d-flex justify-content-between mt-2">
-                    <h3 class="fw-bold mb-0 text-danger" id="critical-count">
-                        {{ critical_count }}
-                    </h3>
-                    <div class="icon-circle bg-danger-soft text-danger">
-                        <i class="bi bi-exclamation-octagon"></i>
-                    </div>
-                </div>
-            </div>
+        {% if critical_count > 0 %}
+        <div class="ac-critical-badge">
+            <i class="bi bi-exclamation-triangle-fill"></i>
+            <span>{{ critical_count }} critical action{{ critical_count|pluralize }}</span>
         </div>
+        {% endif %}
+    </div>
 
-        <div class="col-md-6 d-flex justify-content-md-end align-items-end">
-
-            <form method="GET" class="date-filter d-flex align-items-end gap-3">
-
-                <input type="hidden" name="q" value="{{ query }}">
-
-                <!-- Start Date -->
-                <div class="date-field">
-                    <label class="date-label">Start</label>
-                    <input type="date" 
-                        name="from_date" 
-                        value="{{ from_date }}"
-                        class="form-control form-control-sm">
-                </div>
-
-                <!-- End Date -->
-                <div class="date-field">
-                    <label class="date-label">End</label>
-                    <input type="date" 
-                        name="to_date" 
-                        value="{{ to_date }}"
-                        class="form-control form-control-sm">
-                </div>
-
-                <!-- Filter Button -->
-                <button type="submit" class="btn btn-dark-glass btn-sm px-3 rounded-3 mt-3">
-                    <i class="bi bi-funnel"></i>
-                </button>
-
-            </form>
-
+    <!-- ════════════════════════════════════════
+         STAT CARDS
+    ════════════════════════════════════════ -->
+    <div class="ac-stats-row">
+        <div class="ac-stat-card">
+            <div class="ac-stat-icon ac-si-slate"><i class="bi bi-list-ul"></i></div>
+            <div class="ac-stat-body">
+                <span class="ac-stat-val">{{ total_count }}</span>
+                <span class="ac-stat-lbl">Total</span>
+            </div>
+            <div class="ac-stat-bar ac-bar-slate"></div>
+        </div>
+        <div class="ac-stat-card">
+            <div class="ac-stat-icon ac-si-emerald"><i class="bi bi-plus-circle-fill"></i></div>
+            <div class="ac-stat-body">
+                <span class="ac-stat-val ac-val-emerald">{{ create_count }}</span>
+                <span class="ac-stat-lbl">Created</span>
+            </div>
+            <div class="ac-stat-bar ac-bar-emerald"></div>
+        </div>
+        <div class="ac-stat-card">
+            <div class="ac-stat-icon ac-si-amber"><i class="bi bi-pencil-fill"></i></div>
+            <div class="ac-stat-body">
+                <span class="ac-stat-val ac-val-amber">{{ update_count }}</span>
+                <span class="ac-stat-lbl">Updated</span>
+            </div>
+            <div class="ac-stat-bar ac-bar-amber"></div>
+        </div>
+        <div class="ac-stat-card">
+            <div class="ac-stat-icon ac-si-red"><i class="bi bi-trash3-fill"></i></div>
+            <div class="ac-stat-body">
+                <span class="ac-stat-val ac-val-red">{{ delete_count }}</span>
+                <span class="ac-stat-lbl">Deleted</span>
+            </div>
+            <div class="ac-stat-bar ac-bar-red"></div>
         </div>
     </div>
 
-    <!-- 🔍 FILTER BAR -->
-    <div class="col-xl-9 mx-auto">
-        <div class="glass-toolbar mb-4 px-4 py-2 d-flex justify-content-between">
+    <!-- ════════════════════════════════════════
+         FILTER + SEARCH TOOLBAR
+    ════════════════════════════════════════ -->
+    <div class="ac-toolbar">
+        <form method="get" id="acFilterForm" class="ac-filter-form">
 
-            <div class="d-flex gap-2">
-                <button class="filter-btn active">All</button>
-                <button class="filter-btn success">Create</button>
-                <button class="filter-btn warning">Update</button>
-                <button class="filter-btn danger">Delete</button>
+            <!-- Search -->
+            <div class="ac-search-wrap">
+                <i class="bi bi-search ac-search-icon"></i>
+                <input type="text"
+                       name="q"
+                       id="acSearch"
+                       value="{{ query }}"
+                       class="ac-search-input"
+                       placeholder="Search activities…"
+                       autocomplete="off">
+                {% if query %}
+                <a href="?from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                   class="ac-search-clear">
+                    <i class="bi bi-x-circle-fill"></i>
+                </a>
+                {% endif %}
             </div>
 
-            <div class="search-box-sm">
-                <form method="GET" class="search-box-sm">
-                    <i class="bi bi-search"></i>
-                    <input 
-                        type="text" 
-                        name="q"
-                        value="{{ query }}"
-                        placeholder="Search activity..."
-                        class="form-control form-control-sm border-0 shadow-none"
-                    >
-                </form>
+            <!-- From Date -->
+            <div class="ac-date-wrap">
+                <i class="bi bi-calendar3 ac-date-icon"></i>
+                <input type="date"
+                       name="from_date"
+                       value="{{ from_date }}"
+                       class="ac-date-input"
+                       placeholder="From">
             </div>
 
+            <!-- To Date -->
+            <div class="ac-date-wrap">
+                <i class="bi bi-calendar-check ac-date-icon"></i>
+                <input type="date"
+                       name="to_date"
+                       value="{{ to_date }}"
+                       class="ac-date-input"
+                       placeholder="To">
+            </div>
+
+            <button type="submit" class="ac-filter-btn">
+                <i class="bi bi-funnel-fill"></i>
+                Filter
+            </button>
+
+            {% if query or from_date or to_date or action_filter %}
+            <a href="{% url 'activity' %}" class="ac-reset-btn bg-danger text-white">
+                <i class="bi bi-arrow-counterclockwise"></i>
+                Reset
+            </a>
+            {% endif %}
+
+        </form>
+
+        <!-- Action Filter Tabs -->
+        <div class="ac-action-tabs">
+            <a href="?q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action="
+               class="ac-tab {% if not action_filter %}ac-tab-active{% endif %}">
+                All
+            </a>
+            <a href="?q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action=create"
+               class="ac-tab ac-tab-emerald {% if action_filter == 'create' %}ac-tab-on-emerald{% endif %}">
+                <span class="ac-tab-dot ac-tdot-emerald"></span> Created
+            </a>
+            <a href="?q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action=update"
+               class="ac-tab ac-tab-amber {% if action_filter == 'update' %}ac-tab-on-amber{% endif %}">
+                <span class="ac-tab-dot ac-tdot-amber"></span> Updated
+            </a>
+            <a href="?q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action=delete"
+               class="ac-tab ac-tab-red {% if action_filter == 'delete' %}ac-tab-on-red{% endif %}">
+                <span class="ac-tab-dot ac-tdot-red"></span> Deleted
+            </a>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SHOWING INFO
+    ════════════════════════════════════════ -->
+    {% if total_count %}
+    <div class="ac-showing">
+        <i class="bi bi-eye me-1"></i>
+        Showing <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+        of <strong>{{ total_count }}</strong> activities
+    </div>
+    {% endif %}
+
+    <!-- ════════════════════════════════════════
+         ACTIVITY TIMELINE
+    ════════════════════════════════════════ -->
+    <div class="ac-timeline-card">
+
+        <div class="ac-card-header">
+            <div class="ac-card-hdr-left">
+                <div class="ac-card-hdr-icon">
+                    <i class="bi bi-clock-history"></i>
+                </div>
+                <span class="ac-card-hdr-title">Timeline</span>
+                <span class="ac-card-hdr-count">{{ total_count }}</span>
+            </div>
+            <span class="ac-card-hdr-badge">
+                <span class="ac-live-dot"></span>
+                Live
+            </span>
         </div>
 
-        <!-- 🧠 TIMELINE -->
-        <div class="saas-timeline">
+        <div class="ac-timeline">
+            {% for activity in activities %}
+            <div class="ac-item ac-item-{{ activity.action }}"
+                 style="animation-delay: {{ forloop.counter0 }}0ms">
 
-            {% for act in activities %}
-            <div class="timeline-block">
-
-                <div class="timeline-indicator">
-                    <div class="indicator-icon
-                        {% if act.action == 'create' %}bg-success text-white
-                        {% elif act.action == 'update' %}bg-warning text-white
-                        {% elif act.action == 'delete' %}bg-danger text-white
-                        {% else %}bg-primary text-white{% endif %}">
-
-                        {% if act.action == 'create' %}
+                <!-- Timeline dot + line -->
+                <div class="ac-timeline-track">
+                    <div class="ac-dot ac-dot-{{ activity.action }}">
+                        {% if activity.action == 'create' %}
                             <i class="bi bi-plus-lg"></i>
-                        {% elif act.action == 'update' %}
-                            <i class="bi bi-arrow-repeat"></i>
-                        {% elif act.action == 'delete' %}
-                            <i class="bi bi-trash"></i>
+                        {% elif activity.action == 'update' %}
+                            <i class="bi bi-pencil"></i>
                         {% else %}
-                            <i class="bi bi-lightning"></i>
+                            <i class="bi bi-trash3"></i>
                         {% endif %}
                     </div>
+                    {% if not forloop.last %}
+                    <div class="ac-track-line"></div>
+                    {% endif %}
                 </div>
 
-                <div class="timeline-content-card">
-
-                    <div class="d-flex justify-content-between mb-2">
-                        <div class="d-flex align-items-center gap-2">
-                            <span class="badge-dot 
-                                {% if act.action == 'create' %}bg-success
-                                {% elif act.action == 'update' %}bg-warning
-                                {% else %}bg-danger{% endif %}">
+                <!-- Content -->
+                <div class="ac-item-content">
+                    <div class="ac-item-header">
+                        <div class="ac-item-hdr-left">
+                            <!-- Action badge -->
+                            <span class="ac-action-badge ac-badge-{{ activity.action }}">
+                                <span class="ac-badge-dot"></span>
+                                {{ activity.get_action_display }}
                             </span>
-
-                            <h6 class="fw-bold mb-0">{{ act.title }}</h6>
+                            <span class="ac-item-title">{{ activity.title }}</span>
                         </div>
-
-                        <small class="text-muted">{{ act.created_at|timesince }} ago</small>
+                        <span class="ac-item-time">
+                            <i class="bi bi-clock"></i>
+                            {{ activity.created_at|timesince }} ago
+                        </span>
                     </div>
 
-                    <p class="activity-desc">{{ act.description }}</p>
+                    <!-- Description -->
+                    <p class="ac-item-desc">{{ activity.description }}</p>
 
-                    <div class="footer-meta mt-3">
-
-                        <div class="user-chip">
-                            <div class="user-avatar-mini">
-                                {{ act.user.username|default:"S"|slice:":1"|upper }}
-                            </div>
-                            {{ act.user.username|default:"System" }}
-                        </div>
-
-                        <div>
-                            <span class="tag-outline">ID-{{ act.id }}</span>
-                        </div>
-
+                    <!-- Meta row -->
+                    <div class="ac-item-meta">
+                        {% if activity.project %}
+                        <span class="ac-meta-chip ac-chip-project">
+                            <i class="bi bi-folder-fill"></i>
+                            {{ activity.project.name }}
+                        </span>
+                        <span class="ac-meta-chip ac-chip-client">
+                            <i class="bi bi-person-fill"></i>
+                            {{ activity.project.client_name }}
+                        </span>
+                        {% endif %}
+                        <span class="ac-meta-chip ac-chip-date">
+                            <i class="bi bi-calendar3"></i>
+                            {{ activity.created_at|date:"d M Y, h:i A" }}
+                        </span>
                     </div>
-
                 </div>
+
             </div>
             {% empty %}
-
-            <div class="text-center py-5">
-                <i class="bi bi-inboxes display-5 text-muted"></i>
-                <h4 class="mt-3">No Activity Yet</h4>
-                <p class="text-muted">Start using system to see logs</p>
+            <div class="ac-empty">
+                <div class="ac-empty-art">
+                    <div class="ac-ea-ring ac-ear-1"></div>
+                    <div class="ac-ea-ring ac-ear-2"></div>
+                    <div class="ac-ea-icon"><i class="bi bi-journal-x"></i></div>
+                </div>
+                <h5>No Activity Found</h5>
+                <p>
+                    {% if query or from_date or to_date or action_filter %}
+                        No activities match your filters.
+                    {% else %}
+                        No activities have been recorded yet.
+                    {% endif %}
+                </p>
+                {% if query or from_date or to_date or action_filter %}
+                <a href="{% url 'activity' %}" class="ac-reset-link">
+                    <i class="bi bi-arrow-counterclockwise me-1"></i> Clear Filters
+                </a>
+                {% endif %}
             </div>
-
             {% endfor %}
-
         </div>
+
+        <!-- ════════════════════════════════════════
+             PAGINATION
+        ════════════════════════════════════════ -->
+        {% if page_obj.has_other_pages %}
+        <div class="ac-pag-wrap">
+            <span class="ac-pag-info">
+                <strong>{{ page_obj.start_index }}–{{ page_obj.end_index }}</strong>
+                of <strong>{{ total_count }}</strong>
+            </span>
+
+            <nav class="ac-pag-nav">
+                {% if page_obj.has_previous %}
+                <a href="?page=1&q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                   class="ac-pb ac-pb-nav"><i class="bi bi-chevron-double-left"></i></a>
+                <a href="?page={{ page_obj.previous_page_number }}&q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                   class="ac-pb ac-pb-nav"><i class="bi bi-chevron-left"></i></a>
+                {% else %}
+                <span class="ac-pb ac-pb-off"><i class="bi bi-chevron-double-left"></i></span>
+                <span class="ac-pb ac-pb-off"><i class="bi bi-chevron-left"></i></span>
+                {% endif %}
+
+                <div class="ac-pag-nums">
+                {% for num in paginator.page_range %}
+                    {% if page_obj.number == num %}
+                        <span class="ac-pb ac-pb-on">{{ num }}</span>
+                    {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                        <a href="?page={{ num }}&q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                           class="ac-pb">{{ num }}</a>
+                    {% elif num == 1 or num == paginator.num_pages %}
+                        <a href="?page={{ num }}&q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                           class="ac-pb">{{ num }}</a>
+                    {% elif num == page_obj.number|add:'-3' or num == page_obj.number|add:'3' %}
+                        <span class="ac-pag-dots">•••</span>
+                    {% endif %}
+                {% endfor %}
+                </div>
+
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}&q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                   class="ac-pb ac-pb-nav"><i class="bi bi-chevron-right"></i></a>
+                <a href="?page={{ paginator.num_pages }}&q={{ query }}&from_date={{ from_date }}&to_date={{ to_date }}&action={{ action_filter }}"
+                   class="ac-pb ac-pb-nav"><i class="bi bi-chevron-double-right"></i></a>
+                {% else %}
+                <span class="ac-pb ac-pb-off"><i class="bi bi-chevron-right"></i></span>
+                <span class="ac-pb ac-pb-off"><i class="bi bi-chevron-double-right"></i></span>
+                {% endif %}
+            </nav>
+
+            <span class="ac-pag-info">
+                Page <strong>{{ page_obj.number }}</strong>
+                of <strong>{{ paginator.num_pages }}</strong>
+            </span>
+        </div>
+        {% endif %}
+
     </div>
+
 </div>
-</div>
 
 
-
-
-<!-- 🔥 STYLE -->
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
 <style>
+
 :root {
-    --primary:#3b82f6;
+    --ac-indigo:    #4f46e5;
+    --ac-indigo-lt: #eef2ff;
+    --ac-indigo-md: #c7d2fe;
+    --ac-indigo-dk: #3730a3;
+    --ac-emerald:   #059669;
+    --ac-emerald-lt:#ecfdf5;
+    --ac-amber:     #d97706;
+    --ac-amber-lt:  #fffbeb;
+    --ac-red:       #dc2626;
+    --ac-red-lt:    #fef2f2;
+    --ac-violet:    #7c3aed;
+    --ac-violet-lt: #f5f3ff;
+    --ac-s50:  #f8fafc;
+    --ac-s100: #f1f5f9;
+    --ac-s200: #e2e8f0;
+    --ac-s300: #cbd5e1;
+    --ac-s400: #94a3b8;
+    --ac-s500: #64748b;
+    --ac-s600: #475569;
+    --ac-dark: #0f172a;
+    --ac-r-sm: 8px;
+    --ac-r-md: 12px;
+    --ac-r-lg: 16px;
+    --ac-r-xl: 20px;
+    --ac-ease: cubic-bezier(.4,0,.2,1);
+    --ac-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --ac-sh-md: 0 4px 12px rgba(0,0,0,.07);
 }
 
-/* Background */
-.bg-dashboard-subtle { background:#f8fafc; min-height:100vh; }
-
-/* Cards */
-.stats-card {
-    background:linear-gradient(145deg,#fff,#f8fafc);
-    border:1px solid #e2e8f0;
-    border-radius:14px;
-    transition:0.3s;
-}
-.stats-card:hover {
-    transform:translateY(-5px);
-    box-shadow:0 15px 30px rgba(0,0,0,0.06);
+/* ── Page ── */
+.ac-page {
+    display: flex; flex-direction: column;
+    gap: 20px; max-width: 1000px;
+    margin: 0 auto; padding-bottom: 48px;
+    animation: acFade .4s ease both;
 }
 
-/* Icons */
-.icon-circle {
-    width:40px;height:40px;border-radius:10px;
-    display:flex;align-items:center;justify-content:center;
+@keyframes acFade {
+    from { opacity:0; transform:translateY(10px); }
+    to   { opacity:1; transform:translateY(0); }
 }
-.bg-primary-soft { background:rgba(59,130,246,0.1); }
-.bg-success-soft { background:rgba(34,197,94,0.1); }
-.bg-warning-soft { background:rgba(234,179,8,0.1); }
-.bg-danger-soft { background:rgba(239,68,68,0.1); }
 
-/* Filter */
-.filter-btn {
-    border:none;
-    background:#f1f5f9;
-    padding:6px 14px;
-    border-radius:20px;
-    font-size:0.8rem;
+/* ── Header ── */
+.ac-header { display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; }
+.ac-header-left { display:flex; align-items:center; gap:14px; }
+
+.ac-header-icon {
+    position:relative; width:50px; height:50px;
+    background:linear-gradient(135deg,var(--ac-violet),var(--ac-indigo));
+    border-radius:var(--ac-r-lg); display:flex; align-items:center;
+    justify-content:center; color:white; font-size:1.2rem;
+    box-shadow:0 6px 18px rgba(124,58,237,.3); flex-shrink:0;
 }
-.filter-btn.active { background:var(--primary); color:#fff; }
+
+.ac-icon-ring {
+    position:absolute; inset:-5px;
+    border:2px solid rgba(124,58,237,.2);
+    border-radius:calc(var(--ac-r-lg)+5px);
+    animation:acRing 2.5s ease-in-out infinite;
+}
+
+@keyframes acRing { 0%,100%{opacity:.4;transform:scale(1);} 50%{opacity:1;transform:scale(1.04);} }
+
+.ac-eyebrow { font-size:.6rem; font-weight:600; text-transform:uppercase; letter-spacing:.09em; color:var(--ac-violet); margin:0 0 2px; }
+.ac-title { font-size:1.3rem; font-weight:700; color:var(--ac-dark); letter-spacing:-.025em; margin:0 0 2px; line-height:1.2; }
+.ac-subtitle { font-size:.72rem; font-weight:400; color:var(--ac-s500); margin:0; }
+
+.ac-critical-badge {
+    display:flex; align-items:center; gap:7px;
+    padding:7px 14px;
+    background:var(--ac-red-lt);
+    border:1px solid rgba(220,38,38,.2);
+    border-radius:var(--ac-r-md);
+    font-size:.72rem; font-weight:600; color:var(--ac-red);
+    animation:acPulse 2s ease-in-out infinite;
+}
+
+@keyframes acPulse { 0%,100%{opacity:1;} 50%{opacity:.7;} }
+.ac-critical-badge i { font-size:.82rem; }
+
+/* ── Stat Cards ── */
+.ac-stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:12px; }
+
+.ac-stat-card {
+    background:white; border:1px solid var(--ac-s200);
+    border-radius:var(--ac-r-lg);
+    padding:14px 16px;
+    display:flex; align-items:center; gap:12px;
+    position:relative; overflow:hidden;
+    transition:transform .2s var(--ac-ease), box-shadow .2s var(--ac-ease);
+}
+
+.ac-stat-card:hover { transform:translateY(-3px); box-shadow:var(--ac-sh-md); }
+
+.ac-stat-bar {
+    position:absolute; top:0; left:0; right:0; height:2px;
+}
+
+.ac-bar-slate   { background:linear-gradient(90deg,var(--ac-s400),var(--ac-s300)); }
+.ac-bar-emerald { background:linear-gradient(90deg,var(--ac-emerald),#34d399); }
+.ac-bar-amber   { background:linear-gradient(90deg,var(--ac-amber),#fbbf24); }
+.ac-bar-red     { background:linear-gradient(90deg,var(--ac-red),#f87171); }
+
+.ac-stat-icon {
+    width:38px; height:38px; min-width:38px;
+    border-radius:var(--ac-r-sm);
+    display:flex; align-items:center; justify-content:center;
+    font-size:.95rem;
+}
+
+.ac-si-slate   { background:var(--ac-s100);        color:var(--ac-s600); }
+.ac-si-emerald { background:var(--ac-emerald-lt);  color:var(--ac-emerald); }
+.ac-si-amber   { background:var(--ac-amber-lt);    color:var(--ac-amber); }
+.ac-si-red     { background:var(--ac-red-lt);      color:var(--ac-red); }
+
+.ac-stat-body { display:flex; flex-direction:column; }
+.ac-stat-val { font-size:1.05rem; font-weight:700; color:var(--ac-dark); line-height:1.2; }
+.ac-stat-lbl { font-size:.6rem; font-weight:500; color:var(--ac-s500); text-transform:uppercase; letter-spacing:.05em; }
+
+.ac-val-emerald { color:var(--ac-emerald)!important; }
+.ac-val-amber   { color:var(--ac-amber)!important; }
+.ac-val-red     { color:var(--ac-red)!important; }
+
+/* ── Toolbar ── */
+.ac-toolbar {
+    display:flex; align-items:center;
+    justify-content:space-between;
+    gap:12px; flex-wrap:wrap;
+    background:white; border:1px solid var(--ac-s200);
+    border-radius:var(--ac-r-xl);
+    padding:12px 16px; box-shadow:var(--ac-sh-sm);
+}
+
+.ac-filter-form { display:flex; align-items:center; gap:8px; flex-wrap:wrap; flex:1; }
 
 /* Search */
-.search-box-sm { position:relative; }
-.search-box-sm input {
-    padding-left:30px;
-    border-radius:8px;
-    background:#f1f5f9;
-    border:none;
-}
-.search-box-sm i {
-    position:absolute;
-    left:8px; top:6px;
-    color:#94a3b8;
+.ac-search-wrap { position:relative; flex:1; min-width:180px; }
+.ac-search-icon { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:var(--ac-s400); font-size:.8rem; pointer-events:none; }
+.ac-search-input { width:100%; padding:8px 32px 8px 32px; border:1.5px solid var(--ac-s200); border-radius:var(--ac-r-md); font-size:.78rem; font-weight:400; color:var(--ac-dark); background:white; font-family:inherit; transition:all .2s; outline:none; }
+.ac-search-input:focus { border-color:var(--ac-indigo); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+.ac-search-input::placeholder { color:var(--ac-s400); }
+.ac-search-clear { position:absolute; right:9px; top:50%; transform:translateY(-50%); color:var(--ac-s400); font-size:.8rem; text-decoration:none; transition:color .15s; }
+.ac-search-clear:hover { color:var(--ac-red); }
+
+/* Date inputs */
+.ac-date-wrap { position:relative; }
+.ac-date-icon { position:absolute; left:9px; top:50%; transform:translateY(-50%); color:var(--ac-s400); font-size:.74rem; pointer-events:none; }
+.ac-date-input { padding:8px 10px 8px 28px; border:1.5px solid var(--ac-s200); border-radius:var(--ac-r-md); font-size:.76rem; color:var(--ac-dark); background:white; font-family:inherit; transition:all .2s; outline:none; }
+.ac-date-input:focus { border-color:var(--ac-indigo); box-shadow:0 0 0 3px rgba(79,70,229,.1); }
+
+/* Filter / Reset buttons */
+.ac-filter-btn { display:inline-flex; align-items:center; gap:5px; padding:8px 14px; background:linear-gradient(135deg,var(--ac-indigo),var(--ac-indigo-dk)); color:white; border:none; border-radius:var(--ac-r-sm); font-size:.76rem; font-weight:600; cursor:pointer; font-family:inherit; transition:all .2s; }
+.ac-filter-btn:hover { transform:translateY(-1px); box-shadow:0 4px 10px rgba(79,70,229,.3); }
+
+.ac-reset-btn { display:inline-flex; align-items:center; gap:5px; padding:8px 12px; background:white; color:var(--ac-s500); border:1.5px solid var(--ac-s200); border-radius:var(--ac-r-sm); font-size:.76rem; font-weight:500; text-decoration:none; transition:all .2s; }
+.ac-reset-btn:hover { background:var(--ac-s50); color:var(--ac-dark); }
+
+/* Action Tabs */
+.ac-action-tabs { display:flex; gap:4px; flex-wrap:wrap; }
+
+.ac-tab { display:inline-flex; align-items:center; gap:5px; padding:7px 12px; border-radius:var(--ac-r-sm); font-size:.72rem; font-weight:500; color:var(--ac-s500); text-decoration:none; transition:all .2s; border:1.5px solid var(--ac-s200); background:white; }
+.ac-tab:hover { background:var(--ac-s50); color:var(--ac-dark); }
+.ac-tab-active { background:var(--ac-indigo-lt)!important; color:var(--ac-indigo)!important; border-color:var(--ac-indigo-md)!important; }
+
+.ac-tab-dot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.ac-tdot-emerald { background:var(--ac-emerald); }
+.ac-tdot-amber   { background:var(--ac-amber); }
+.ac-tdot-red     { background:var(--ac-red); }
+
+.ac-tab-on-emerald { background:var(--ac-emerald-lt)!important; color:var(--ac-emerald)!important; border-color:rgba(5,150,105,.25)!important; }
+.ac-tab-on-amber   { background:var(--ac-amber-lt)!important;   color:var(--ac-amber)!important;   border-color:rgba(217,119,6,.25)!important; }
+.ac-tab-on-red     { background:var(--ac-red-lt)!important;     color:var(--ac-red)!important;     border-color:rgba(220,38,38,.25)!important; }
+
+/* ── Showing Bar ── */
+.ac-showing { font-size:.72rem; font-weight:400; color:var(--ac-s500); }
+.ac-showing strong { font-weight:600; color:var(--ac-dark); }
+
+/* ── Timeline Card ── */
+.ac-timeline-card { background:white; border:1px solid var(--ac-s200); border-radius:var(--ac-r-xl); overflow:hidden; box-shadow:var(--ac-sh-md); }
+
+.ac-card-header { display:flex; align-items:center; justify-content:space-between; padding:14px 22px; background:var(--ac-s50); border-bottom:1px solid var(--ac-s100); }
+.ac-card-hdr-left { display:flex; align-items:center; gap:9px; }
+.ac-card-hdr-icon { width:28px; height:28px; background:var(--ac-violet-lt); border-radius:var(--ac-r-sm); display:flex; align-items:center; justify-content:center; color:var(--ac-violet); font-size:.72rem; }
+.ac-card-hdr-title { font-size:.82rem; font-weight:600; color:var(--ac-dark); }
+.ac-card-hdr-count { font-size:.62rem; font-weight:600; color:var(--ac-s400); background:var(--ac-s100); padding:2px 8px; border-radius:8px; }
+.ac-card-hdr-badge { display:inline-flex; align-items:center; gap:5px; font-size:.62rem; font-weight:600; color:var(--ac-emerald); background:var(--ac-emerald-lt); padding:3px 10px; border-radius:20px; }
+
+.ac-live-dot { width:6px; height:6px; border-radius:50%; background:var(--ac-emerald); animation:acLive 1.5s ease-in-out infinite; }
+@keyframes acLive { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:.5;transform:scale(.7);} }
+
+/* ── Timeline ── */
+.ac-timeline { display:flex; flex-direction:column; padding:18px 22px; }
+
+.ac-item {
+    display:flex; gap:14px;
+    animation:acRowUp .3s var(--ac-ease) both;
 }
 
-/* Timeline */
-.saas-timeline {
-    position:relative;
-    padding-left:50px;
-}
-.saas-timeline::before {
-    content:"";
-    position:absolute;
-    left:18px;
-    width: 2px;
-    top:0;
-    bottom:0;
-    width:3px;
-    background:linear-gradient(#3b82f6,#22c55e,#ef4444);
-    opacity:0.3;
+@keyframes acRowUp { from{opacity:0;transform:translateY(6px);} to{opacity:1;transform:translateY(0);} }
+
+/* Track */
+.ac-timeline-track { display:flex; flex-direction:column; align-items:center; flex-shrink:0; width:36px; }
+
+.ac-dot {
+    width:36px; height:36px; min-height:36px;
+    border-radius:50%; display:flex; align-items:center;
+    justify-content:center; font-size:.82rem;
+    border:3px solid rgba(218, 0, 0, 0.36);
+    box-shadow:0 2px 8px rgba(0,0,0,.08);
+    flex-shrink:0; z-index:2;
 }
 
-.timeline-block { position:relative; margin-bottom:20px; }
+.ac-dot-create { background:var(--ac-emerald-lt); color:var(--ac-emerald); }
+.ac-dot-update { background:var(--ac-amber-lt);   color:var(--ac-amber); }
+.ac-dot-delete { background:var(--ac-red-lt);     color:var(--ac-red); }
 
+.ac-track-line { width:2px; flex:1; background:linear-gradient(180deg,var(--ac-s200),transparent); margin-top:4px; min-height:16px; }
 
-.indicator-icon {
-    width: 36px;
-    height: 36px;
-    border-radius: 50%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background: white;   /* 👈 important */
-    border: 3px solid #f8fafc;
+/* Item content */
+.ac-item-content { flex:1; min-width:0; padding-bottom:22px; }
+
+.ac-item:last-child .ac-item-content { padding-bottom:4px; }
+
+.ac-item-header { display:flex; align-items:center; justify-content:space-between; gap:8px; margin-bottom:6px; flex-wrap:wrap; }
+.ac-item-hdr-left { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+
+/* Action badge */
+.ac-action-badge { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:20px; font-size:.6rem; font-weight:700; text-transform:uppercase; letter-spacing:.04em; }
+.ac-badge-dot { width:5px; height:5px; border-radius:50%; }
+
+.ac-badge-create { background:var(--ac-emerald-lt); color:var(--ac-emerald); border:1px solid rgba(5,150,105,.15); }
+.ac-badge-create .ac-badge-dot { background:var(--ac-emerald); }
+
+.ac-badge-update { background:var(--ac-amber-lt); color:var(--ac-amber); border:1px solid rgba(217,119,6,.15); }
+.ac-badge-update .ac-badge-dot { background:var(--ac-amber); }
+
+.ac-badge-delete { background:var(--ac-red-lt); color:var(--ac-red); border:1px solid rgba(220,38,38,.15); }
+.ac-badge-delete .ac-badge-dot { background:var(--ac-red); }
+
+.ac-item-title { font-size:.82rem; font-weight:600; color:var(--ac-dark); }
+
+.ac-item-time { font-size:.62rem; font-weight:500; color:var(--ac-s400); display:flex; align-items:center; gap:4px; white-space:nowrap; flex-shrink:0; }
+.ac-item-time i { font-size:.6rem; }
+
+.ac-item-desc { font-size:.76rem; font-weight:400; color:var(--ac-s600); margin:0 0 8px; line-height:1.6; }
+
+/* Meta chips */
+.ac-item-meta { display:flex; flex-wrap:wrap; gap:6px; }
+
+.ac-meta-chip { display:inline-flex; align-items:center; gap:4px; padding:3px 9px; border-radius:6px; font-size:.62rem; font-weight:500; }
+.ac-meta-chip i { font-size:.58rem; }
+
+.ac-chip-project { background:var(--ac-indigo-lt); color:var(--ac-indigo); }
+.ac-chip-client  { background:var(--ac-emerald-lt); color:var(--ac-emerald); }
+.ac-chip-date    { background:var(--ac-s100); color:var(--ac-s600); }
+
+/* Row hover */
+.ac-item-create:hover .ac-item-content { background:rgba(5,150,105,.02); border-radius:var(--ac-r-md); }
+.ac-item-update:hover .ac-item-content { background:rgba(217,119,6,.02); border-radius:var(--ac-r-md); }
+.ac-item-delete:hover .ac-item-content { background:rgba(220,38,38,.02); border-radius:var(--ac-r-md); }
+
+/* ── Empty ── */
+.ac-empty { text-align:center; padding:56px 24px; }
+.ac-empty-art { position:relative; width:80px; height:80px; margin:0 auto 18px; }
+.ac-ea-ring { position:absolute; border-radius:50%; opacity:.06; }
+.ac-ear-1 { inset:0; background:var(--ac-violet); animation:acEcP 3s ease-in-out infinite; }
+.ac-ear-2 { inset:10px; background:var(--ac-indigo); animation:acEcP 3s ease-in-out infinite .5s; }
+@keyframes acEcP { 0%,100%{transform:scale(.95);opacity:.05;} 50%{transform:scale(1.06);opacity:.12;} }
+.ac-ea-icon { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:1.8rem; color:var(--ac-s400); background:var(--ac-s100); border-radius:50%; }
+.ac-empty h5 { font-size:.95rem; font-weight:600; color:var(--ac-dark); margin-bottom:6px; }
+.ac-empty p  { font-size:.76rem; font-weight:400; color:var(--ac-s500); margin-bottom:14px; }
+.ac-reset-link { display:inline-flex; align-items:center; padding:7px 16px; background:var(--ac-indigo-lt); color:var(--ac-indigo); border-radius:var(--ac-r-sm); font-size:.76rem; font-weight:600; text-decoration:none; transition:all .2s; }
+.ac-reset-link:hover { background:var(--ac-indigo-md); }
+
+/* ── Pagination ── */
+.ac-pag-wrap { display:flex; align-items:center; justify-content:space-between; padding:12px 22px; border-top:1px solid var(--ac-s100); background:var(--ac-s50); gap:10px; flex-wrap:wrap; }
+.ac-pag-info { font-size:.72rem; font-weight:400; color:var(--ac-s500); }
+.ac-pag-info strong { font-weight:600; color:var(--ac-dark); }
+.ac-pag-nav { display:flex; align-items:center; gap:4px; }
+.ac-pag-nums { display:flex; align-items:center; gap:4px; }
+.ac-pb { min-width:32px; height:32px; padding:0 7px; display:inline-flex; align-items:center; justify-content:center; border:1.5px solid var(--ac-s200); border-radius:var(--ac-r-sm); font-size:.74rem; font-weight:500; color:var(--ac-s600); background:white; text-decoration:none; transition:all .18s; cursor:pointer; }
+.ac-pb:hover { background:var(--ac-indigo-lt); border-color:var(--ac-indigo-md); color:var(--ac-indigo); transform:translateY(-1px); }
+.ac-pb-on { background:linear-gradient(135deg,var(--ac-indigo),var(--ac-indigo-dk)); border-color:var(--ac-indigo-dk); color:white!important; box-shadow:0 3px 8px rgba(79,70,229,.25); pointer-events:none; }
+.ac-pb-off { opacity:.3; pointer-events:none; background:var(--ac-s50); }
+.ac-pag-dots { display:inline-flex; align-items:center; justify-content:center; width:28px; height:32px; font-size:.55rem; color:var(--ac-s400); letter-spacing:.1em; }
+
+/* ── Responsive ── */
+@media (max-width:1024px) { .ac-stats-row{grid-template-columns:1fr 1fr;} }
+@media (max-width:768px) {
+    .ac-header{flex-direction:column;align-items:flex-start;}
+    .ac-toolbar{flex-direction:column;align-items:stretch;}
+    .ac-filter-form{flex-direction:column;align-items:stretch;}
+    .ac-search-wrap{max-width:100%;}
+    .ac-action-tabs{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;}
+    .ac-pag-wrap{justify-content:center;}
+    .ac-pag-info:last-child{display:none;}
+    .ac-timeline{padding:14px;}
+}
+@media (max-width:480px) {
+    .ac-stats-row{grid-template-columns:1fr 1fr;}
+    .ac-item-header{flex-direction:column;align-items:flex-start;}
+    .ac-critical-badge{display:none;}
 }
 
-/* Card */
-.timeline-content-card {
-    background:#fff;
-    border-radius:14px;
-    padding:16px;
-    border:1px solid #e2e8f0;
-    transition:0.3s;
-    position:relative;
-}
-.timeline-content-card:hover {
-    transform:translateY(-4px);
-    box-shadow:0 20px 40px rgba(0,0,0,0.08);
-}
-
-/* Left highlight */
-.timeline-content-card::before {
-    content:"";
-    position:absolute;
-    left:0; top:0;
-    width:4px; height:100%;
-    background:transparent;
-}
-
-
-/* Text */
-.activity-desc {
-    font-size:0.9rem;
-    color:#475569;
-}
-
-/* Footer */
-.footer-meta {
-    display:flex;
-    justify-content:space-between;
-}
-.user-chip {
-    background:#f1f5f9;
-    padding:4px 10px;
-    border-radius:20px;
-    font-size:0.75rem;
-}
-.user-avatar-mini {
-    width:18px;height:18px;
-    background:#3b82f6;
-    color:#fff;
-    border-radius:50%;
-    display:inline-flex;
-    align-items:center;
-    justify-content:center;
-    font-size:0.6rem;
-}
-
-/* Tags */
-.tag-outline {
-    font-size:0.7rem;
-    border:1px solid #e2e8f0;
-    padding:2px 6px;
-    border-radius:6px;
-}
-
-/* Buttons */
-.btn-dark-glass { background:#1e293b;color:#fff; }
-.btn-primary-glass { background:#3b82f6;color:#fff; }
-
-
-#activity-container {
-    transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.fade-out {
-    opacity: 0;
-}
-
-.fade-in {
-    opacity: 1;
-}
-
-/* Optional loading blur */
-.loading {
-    filter: blur(2px);
-    pointer-events: none;
-}
-
-/* Date Filter UI */
-.date-filter {
-    background: #ffffff;
-    padding: 10px 14px;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.03);
-}
-
-.date-field {
-    display: flex;
-    flex-direction: column;
-}
-
-.date-label {
-    font-size: 0.65rem;
-    font-weight: 600;
-    color: #64748b;
-    margin-bottom: 3px;
-    text-transform: uppercase;
-}
-
-/* Inputs */
-.date-filter input {
-    background: #f1f5f9;
-    border: none;
-    border-radius: 8px;
-    padding: 6px 8px;
-    font-size: 0.8rem;
-    transition: 0.2s;
-}
-
-.date-filter input:focus {
-    outline: none;
-    box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
-    background: #fff;
-}
 </style>
 
 
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
 <script>
-document.addEventListener("DOMContentLoaded", function () {
-    const input = document.querySelector('input[name="q"]');
-    const container = document.getElementById("activity-container");
+document.addEventListener('DOMContentLoaded', function () {
 
-    input.addEventListener('input', function () {
-        clearTimeout(this.delay);
-
-        this.delay = setTimeout(() => {
-
-            // 🔥 smooth fade before submit
-            container.classList.add("fade-out", "loading");
-
-            setTimeout(() => {
-                this.form.submit();
-            }, 250); // wait animation
-
-        }, 400);
+    /* ── Row animation delays ── */
+    document.querySelectorAll('.ac-item').forEach((item, idx) => {
+        item.style.animationDelay = `${idx * 25}ms`;
     });
-});
-</script>
 
+    /* ── Auto-submit search on typing ── */
+    const searchInput = document.getElementById('acSearch');
+    const filterForm  = document.getElementById('acFilterForm');
+    let timer;
 
+    if (searchInput) {
+        searchInput.addEventListener('input', function () {
+            clearTimeout(timer);
+            timer = setTimeout(() => filterForm.submit(), 500);
+        });
+    }
 
+    /* ── Keyboard: Cmd+K focus search ── */
+    document.addEventListener('keydown', function (e) {
+        if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+            e.preventDefault();
+            if (searchInput) { searchInput.focus(); searchInput.select(); }
+        }
+    });
 
-<!-- 🔥 SCRIPT -->
-<script>
-document.addEventListener("DOMContentLoaded", () => {
-    let el = document.getElementById("critical-count");
-    let target = parseInt(el.innerText);  // ✅ real value
-    let count = 0;
-
-    el.innerText = 0;
-
-    let i = setInterval(() => {
-        count++;
-        el.innerText = count;
-
-        if (count >= target) clearInterval(i);
-    }, 30);
 });
 </script>
 

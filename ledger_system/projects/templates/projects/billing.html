@@ -1,528 +1,564 @@
-
 {% extends 'projects/base.html' %}
 {% block title %}Billing{% endblock %}
 {% load static %}
 {% load extra_filters %}
 {% load billing_tags %}
-{% billing_summary projects "In Progress" as ongoing %}
-{% billing_summary projects "Completed" as completed %}
-{% billing_summary projects "On Hold" as hold %}
-{% billing_summary projects "Not Started" as not_started %}
-
-
 {% load humanize %}
 {% load indian_format %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
-    <title>Billing</title>
-  <link rel="canonical" href="https://www.edbbilling.com/" />
-
-
-<!-- SEO Meta Tags -->
-<meta name="description" content="Access your billing dashboard at edbbilling.com. Manage projects, invoices, and payments with Elite Dream Builders.">
-<meta name="keywords" content="Elite Dream Builders, login, client login, project management, construction dashboard">
-<meta name="author" content="The Elite Dream Builders">
-<meta name="google-site-verification" content="68LnzYm0TJcA1eTKG1h7ySOYL0RviN56WFJNTtRZ9b4" />
-<meta name="robots" content="index, follow" />
-
-
-<!-- Open Graph (Facebook, LinkedIn) -->
-<meta property="og:title" content="The Elite Dream Builders" />
-<meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments." />
-<meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG" />
-<meta property="og:url" content="https://www.edbbilling.com/" />
-<meta property="og:type" content="website" />
-
-<!-- Twitter Card -->
-<meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:title" content="The Elite Dream Builders" />
-<meta name="twitter:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments." />
-<meta name="twitter:image" content="https://edbbilling.com/static/images/logo.PNG" />
-
-<!-- CSS -->
-<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" href="{% static 'css/ledger.css' %}" />
-
-<!-- Structured Data for SEO -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "WebSite",
-  "name": "edbbilling",
-  "url": "https://www.edbbilling.com/",
-  "potentialAction": {
-    "@type": "SearchAction",
-    "target": "https://www.edbbilling.com/?s={search_term_string}",
-    "query-input": "required name=search_term_string"
-  }
-}
-
-</script>
-    <style>
-        body {
-            cursor: url("{% static 'images/cursor.png' %}") 16 16, auto;
-            margin: 0!important;
-            padding: 0!important;
-        }
-
-        .header {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-
-        .nav-links ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-       
-        
-
-        .add_form_div {
-            display: flex;
-            justify-content: space-between;
-            gap: 20px;
-        }
-
-        .add-expense-form {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-            width: 48%;
-        }
-
-        
-
-
-        .main-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            border-radius: 12px;
-        }
-
-        .main-table th, .main-table td {
-            padding: 12px;
-            text-align: left;
-        }
-
-        .main-table th {
-           
-            color: white;
-        }
-
-        .right-align {
-            text-align: right;
-        }
-
-        .remove-btn {
-            background-color: red; 
-            color: white; 
-            border-radius: 5px; 
-            padding: 5px; 
-            cursor:pointer; 
-        }
-        .rotate-message {
-            background: #fffae6;
-            color: #665500;
-            padding: 1rem;
-            text-align: center;
-            font-weight: 600;
-            border: 1px solid #ffd700;  
-            border-radius: 6px;
-            margin: 1rem 0;
-        }
-
-/* Show only on small portrait devices */
-@media (max-width: 600px) and (orientation: portrait) {
-  #rotate-screen-message {
-    display: block !important;
-  }
-}
-
-/* Hide on landscape or larger screens */
-@media (orientation: landscape), (min-width: 601px) {
-  #rotate-screen-message {
-    display: none !important;
-  }
-}
-
-
-
-
-
-
-    </style>
-</head>
-<body>
-{% block content %}
- <script>
-        function checkOrientation() {
-        const msg = document.getElementById('rotate-screen-message');
-        if(window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches) {
-            msg.style.display = 'block';
-        } else {
-            msg.style.display = 'none';
-        }
-        }
-
-        // Check on load
-        window.addEventListener('load', checkOrientation);
-
-        // Check on orientation change
-        window.addEventListener('orientationchange', checkOrientation);
-    </script>
-    <div id="rotate-screen-message" class="rotate-message" style="display:none;">
-            📱 For better viewing, please rotate your device to <strong>landscape</strong> mode.
-    </div>
-<div class="header">
-    
-   
-    
-</div>
-<!-- NAVBAR -->
-
-
-
-<!-- Add Expense Form -->
-
-
 {% billing_summary projects "In Progress" as ongoing %}
 {% billing_summary projects "Completed" as completed %}
 {% billing_summary projects "On Hold" as hold %}
 {% billing_summary projects "Not Started" as not_started %}
 
-<div class="row g-4 mb-5">
+{% block content %}
 
-  <!-- Ongoing -->
-  <div class="col-md-3">
-    <div class="summary-card summary-active">
-      <h3>Ongoing</h3>
-
-        <div class="stat-item ">
-          <span class="stat-label">Total Projects</span>
-          <span class="stat-value">
-            {{ ongoing.count }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Budget</span>
-          <span class="stat-value">
-            {{ ongoing.budget|indian_currency }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Paid</span>
-          <span class="stat-value">
-            {{ ongoing.paid|indian_currency }}
-          </span>
-        </div>
-          <!-- Highlight -->
-        <div class="stat-item highlight">
-          <span class="stat-label">Yet to Receive</span>
-          <span class="stat-value">
-            {{ ongoing.remaining|indian_currency }}
-          </span>
-        </div>
-
-    </div>
-  </div>
-
-  <!-- Completed -->
-  <div class="col-md-3">
-    <div class="summary-card summary-completed">
-      <h3>Completed</h3>
-        <div class="stat-item ">
-          <span class="stat-label">Total Projects</span>
-          <span class="stat-value">
-            {{ completed.count }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Budget</span>
-          <span class="stat-value">
-            {{ completed.budget|indian_currency }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Paid</span>
-          <span class="stat-value">
-            {{ completed.paid|indian_currency }}
-          </span>
-        </div>
-        <!-- Highlight -->
-        <div class="stat-item highlight">
-          <span class="stat-label">Yet to Receive</span>
-          <span class="stat-value">
-            {{ completed.remaining|indian_currency }}
-          </span>
-        </div>
-
-    </div>
-  </div>
-
-  <!-- On Hold -->
-  <div class="col-md-3">
-    <div class="summary-card summary-hold">
-      <h3>On Hold</h3>
-        <div class="stat-item ">
-          <span class="stat-label">Total Projects</span>
-          <span class="stat-value">
-            {{ hold.count }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Budget</span>
-          <span class="stat-value">
-            {{ hold.budget|indian_currency }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Paid</span>
-          <span class="stat-value">
-            {{ hold.paid|indian_currency }}
-          </span>
-        </div>
-          <!-- Highlight -->
-        <div class="stat-item highlight">
-          <span class="stat-label">Yet to Receive</span>
-          <span class="stat-value">
-            {{ hold.remaining|indian_currency }}
-          </span>
-        </div>
-    </div>
-  </div>
-
-  <!-- Not Started -->
-  <div class="col-md-3">
-    <div class="summary-card summary-not-started">
-      <h3>Yet to Started</h3>
-        <div class="stat-item ">
-          <span class="stat-label">Total Projects</span>
-          <span class="stat-value">
-            {{ not_started.count }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Budget</span>
-          <span class="stat-value">
-            {{ not_started.budget|indian_currency }}
-          </span>
-        </div>
-        <div class="stat-item ">
-          <span class="stat-label">Paid</span>
-          <span class="stat-value">
-            {{ not_started.paid|indian_currency }}
-          </span>
-        </div>
-        <!-- Highlight -->
-        <div class="stat-item highlight">
-          <span class="stat-label">Yet to Receive</span>
-          <span class="stat-value">
-            {{ not_started.remaining|indian_currency }}
-          </span>
-        </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Alerts -->
-
-
-
-<div class="row g-4">
-
-  <!-- LEFT : Recent Activity -->
-  <div class="col-lg-7 ">
-    <div class="card h-100">
-      <div class="card-header fw-bold">Recent Activity</div>
-      <ul class="list-group list-group-flush">
-        {% for a in activities %}
-          <li class="list-group-item d-flex align-items-start gap-3">
-            <span class="badge bg-{{ a.color }} p-2">
-              <i class="bi {{ a.icon }}"></i>
-            </span>
-            <div class="flex-grow-1">
-              <div class="fw-semibold">{{ a.title }}</div>
-              <small class="text-muted">{{ a.desc }}</small>
-            </div>
-            <small class="text-muted">{{ a.time }}</small>
-          </li>
-        {% empty %}
-          <li class="list-group-item text-muted text-center">
-            No recent activity
-          </li>
-        {% endfor %}
-      </ul>
-    </div>
-  </div>
-
-  <!-- RIGHT : Quick Actions -->
-  <div class="col-lg-5">
-    <div class="card quick-actions h-100">
-      <div class="card-header fw-bold">Quick Actions</div>
-
-      <div class="card-body">
-        <div class="quick-grid">
-          <a href="{% url 'add_project' %}" class="quick-card teal">
-            <i class="bi bi-plus-lg"></i>
-            <h6>New Project</h6>
-            <p>Start a new project</p>
-          </a>
-
-          <a href="{% url 'add_expense' %}" class="quick-card green">
-            <i class="bi bi-receipt"></i>
-            <h6>Add Cost</h6>
-            <p>Record project expense</p>
-          </a>
-
-          <a href="{% url 'analysis_dashboard' %}" class="quick-card blue">
-            <i class="bi bi-bar-chart-line"></i>
-            <h6>Analysis</h6>
-            <p>View insights</p>
-          </a>
-
-          <a href="{% url 'add_payment' %}" class="quick-card orange">
-            <i class="bi bi-cash-coin"></i>
-            <h6>Record Payment</h6>
-            <p>Log payment</p>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-
-<div class="search-container mb-4 mt-4" data-aos="fade-down">
-    <form method="GET" id="searchForm" class="position-relative">
-        <div class="search-wrapper">
-            <div class="search-icon-box">
-                <i class="fa-solid fa-magnifying-glass search-icon"></i>
-            </div>
-            
-            <input 
-                type="text" 
-                name="q" 
-                id="searchInput"
-                value="{{ query }}" 
-                class="modern-search-input" 
-                placeholder="Search clients, projects, or phone..."
-                autocomplete="off">
-            
-            <div class="search-status">
-                <div id="searchSpinner" class="search-spinner d-none">
-                    <div class="spinner-ring"></div>
-                </div>
-                {% if query %}
-                <a href="?" class="clear-search">
-                    <i class="fa-solid fa-circle-xmark"></i>
-                </a>
-                {% endif %}
-            </div>
-        </div>
-    </form>
-</div>
-
-
+<!-- ── Orientation JS (logic unchanged) ── -->
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const searchInput = document.getElementById('searchInput');
-    const searchForm = document.getElementById('searchForm');
-    const searchSpinner = document.getElementById('searchSpinner');
-
-    // 1. Restore focus and put cursor at the end of the text
-    if (searchInput.value.length > 0) {
-        searchInput.focus();
-        const val = searchInput.value;
-        searchInput.value = '';
-        searchInput.value = val;
+function checkOrientation() {
+    const msg = document.getElementById('rotate-screen-message');
+    if (window.matchMedia("(max-width: 600px) and (orientation: portrait)").matches) {
+        msg.style.display = 'block';
+    } else {
+        msg.style.display = 'none';
     }
-
-    let delayTimer;
-
-    searchInput.addEventListener('input', function(e) {
-        // Show the loading spinner
-        searchSpinner.classList.remove('d-none');
-        
-        clearTimeout(delayTimer);
-        
-        delayTimer = setTimeout(() => {
-            // Only submit if the value has changed (prevents reload on arrow keys)
-            searchForm.submit();
-        }, 600); // 600ms is the "Goldilocks" zone for typing speed
-    });
-
-    // 2. Clear spinner if user clears search manually
-    searchInput.addEventListener('keydown', function(e) {
-        if (e.key === "Enter") {
-            searchForm.submit();
-        }
-    });
-});
+}
+window.addEventListener('load', checkOrientation);
+window.addEventListener('orientationchange', checkOrientation);
 </script>
 
-
-<div class="table-responsive">
-    <table class="project-table">
-        <thead>
-            <tr>
-                <th>S.No</th>
-                <th>Project Name</th>
-                <th>Client Name</th>
-                <th>Project Status</th>
-                <th>Total Budget</th>
-                <th>Total Paid</th>
-                <th>Yet to Receive</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for project in projects %}
-            <tr>
-                <td class="sno">{{ forloop.counter }}</td>
-                <td class="project-name">{{ project.name }}</td>
-                <td class="client-name">
-                    <a href="{% url 'client_details' project.id %}" class="client-link text-decoration-none">
-                        <div class="d-flex align-items-center">
-                            <span class="fw-bold text-primary">{{ project.client_name }}</span>
-                            <i class="bi bi-arrow-up-right-circle ms-2 small opacity-50 link-icon"></i>
-                        </div>
-                        <div class="extra-small text-muted mt-n1">View</div>
-                    </a>
-                </td>
-                <td class="status-cell">
-                    <span class="status-badge status-{% if project.status == 'Not Started' %}not-started
-                        {% elif project.status == 'In Progress' %}in-progress
-                        {% elif project.status == 'Completed' %}completed
-                        {% elif project.status == 'On Hold' %}on-hold
-                        {% else %}default{% endif %}">
-                        {{ project.status }}
-                    </span>
-                    <a href="{% url 'update_project_status' project.id %}" class="btn-update-status">
-                        Update
-                    </a>
-                </td>
-                <td class="amount budget">{{ project|total_budget_with_expense|indian_currency }}</td>
-                <td class="amount paid">{{ project.payments.all|total_payment|indian_currency|default:"₹0" }}</td>
-                <td class="amount remaining {% if project.remaining < 0 %}negative{% endif %}">
-                    {{ project.remaining|indian_currency }}
-                </td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+<div id="rotate-screen-message" class="bl-rotate-msg" style="display:none;">
+    📱 For better viewing, please rotate your device to <strong>landscape</strong> mode.
 </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+<div class="bl-page">
+
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="bl-header">
+        <div class="bl-header-left">
+            <div class="bl-header-icon">
+                <i class="bi bi-graph-up-arrow"></i>
+                <div class="bl-header-ring"></div>
+            </div>
+
+        </div>
+        <div class="bl-header-right">
+            <a href="{% url 'add_project' %}" class="bl-btn bl-btn-primary">
+                <i class="bi bi-plus-lg"></i> New Project
+            </a>
+            <a href="{% url 'add_payment' %}" class="bl-btn bl-btn-success">
+                <i class="bi bi-cash-coin"></i> Payment
+            </a>
+            <a href="{% url 'add_expense' %}" class="bl-btn bg-danger text-white">
+                <i class="bi bi-receipt"></i> Expense
+            </a>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SUMMARY CARDS  (billing_summary logic unchanged)
+    ════════════════════════════════════════ -->
+
+    {% billing_summary projects "In Progress" as ongoing %}
+    {% billing_summary projects "Completed" as completed %}
+    {% billing_summary projects "On Hold" as hold %}
+    {% billing_summary projects "Not Started" as not_started %}
+
+    <div class="bl-summary-grid">
+
+    <!-- ═══ Ongoing ═══ -->
+    <div class="bl-sc bl-sc-indigo">
+        <div class="bl-sc-head">
+            <div class="bl-sc-icon bl-sci-indigo">
+                <i class="bi bi-play-circle-fill"></i>
+            </div>
+            <div class="bl-sc-head-text">
+                <h6 class="bl-sc-name">Ongoing</h6>
+                <span class="bl-sc-pill bl-scp-indigo">
+                    {{ ongoing.count }} project{{ ongoing.count|pluralize }}
+                </span>
+            </div>
+        </div>
+
+        <div class="bl-sc-body">
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Budget</span>
+                <span class="bl-sc-value">{{ ongoing.budget|indian_currency }}</span>
+            </div>
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Total Paid</span>
+                <span class="bl-sc-value bl-val-green">{{ ongoing.paid|indian_currency }}</span>
+            </div>
+        </div>
+
+        <div class="bl-sc-divider"></div>
+
+        <div class="bl-sc-highlight">
+            <div class="bl-sc-hl-left">
+                <i class="bi bi-hourglass-split"></i>
+                <span>Yet to Receive</span>
+            </div>
+            <span class="bl-sc-hl-value">{{ ongoing.remaining|indian_currency }}</span>
+        </div>
+
+        {% if ongoing.budget %}
+        <div class="bl-sc-progress">
+            <div class="bl-sc-progress-bar bl-fill-indigo"
+                 style="width:{% widthratio ongoing.paid ongoing.budget 100 %}%"></div>
+            <span class="bl-sc-progress-text">
+                {% widthratio ongoing.paid ongoing.budget 100 %}% collected
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ═══ Completed ═══ -->
+    <div class="bl-sc bl-sc-emerald">
+        <div class="bl-sc-head">
+            <div class="bl-sc-icon bl-sci-emerald">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="bl-sc-head-text">
+                <h6 class="bl-sc-name">Completed</h6>
+                <span class="bl-sc-pill bl-scp-emerald">
+                    {{ completed.count }} project{{ completed.count|pluralize }}
+                </span>
+            </div>
+        </div>
+
+        <div class="bl-sc-body">
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Budget</span>
+                <span class="bl-sc-value">{{ completed.budget|indian_currency }}</span>
+            </div>
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Total Paid</span>
+                <span class="bl-sc-value bl-val-green">{{ completed.paid|indian_currency }}</span>
+            </div>
+        </div>
+
+        <div class="bl-sc-divider"></div>
+
+        <div class="bl-sc-highlight">
+            <div class="bl-sc-hl-left">
+                <i class="bi bi-hourglass-split"></i>
+                <span>Yet to Receive</span>
+            </div>
+            <span class="bl-sc-hl-value">{{ completed.remaining|indian_currency }}</span>
+        </div>
+
+        {% if completed.budget %}
+        <div class="bl-sc-progress">
+            <div class="bl-sc-progress-bar bl-fill-emerald"
+                 style="width:{% widthratio completed.paid completed.budget 100 %}%"></div>
+            <span class="bl-sc-progress-text">
+                {% widthratio completed.paid completed.budget 100 %}% collected
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ═══ On Hold ═══ -->
+    <div class="bl-sc bl-sc-amber">
+        <div class="bl-sc-head">
+            <div class="bl-sc-icon bl-sci-amber">
+                <i class="bi bi-pause-circle-fill"></i>
+            </div>
+            <div class="bl-sc-head-text">
+                <h6 class="bl-sc-name">On Hold</h6>
+                <span class="bl-sc-pill bl-scp-amber">
+                    {{ hold.count }} project{{ hold.count|pluralize }}
+                </span>
+            </div>
+        </div>
+
+        <div class="bl-sc-body">
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Budget</span>
+                <span class="bl-sc-value">{{ hold.budget|indian_currency }}</span>
+            </div>
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Total Paid</span>
+                <span class="bl-sc-value bl-val-green">{{ hold.paid|indian_currency }}</span>
+            </div>
+        </div>
+
+        <div class="bl-sc-divider"></div>
+
+        <div class="bl-sc-highlight">
+            <div class="bl-sc-hl-left">
+                <i class="bi bi-hourglass-split"></i>
+                <span>Yet to Receive</span>
+            </div>
+            <span class="bl-sc-hl-value">{{ hold.remaining|indian_currency }}</span>
+        </div>
+
+        {% if hold.budget %}
+        <div class="bl-sc-progress">
+            <div class="bl-sc-progress-bar bl-fill-amber"
+                 style="width:{% widthratio hold.paid hold.budget 100 %}%"></div>
+            <span class="bl-sc-progress-text">
+                {% widthratio hold.paid hold.budget 100 %}% collected
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ═══ Not Started ═══ -->
+    <div class="bl-sc bl-sc-slate">
+        <div class="bl-sc-head">
+            <div class="bl-sc-icon bl-sci-slate">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+            <div class="bl-sc-head-text">
+                <h6 class="bl-sc-name">Not Started</h6>
+                <span class="bl-sc-pill bl-scp-slate">
+                    {{ not_started.count }} project{{ not_started.count|pluralize }}
+                </span>
+            </div>
+        </div>
+
+        <div class="bl-sc-body">
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Budget</span>
+                <span class="bl-sc-value">{{ not_started.budget|indian_currency }}</span>
+            </div>
+            <div class="bl-sc-row">
+                <span class="bl-sc-label">Total Paid</span>
+                <span class="bl-sc-value bl-val-green">{{ not_started.paid|indian_currency }}</span>
+            </div>
+        </div>
+
+        <div class="bl-sc-divider"></div>
+
+        <div class="bl-sc-highlight">
+            <div class="bl-sc-hl-left">
+                <i class="bi bi-hourglass-split"></i>
+                <span>Yet to Receive</span>
+            </div>
+            <span class="bl-sc-hl-value">{{ not_started.remaining|indian_currency }}</span>
+        </div>
+
+        {% if not_started.budget %}
+        <div class="bl-sc-progress">
+            <div class="bl-sc-progress-bar bl-fill-slate"
+                 style="width:{% widthratio not_started.paid not_started.budget 100 %}%"></div>
+            <span class="bl-sc-progress-text">
+                {% widthratio not_started.paid not_started.budget 100 %}% collected
+            </span>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+
+
+
+    <!-- ════════════════════════════════════════
+         ACTIVITY + QUICK ACTIONS (logic unchanged)
+    ════════════════════════════════════════ -->
+    <div class="bl-panels">
+
+        <!-- Recent Activity -->
+        <div class="bl-panel">
+            <div class="bl-panel-hdr">
+                <div class="bl-panel-ico bl-ico-violet">
+                    <i class="bi bi-lightning-charge-fill"></i>
+                </div>
+                <span class="bl-panel-title">Recent Activity</span>
+            </div>
+            <div class="bl-act-list">
+                {% for a in activities %}
+                <div class="bl-act-row">
+                    <div class="bl-act-dot bl-dot-{{ a.color }}"></div>
+                    <div class="bl-act-icon bl-aic-{{ a.color }}">
+                        <i class="bi {{ a.icon }}"></i>
+                    </div>
+                    <div class="bl-act-body">
+                        <span class="bl-act-title">{{ a.title }}</span>
+                        <span class="bl-act-desc">{{ a.desc }}</span>
+                    </div>
+                    <span class="bl-act-time">{{ a.time }}</span>
+                </div>
+                {% empty %}
+                <div class="bl-act-empty">
+                    <i class="bi bi-clock-history"></i>
+                    <span>No recent activity</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="bl-panel">
+            <div class="bl-panel-hdr">
+                <div class="bl-panel-ico bl-ico-indigo">
+                    <i class="bi bi-grid-3x3-gap-fill"></i>
+                </div>
+                <span class="bl-panel-title">Quick Actions</span>
+            </div>
+            <div class="bl-qa-list">
+                <a href="{% url 'add_project' %}" class="bl-qa-row">
+                    <div class="bl-qa-icon bl-qa-teal"><i class="bi bi-plus-lg"></i></div>
+                    <div class="bl-qa-body">
+                        <span class="bl-qa-name">New Project</span>
+                        <span class="bl-qa-desc">Start a new project</span>
+                    </div>
+                    <i class="bi bi-chevron-right bl-qa-chev"></i>
+                </a>
+                <a href="{% url 'add_expense' %}" class="bl-qa-row">
+                    <div class="bl-qa-icon bl-qa-amber"><i class="bi bi-receipt"></i></div>
+                    <div class="bl-qa-body">
+                        <span class="bl-qa-name">Add Cost</span>
+                        <span class="bl-qa-desc">Record project expense</span>
+                    </div>
+                    <i class="bi bi-chevron-right bl-qa-chev"></i>
+                </a>
+                <a href="{% url 'analysis_dashboard' %}" class="bl-qa-row">
+                    <div class="bl-qa-icon bl-qa-purple"><i class="bi bi-bar-chart-line"></i></div>
+                    <div class="bl-qa-body">
+                        <span class="bl-qa-name">Analysis</span>
+                        <span class="bl-qa-desc">View insights</span>
+                    </div>
+                    <i class="bi bi-chevron-right bl-qa-chev"></i>
+                </a>
+                <a href="{% url 'add_payment' %}" class="bl-qa-row">
+                    <div class="bl-qa-icon bl-qa-green"><i class="bi bi-cash-coin"></i></div>
+                    <div class="bl-qa-body">
+                        <span class="bl-qa-name">Record Payment</span>
+                        <span class="bl-qa-desc">Log payment</span>
+                    </div>
+                    <i class="bi bi-chevron-right bl-qa-chev"></i>
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- ════════════════════════════════════════
+         SEARCH (logic unchanged)
+    ════════════════════════════════════════ -->
+    <div class="bl-search-wrap">
+        <form method="GET" id="searchForm">
+            <div class="bl-search-inner">
+                <i class="bi bi-search bl-srch-ico"></i>
+                <input type="text"
+                       name="q"
+                       id="searchInput"
+                       value="{{ query }}"
+                       class="bl-srch-field"
+                       placeholder="Search clients, projects, or phone…"
+                       autocomplete="off">
+                <div id="searchSpinner" class="bl-srch-spin d-none">
+                    <div class="bl-spin-ring"></div>
+                </div>
+                {% if query %}
+                <a href="?" class="bl-srch-clear">
+                    <i class="bi bi-x-circle-fill"></i>
+                </a>
+                {% endif %}
+                <kbd class="bl-srch-kbd">⌘K</kbd>
+            </div>
+        </form>
+    </div>
+
+    <!-- ── Search JS (logic unchanged) ── -->
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchInput  = document.getElementById('searchInput');
+        const searchForm   = document.getElementById('searchForm');
+        const searchSpinner = document.getElementById('searchSpinner');
+
+        if (searchInput.value.length > 0) {
+            searchInput.focus();
+            const v = searchInput.value;
+            searchInput.value = '';
+            searchInput.value = v;
+        }
+
+        let delayTimer;
+
+        searchInput.addEventListener('input', function () {
+            searchSpinner.classList.remove('d-none');
+            clearTimeout(delayTimer);
+            delayTimer = setTimeout(() => { searchForm.submit(); }, 600);
+        });
+
+        searchInput.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter') searchForm.submit();
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+                e.preventDefault();
+                searchInput.focus();
+                searchInput.select();
+            }
+        });
+    });
+    </script>
+
+    <!-- ════════════════════════════════════════
+         PROJECTS TABLE (all template logic unchanged)
+    ════════════════════════════════════════ -->
+    <div class="bl-tbl-card">
+
+        <div class="bl-tbl-topbar">
+            <div class="bl-tbl-topbar-left">
+                <i class="bi bi-table"></i>
+                <span>Projects</span>
+                <span class="bl-tbl-badge">{{ projects|length }} total</span>
+            </div>
+            <span class="bl-tbl-sort-hint">
+                <i class="bi bi-sort-down me-1"></i>Active first
+            </span>
+        </div>
+
+        <div class="bl-tbl-scroll">
+            <table class="project-table bl-table">
+                <thead>
+                    <tr>
+                        <th>
+                            <div class="bl-th">#</div>
+                        </th>
+                        <th>
+                            <div class="bl-th"><i class="bi bi-folder"></i> Project</div>
+                        </th>
+                        <th>
+                            <div class="bl-th"><i class="bi bi-person"></i> Client</div>
+                        </th>
+                        <th>
+                            <div class="bl-th"><i class="bi bi-flag"></i> Status</div>
+                        </th>
+                        <th>
+                            <div class="bl-th "><i class="bi bi-calculator"></i> Budget</div>
+                        </th>
+                        <th>
+                            <div class="bl-th "><i class="bi bi-cash-stack"></i> Paid</div>
+                        </th>
+                        <th>
+                            <div class="bl-th "><i class="bi bi-hourglass"></i> Remaining</div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for project in projects %}
+                    <tr class="bl-tr">
+
+                        <!-- S.No (unchanged) -->
+                        <td class="sno">
+                            <span class="bl-sno">{{ forloop.counter }}</span>
+                        </td>
+
+                        <!-- Project Name (unchanged) -->
+                        <td class="project-name">
+                            <div class="bl-proj-cell">
+                                <div class="bl-proj-av bl-av-{% cycle 'indigo' 'emerald' 'amber' 'violet' 'teal' %}">
+                                    {{ project.name|slice:":2"|upper }}
+                                </div>
+                                <span class="bl-proj-nm">{{ project.name }}</span>
+                            </div>
+                        </td>
+
+                        <!-- Client Name (logic unchanged) -->
+                        <td class="client-name">
+                            <a href="{% url 'client_details' project.id %}"
+                               class="client-link text-decoration-none">
+                                <div class="bl-client-cell">
+                                    <div class="bl-client-av">
+                                        {{ project.client_name|first|upper }}
+                                    </div>
+                                    <div>
+                                        <span class="bl-client-nm">{{ project.client_name }}</span>
+                                        <span class="bl-client-view">
+                                            <i class="bi bi-arrow-up-right-circle"></i> View
+                                        </span>
+                                    </div>
+                                </div>
+                            </a>
+                        </td>
+
+                        <!-- Status (logic unchanged) -->
+                        <td class="status-cell">
+                            <div class="bl-status-wrap">
+                                <span class="status-badge bl-status-tag
+                                    status-{% if project.status == 'Not Started' %}not-started
+                                    {% elif project.status == 'In Progress' %}in-progress
+                                    {% elif project.status == 'Completed' %}completed
+                                    {% elif project.status == 'On Hold' %}on-hold
+                                    {% else %}default{% endif %}">
+                                    <span class="bl-st-dot"></span>
+                                    {{ project.status }}
+                                </span>
+                                <a href="{% url 'update_project_status' project.id %}"
+                                   class="btn-update-status bl-upd-btn"
+                                   title="Update status">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                            </div>
+                        </td>
+
+                        <!-- Budget (logic unchanged) -->
+                        <td class="amount budget">
+                            <span class="bl-money">
+                                {{ project|total_budget_with_expense|indian_currency }}
+                            </span>
+                        </td>
+
+                        <!-- Total Paid (logic unchanged) -->
+                        <td class="amount paid">
+                            <span class="bl-money bl-money-green">
+                                {{ project.payments.all|total_payment|indian_currency|default:"₹0" }}
+                            </span>
+                        </td>
+
+                        <!-- Remaining (logic unchanged) -->
+                        <td class="amount remaining {% if project.remaining < 0 %}negative{% endif %}">
+                            <span class="bl-money {% if project.remaining < 0 %}bl-money-red{% else %}bl-money-amber{% endif %}">
+                                {{ project.remaining|indian_currency }}
+                            </span>
+                        </td>
+
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7">
+                            <div class="bl-empty">
+                                <div class="bl-empty-art">
+                                    <div class="bl-ea-ring bl-ea-r1"></div>
+                                    <div class="bl-ea-ring bl-ea-r2"></div>
+                                    <div class="bl-ea-icon">
+                                        <i class="bi bi-inbox"></i>
+                                    </div>
+                                </div>
+                                <h5>No Projects Found</h5>
+                                <p>
+                                    {% if query %}
+                                        No results for "{{ query }}"
+                                    {% else %}
+                                        Add your first project to get started
+                                    {% endif %}
+                                </p>
+                                <a href="{% url 'add_project' %}" class="bl-btn bl-btn-primary bl-btn-sm">
+                                    <i class="bi bi-plus-lg"></i> New Project
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+</div><!-- end bl-page -->
+
+<!-- ── SweetAlert + Confetti (logic unchanged) ── -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
 document.addEventListener("DOMContentLoaded", function () {
@@ -530,73 +566,41 @@ document.addEventListener("DOMContentLoaded", function () {
         {% for message in messages %}
             {% if message.message == "PROJECT_COMPLETED" %}
 
-                const end = Date.now() + (4 * 1000); // 4 Seconds
-                const colors = ['#0d6efd', '#ffffff', '#ffd700', '#22c55e']; // Brand Colors
+                const end    = Date.now() + (4 * 1000);
+                const colors = ['#0d6efd', '#ffffff', '#ffd700', '#22c55e'];
 
                 (function frame() {
-                    // Left Side Cannon
-                    confetti({
-                        particleCount: 3,
-                        angle: 60,
-                        spread: 55,
-                        origin: { x: 0, y: 0.8 },
-                        colors: colors,
-                        ticks: 200,
-                        gravity: 1.2,
-                        shapes: ['circle', 'square'],
-                        scalar: 1.2,
-                        zIndex: 10000 // Set higher than SweetAlert (usually 1060) and Navbars
-                    });
-
-                    // Right Side Cannon
-                    confetti({
-                        particleCount: 3,
-                        angle: 120,
-                        spread: 55,
-                        origin: { x: 1, y: 0.8 },
-                        colors: colors,
-                        ticks: 200,
-                        gravity: 1.2,
-                        shapes: ['circle', 'square'],
-                        scalar: 1.2,
-                        zIndex: 10000 // Ensure both cannons are at the top layer
-                    });
-
-                    
-                    if (Date.now() < end) {
-                        requestAnimationFrame(frame);
-                    }
+                    confetti({ particleCount:3, angle:60,  spread:55, origin:{x:0,y:0.8}, colors, ticks:200, gravity:1.2, shapes:['circle','square'], scalar:1.2, zIndex:10000 });
+                    confetti({ particleCount:3, angle:120, spread:55, origin:{x:1,y:0.8}, colors, ticks:200, gravity:1.2, shapes:['circle','square'], scalar:1.2, zIndex:10000 });
+                    if (Date.now() < end) requestAnimationFrame(frame);
                 }());
 
-                // 💎 NEUMORPHIC / GLASSMORPHIC SWEETALERT
                 Swal.fire({
-                    title: '<div style="letter-spacing:2px; font-size:1.5rem; color:#1e2130;">PROJECT ARCHIEVED</div>',
+                    title: '<div style="letter-spacing:1.5px;font-size:1.1rem;font-weight:700;color:#1e2130;">PROJECT ARCHIVED 🎉</div>',
                     html: `
-                        <div style="padding: 10px;">
-                            <p style="color: #64748b; font-size: 1rem;">The milestone has been reached and finalized.</p>
-                            <div style="background: #f8fafc; border-radius: 12px; padding: 15px; border: 1px solid #e2e8f0;">
-                                <span style="color: #0d6efd; font-weight: 800;">Status:</span> 
-                                <span class="badge bg-success rounded-pill">Completed</span>
-                            </div>
-                        </div>
-                    `,
+                        <p style="color:#64748b;font-size:.85rem;margin:8px 0 14px;font-weight:400;">
+                            The milestone has been reached and finalized.
+                        </p>
+                        <div style="background:#f0fdf4;border-radius:10px;padding:10px 14px;border:1px solid #bbf7d0;display:inline-flex;align-items:center;gap:8px;">
+                            <span style="width:7px;height:7px;border-radius:50%;background:#059669;display:inline-block;"></span>
+                            <span style="font-size:.75rem;font-weight:600;color:#059669;">Status: Completed</span>
+                        </div>`,
                     icon: 'success',
                     showConfirmButton: true,
                     confirmButtonText: 'CONTINUE',
-                    confirmButtonColor: '#1e2130', // Matches your sidebar dark theme
+                    confirmButtonColor: '#1e2130',
                     padding: '2rem',
                     background: '#ffffff',
                     customClass: {
-                        popup: 'border-0 shadow-lg rounded-5',
+                        popup: 'border-0 shadow-lg rounded-4',
                         confirmButton: 'px-5 py-2 fw-bold'
                     },
                     showClass: {
-                        popup: 'animate__animated animate__backInUp' // Requires animate.css or similar
+                        popup: 'animate__animated animate__backInUp'
                     }
                 });
 
             {% else %}
-                // Standard Minimal Toast for regular messages
                 const Toast = Swal.mixin({
                     toast: true,
                     position: 'top-end',
@@ -614,19 +618,1047 @@ document.addEventListener("DOMContentLoaded", function () {
 });
 </script>
 
-    
+
+<style>
+
+/* ══════════════════════════════════════
+   DESIGN TOKENS
+══════════════════════════════════════ */
+:root {
+    --bl-indigo:     #4f46e5;
+    --bl-indigo-lt:  #eef2ff;
+    --bl-indigo-md:  #c7d2fe;
+    --bl-indigo-dk:  #3730a3;
+    --bl-emerald:    #059669;
+    --bl-emerald-lt: #ecfdf5;
+    --bl-emerald-md: #6ee7b7;
+    --bl-amber:      #d97706;
+    --bl-amber-lt:   #fffbeb;
+    --bl-amber-md:   #fcd34d;
+    --bl-red:        #dc2626;
+    --bl-red-lt:     #fef2f2;
+    --bl-violet:     #7c3aed;
+    --bl-violet-lt:  #f5f3ff;
+    --bl-teal:       #0d9488;
+    --bl-teal-lt:    #f0fdfa;
+    --bl-s50:        #f8fafc;
+    --bl-s100:       #f1f5f9;
+    --bl-s200:       #e2e8f0;
+    --bl-s300:       #cbd5e1;
+    --bl-s400:       #94a3b8;
+    --bl-s500:       #64748b;
+    --bl-s600:       #475569;
+    --bl-s700:       #334155;
+    --bl-dark:       #0f172a;
+    --bl-white:      #ffffff;
+
+    --bl-r-sm:  8px;
+    --bl-r-md:  12px;
+    --bl-r-lg:  16px;
+    --bl-r-xl:  20px;
+    --bl-r-2xl: 24px;
+
+    --bl-ease:   cubic-bezier(.4, 0, .2, 1);
+    --bl-sh-sm:  0 1px 3px rgba(0,0,0,.05);
+    --bl-sh-md:  0 4px 12px rgba(0,0,0,.07);
+    --bl-sh-lg:  0 12px 32px rgba(0,0,0,.1);
+}
+
+/* ══════════════════════════════════════
+   PAGE WRAPPER
+══════════════════════════════════════ */
+.bl-page {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    padding-bottom: 48px;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+/* ── Rotate Message ── */
+.bl-rotate-msg {
+    background: #fffbeb;
+    color: #92400e;
+    border: 1px solid #fde68a;
+    border-radius: var(--bl-r-md);
+    padding: 10px 16px;
+    font-size: .78rem;
+    font-weight: 500;
+    text-align: center;
+    margin-bottom: 4px;
+}
+
+/* ══════════════════════════════════════
+   PAGE HEADER
+══════════════════════════════════════ */
+.bl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.bl-header-left { display: flex; align-items: center; gap: 14px; }
+
+.bl-header-icon {
+    position: relative;
+    width: 50px;
+    height: 50px;
+    background: linear-gradient(135deg, var(--bl-indigo), var(--bl-indigo-dk));
+    border-radius: var(--bl-r-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.25rem;
+    box-shadow: 0 6px 20px rgba(79,70,229,.3);
+    flex-shrink: 0;
+}
+
+.bl-header-ring {
+    position: absolute;
+    inset: -5px;
+    border: 2px solid rgba(79,70,229,.18);
+    border-radius: calc(var(--bl-r-lg) + 5px);
+    animation: blRingPulse 2.5s ease-in-out infinite;
+}
+
+@keyframes blRingPulse {
+    0%,100% { opacity:.4; transform: scale(1); }
+    50%     { opacity:1;  transform: scale(1.04); }
+}
+
+.bl-eyebrow {
+    font-size: .6rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+    color: var(--bl-indigo);
+    margin: 0 0 2px;
+}
+
+.bl-title {
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--bl-dark);
+    letter-spacing: -.03em;
+    margin: 0 0 2px;
+    line-height: 1.2;
+}
+
+.bl-subtitle {
+    font-size: .72rem;
+    font-weight: 400;
+    color: var(--bl-s500);
+    margin: 0;
+}
+
+.bl-header-right {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+/* ══════════════════════════════════════
+   BUTTONS
+══════════════════════════════════════ */
+.bl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: var(--bl-r-md);
+    font-size: .78rem;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all .2s var(--bl-ease);
+    text-decoration: none;
+    white-space: nowrap;
+    font-family: inherit;
+    line-height: 1;
+}
+
+.bl-btn-primary {
+    background: linear-gradient(135deg, var(--bl-indigo), var(--bl-indigo-dk));
+    color: white;
+    box-shadow: 0 3px 10px rgba(79,70,229,.24);
+}
+.bl-btn-primary:hover  { transform: translateY(-2px); box-shadow: 0 6px 18px rgba(79,70,229,.35); color: white; }
+.bl-btn-primary:active { transform: translateY(0); }
+
+.bl-btn-success {
+    background: linear-gradient(135deg, var(--bl-emerald), #047857);
+    color: white;
+    box-shadow: 0 3px 10px rgba(5,150,105,.22);
+}
+.bl-btn-success:hover  { transform: translateY(-2px); color: white; }
+
+.bl-btn-outline {
+    background: white;
+    color: var(--bl-s600);
+    border: 1.5px solid var(--bl-s200);
+}
+.bl-btn-outline:hover  { background: var(--bl-s50); color: var(--bl-dark); }
+
+.bl-btn-sm { padding: 6px 12px; font-size: .72rem; border-radius: var(--bl-r-sm); }
+
+/* ══════════════════════════════════════
+   SUMMARY CARDS GRID
+══════════════════════════════════════ */
+.bl-summary-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+}
+
+/* ── Card Base ── */
+.bl-sc {
+    background: white;
+    border: 1px solid var(--bl-s200);
+    border-radius: var(--bl-r-xl);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform .2s var(--bl-ease), box-shadow .2s var(--bl-ease);
+    position: relative;
+}
+
+.bl-sc:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--bl-sh-lg);
+}
+
+/* ── Top accent line ── */
+.bl-sc::before {
+    content: '';
+    display: block;
+    height: 3px;
+    width: 100%;
+    flex-shrink: 0;
+}
+
+.bl-sc-indigo::before  { background: linear-gradient(90deg, var(--bl-indigo), #818cf8); }
+.bl-sc-emerald::before { background: linear-gradient(90deg, var(--bl-emerald), #34d399); }
+.bl-sc-amber::before   { background: linear-gradient(90deg, var(--bl-amber), #fbbf24); }
+.bl-sc-slate::before   { background: linear-gradient(90deg, var(--bl-s500), var(--bl-s400)); }
+
+/* ── Head ── */
+.bl-sc-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 18px 14px;
+}
+
+.bl-sc-icon {
+    width: 40px;
+    height: 40px;
+    min-width: 40px;
+    border-radius: var(--bl-r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.05rem;
+    flex-shrink: 0;
+}
+
+.bl-sci-indigo  { background: var(--bl-indigo-lt);  color: var(--bl-indigo); }
+.bl-sci-emerald { background: var(--bl-emerald-lt); color: var(--bl-emerald); }
+.bl-sci-amber   { background: var(--bl-amber-lt);   color: var(--bl-amber); }
+.bl-sci-slate   { background: var(--bl-s100);       color: var(--bl-s600); }
+
+.bl-sc-head-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+}
+
+.bl-sc-name {
+    font-size: 1.10rem;
+    font-weight: 600;
+    color: var(--bl-dark);
+    margin: 0;
+    line-height: 1.2;
+}
+
+.bl-sc-pill {
+    font-size: .6rem;
+    font-weight: 600;
+    padding: 2px 9px;
+    border-radius: 20px;
+    width: fit-content;
+}
+
+.bl-scp-indigo  { background: var(--bl-indigo-lt);  color: var(--bl-indigo); }
+.bl-scp-emerald { background: var(--bl-emerald-lt); color: var(--bl-emerald); }
+.bl-scp-amber   { background: var(--bl-amber-lt);   color: var(--bl-amber); }
+.bl-scp-slate   { background: var(--bl-s100);       color: var(--bl-s600); }
+
+/* ── Body (Budget + Paid rows) ── */
+.bl-sc-body {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    padding: 0 18px 14px;
+    flex: 1;
+}
+
+.bl-sc-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--bl-s100);
+}
+
+.bl-sc-row:last-child { border-bottom: none; }
+
+.bl-sc-label {
+    font-size: 1rem;
+    font-weight: 500;
+    color: black;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+
+.bl-sc-value {
+    font-size: 1.12rem;
+    font-weight: 600;
+    color: var(--bl-dark);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    white-space: nowrap;
+    letter-spacing: -.01em;
+}
+
+.bl-val-green { color: var(--bl-emerald) !important; }
+
+/* ── Divider ── */
+.bl-sc-divider {
+    height: 1px;
+    background: var(--bl-s200);
+    margin: 0;
+    flex-shrink: 0;
+}
+
+/* ── Highlight (Yet to Receive) ── */
+.bl-sc-highlight {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 11px 18px;
+    background: linear-gradient(135deg, var(--bl-s50), #f8f9ff);
+    flex-shrink: 0;
+}
+
+.bl-sc-hl-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: .65rem;
+    font-weight: 500;
+    color: var(--bl-s500);
+}
+
+.bl-sc-hl-left i {
+    font-size: .68rem;
+    color: var(--bl-amber);
+}
+
+.bl-sc-hl-value {
+    font-size: 1.14rem;
+    font-weight: 700;
+    color: var(--bl-amber);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    letter-spacing: -.01em;
+}
+
+/* ── Progress ── */
+.bl-sc-progress {
+    padding: 10px 18px 14px;
+    flex-shrink: 0;
+}
+
+.bl-sc-progress-bar {
+    height: 5px;
+    border-radius: 10px;
+    min-width: 2px;
+    max-width: 100%;
+    transition: width 1.2s var(--bl-ease);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Shimmer on progress bar */
+.bl-sc-progress-bar::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 60%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,.4), transparent);
+    animation: blShimmer 2s ease-in-out infinite;
+}
+
+@keyframes blShimmer {
+    0%   { left: -100%; }
+    100% { left: 200%; }
+}
+
+.bl-fill-indigo  { background: linear-gradient(90deg, var(--bl-indigo), #818cf8); }
+.bl-fill-emerald { background: linear-gradient(90deg, var(--bl-emerald), #34d399); }
+.bl-fill-amber   { background: linear-gradient(90deg, var(--bl-amber), #fbbf24); }
+.bl-fill-slate   { background: linear-gradient(90deg, var(--bl-s500), var(--bl-s400)); }
+
+.bl-sc-progress-text {
+    display: flex;
+    justify-content: flex-end;
+    font-size: .56rem;
+    font-weight: 500;
+    color: var(--bl-s400);
+    margin-top: 5px;
+    letter-spacing: .02em;
+}
+
+/* ══════════════════════════════════════
+   PANELS ROW (Activity + Quick Actions)
+══════════════════════════════════════ */
+.bl-panels {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 16px;
+}
+
+.bl-panel {
+    background: white;
+    border: 1px solid var(--bl-s200);
+    border-radius: var(--bl-r-xl);
+    overflow: hidden;
+    box-shadow: var(--bl-sh-sm);
+}
+
+.bl-panel-hdr {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 13px 18px;
+    border-bottom: 1px solid var(--bl-s100);
+    background: var(--bl-s50);
+}
+
+.bl-panel-ico {
+    width: 28px;
+    height: 28px;
+    border-radius: var(--bl-r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .75rem;
+}
+
+.bl-ico-violet { background: var(--bl-violet-lt); color: var(--bl-violet); }
+.bl-ico-indigo { background: var(--bl-indigo-lt); color: var(--bl-indigo); }
+
+.bl-panel-title {
+    font-size: 1.28rem;
+    font-weight: 600;
+    color: var(--bl-dark);
+}
+
+/* ── Activity List ── */
+.bl-act-list { display: flex; flex-direction: column; }
+
+.bl-act-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 18px;
+    border-bottom: 1px solid var(--bl-s100);
+    transition: background .12s var(--bl-ease);
+}
+
+.bl-act-row:last-child { border-bottom: none; }
+.bl-act-row:hover      { background: var(--bl-s50); }
+
+{% comment %} .bl-act-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    flex-shrink: 0;
+} {% endcomment %}
+
+.bl-dot-success { background: var(--bl-emerald); }
+.bl-dot-warning { background: var(--bl-amber); }
+
+.bl-act-icon {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    border-radius: var(--bl-r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.32rem;
+}
+
+.bl-aic-success { background: var(--bl-emerald-lt); color: var(--bl-emerald); }
+.bl-aic-warning { background: var(--bl-amber-lt);   color: var(--bl-amber); }
+
+.bl-act-body { flex: 1; min-width: 0; }
+
+.bl-act-title {
+    display: block;
+    font-size: .74rem;
+    font-weight: 600;
+    color: var(--bl-dark);
+    line-height: 1.3;
+}
+
+.bl-act-desc {
+    display: block;
+    font-size: .64rem;
+    font-weight: 400;
+    color: var(--bl-s500);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-top: 1px;
+}
+
+.bl-act-time {
+    font-size: .6rem;
+    font-weight: 500;
+    color: var(--bl-s400);
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.bl-act-empty {
+    padding: 28px 18px;
+    text-align: center;
+    color: var(--bl-s400);
+    font-size: .74rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+}
+
+/* ── Quick Actions ── */
+.bl-qa-list { display: flex; flex-direction: column; }
+
+.bl-qa-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 13px 18px;
+    text-decoration: none;
+    border-bottom: 1px solid var(--bl-s100);
+    transition: all .18s var(--bl-ease);
+}
+
+.bl-qa-row:last-child { border-bottom: none; }
+.bl-qa-row:hover { background: var(--bl-s50); padding-left: 22px; }
+
+.bl-qa-icon {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    border-radius: var(--bl-r-md);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .88rem;
+}
+
+.bl-qa-teal   { background: var(--bl-teal-lt);   color: var(--bl-teal); }
+.bl-qa-amber  { background: var(--bl-amber-lt);  color: var(--bl-amber); }
+.bl-qa-purple { background: var(--bl-violet-lt); color: var(--bl-violet); }
+.bl-qa-green  { background: var(--bl-emerald-lt); color: var(--bl-emerald); }
+
+.bl-qa-body { flex: 1; }
+
+.bl-qa-name {
+    display: block;
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--bl-dark);
+}
+
+.bl-qa-desc {
+    display: block;
+    font-size: .62rem;
+    font-weight: 400;
+    color: var(--bl-s500);
+    margin-top: 1px;
+}
+
+.bl-qa-chev {
+    color: var(--bl-s300);
+    font-size: .65rem;
+    transition: all .18s var(--bl-ease);
+}
+
+.bl-qa-row:hover .bl-qa-chev {
+    color: var(--bl-indigo);
+    transform: translateX(4px);
+}
+
+/* ══════════════════════════════════════
+   SEARCH
+══════════════════════════════════════ */
+.bl-search-wrap { width: 100%; }
+
+.bl-search-inner { position: relative; }
+
+.bl-srch-ico {
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bl-s400);
+    font-size: .85rem;
+    pointer-events: none;
+}
+
+.bl-srch-field {
+    width: 100%;
+    padding: 11px 100px 11px 40px;
+    border: 1.5px solid var(--bl-s200);
+    border-radius: var(--bl-r-lg);
+    font-size: .82rem;
+    font-weight: 400;
+    color: var(--bl-dark);
+    background: white;
+    font-family: inherit;
+    transition: all .2s var(--bl-ease);
+    box-shadow: var(--bl-sh-sm);
+}
+
+.bl-srch-field:focus {
+    outline: none;
+    border-color: var(--bl-indigo);
+    box-shadow: 0 0 0 3px rgba(79,70,229,.1);
+}
+
+.bl-srch-field::placeholder { color: var(--bl-s400); font-weight: 400; }
+
+.bl-srch-spin {
+    position: absolute;
+    right: 64px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.bl-spin-ring {
+    width: 16px;
+    height: 16px;
+    border: 2px solid var(--bl-s200);
+    border-top-color: var(--bl-indigo);
+    border-radius: 50%;
+    animation: blSpin .65s linear infinite;
+}
+
+@keyframes blSpin { to { transform: rotate(360deg); } }
+
+.bl-srch-clear {
+    position: absolute;
+    right: 40px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--bl-s400);
+    font-size: .85rem;
+    text-decoration: none;
+    transition: color .15s;
+    line-height: 1;
+}
+
+.bl-srch-clear:hover { color: var(--bl-red); }
+
+.bl-srch-kbd {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bl-s100);
+    border: 1px solid var(--bl-s200);
+    padding: 2px 7px;
+    border-radius: 5px;
+    font-size: .55rem;
+    font-weight: 600;
+    color: var(--bl-s400);
+    pointer-events: none;
+    font-family: inherit;
+}
+
+/* ══════════════════════════════════════
+   TABLE CARD
+══════════════════════════════════════ */
+.bl-tbl-card {
+    background: white;
+    border: 1px solid var(--bl-s200);
+    border-radius: var(--bl-r-xl);
+    overflow: hidden;
+    box-shadow: var(--bl-sh-md);
+}
+
+.bl-tbl-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 20px;
+    background: var(--bl-s50);
+    border-bottom: 1px solid var(--bl-s100);
+}
+
+.bl-tbl-topbar-left {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 1.18rem;
+    font-weight: 600;
+    color: var(--bl-dark);
+}
+
+.bl-tbl-badge {
+    font-size: .6rem;
+    font-weight: 500;
+    color: var(--bl-s400);
+    background: white;
+    border: 1px solid var(--bl-s200);
+    padding: 2px 9px;
+    border-radius: 20px;
+}
+
+.bl-tbl-sort-hint {
+    font-size: .62rem;
+    font-weight: 500;
+    color: var(--bl-s400);
+    display: flex;
+    align-items: center;
+}
+
+/* ── Scroll wrapper ── */
+.bl-tbl-scroll {
+    overflow-x: auto;
+    max-height: 60vh;
+}
+
+.bl-tbl-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+.bl-tbl-scroll::-webkit-scrollbar-track { background: transparent; }
+.bl-tbl-scroll::-webkit-scrollbar-thumb { background: var(--bl-s200); border-radius: 10px; }
+.bl-tbl-scroll::-webkit-scrollbar-thumb:hover { background: var(--bl-s300); }
+
+/* ── Table ── */
+.bl-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: .78rem;
+}
+
+.bl-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+.bl-table thead tr {
+    background: var(--bl-s50);
+    border-bottom: 2px solid var(--bl-s200);
+}
+
+.bl-table thead th {
+    padding: 10px 13px;
+    border: none;
+    background: var(--bl-s50);
+    white-space: nowrap;
+    font-weight: normal;
+}
+
+.bl-th {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: .58rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--bl-s400);
+}
+
+.bl-th-end {
+    justify-content: flex-end;
+    width: 100%;
+}
+
+.bl-table tbody tr {
+    border-bottom: 1px solid var(--bl-s100);
+    transition: background .12s var(--bl-ease);
+    animation: blRowFade .3s var(--bl-ease) both;
+}
+
+@keyframes blRowFade {
+    from { opacity: 0; transform: translateY(4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.bl-table tbody tr:last-child { border-bottom: none; }
+.bl-table tbody tr:hover { background: var(--bl-s50); }
+
+.bl-table tbody td {
+    padding: 12px 13px;
+    vertical-align: middle;
+    border: none;
+    color: var(--bl-dark);
+}
+
+/* ── Serial ── */
+.bl-sno {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    background: var(--bl-s100);
+    border-radius: 7px;
+    font-size: .62rem;
+    font-weight: 600;
+    color: var(--bl-s500);
+}
+
+/* ── Project Cell ── */
+.bl-proj-cell { display: flex; align-items: center; gap: 9px; }
+
+.bl-proj-av {
+    width: 32px;
+    height: 32px;
+    min-width: 32px;
+    border-radius: var(--bl-r-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: .58rem;
+    font-weight: 700;
+    letter-spacing: .5px;
+}
+
+.bl-av-indigo  { background: var(--bl-indigo-lt);  color: var(--bl-indigo); }
+.bl-av-emerald { background: var(--bl-emerald-lt); color: var(--bl-emerald); }
+.bl-av-amber   { background: var(--bl-amber-lt);   color: var(--bl-amber); }
+.bl-av-violet  { background: var(--bl-violet-lt);  color: var(--bl-violet); }
+.bl-av-teal    { background: var(--bl-teal-lt);    color: var(--bl-teal); }
+
+.bl-proj-nm {
+    font-size: .78rem;
+    font-weight: 500;
+    color: var(--bl-dark);
+    line-height: 1.3;
+}
+
+/* ── Client Cell ── */
+.bl-client-cell {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: transform .15s var(--bl-ease);
+}
+
+.client-link:hover .bl-client-cell { transform: translateX(3px); }
+
+.bl-client-av {
+    width: 28px;
+    height: 28px;
+    min-width: 28px;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: .66rem;
+    color: #065f46;
+}
+
+.bl-client-nm {
+    display: block;
+    font-size: .98rem;
+    color: var(--bl-indigo);
+    line-height: 1.2;
+}
+
+.bl-client-view {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: .56rem;
+    font-weight: 400;
+    color: var(--bl-s400);
+    margin-top: 1px;
+}
+
+.bl-client-view i { font-size: .52rem; }
+
+/* ── Status ── */
+.bl-status-wrap { display: flex; align-items: center; gap: 6px; }
+
+.bl-status-tag {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 5px !important;
+    padding: 4px 10px !important;
+    border-radius: 20px !important;
+    font-size: .62rem !important;
+    font-weight: 500 !important;
+    border: 1px solid transparent;
+}
+
+.bl-st-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    display: inline-block;
+    flex-shrink: 0;
+}
+
+/* Status colors */
+.status-in-progress {
+    background: var(--bl-indigo-lt)  !important;
+    color: var(--bl-indigo)          !important;
+    border-color: rgba(79,70,229,.15) !important;
+}
+.status-in-progress .bl-st-dot { background: var(--bl-indigo); }
+
+.status-completed {
+    background: var(--bl-emerald-lt)  !important;
+    color: var(--bl-emerald)          !important;
+    border-color: rgba(5,150,105,.15) !important;
+}
+.status-completed .bl-st-dot { background: var(--bl-emerald); }
+
+.status-on-hold {
+    background: var(--bl-amber-lt)    !important;
+    color: var(--bl-amber)            !important;
+    border-color: rgba(217,119,6,.15) !important;
+}
+.status-on-hold .bl-st-dot { background: var(--bl-amber); }
+
+.status-not-started {
+    background: var(--bl-s100) !important;
+    color: var(--bl-s600)     !important;
+    border-color: var(--bl-s200) !important;
+}
+.status-not-started .bl-st-dot { background: var(--bl-s400); }
+
+.status-default {
+    background: var(--bl-s100) !important;
+    color: var(--bl-s500)     !important;
+    border-color: var(--bl-s200) !important;
+}
+
+/* Update button (appears on row hover) */
+.bl-upd-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    border: 1px solid var(--bl-s200);
+    background: white;
+    color: var(--bl-s400);
+    font-size: .65rem;
+    text-decoration: none;
+    transition: all .15s var(--bl-ease);
+    opacity: 0;
+    pointer-events: none;
+}
+
+.bl-tr:hover .bl-upd-btn {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.bl-upd-btn:hover {
+    background: var(--bl-indigo-lt);
+    color: var(--bl-indigo);
+    border-color: var(--bl-indigo-md);
+}
+
+/* ── Money values ── */
+.bl-money {
+    font-size: .98rem;
+    font-weight: 500;
+    text-align: right;
+    color: var(--bl-dark);
+    font-family: 'Monaco', 'Menlo', 'Consolas', monospace;
+    letter-spacing: -.01em;
+}
+
+.bl-money-green { color: var(--bl-emerald) !important; }
+.bl-money-amber { color: var(--bl-amber)   !important; }
+.bl-money-red   { color: var(--bl-red)     !important; }
+
+/* ── Empty State ── */
+.bl-empty { text-align: center; padding: 52px 24px; }
+
+.bl-empty-art {
+    position: relative;
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+}
+
+.bl-ea-ring { position: absolute; border-radius: 50%; opacity: .06; }
+.bl-ea-r1   { inset: 0;    background: var(--bl-indigo);  animation: blEcP 3s ease-in-out infinite; }
+.bl-ea-r2   { inset: 10px; background: var(--bl-emerald); animation: blEcP 3s ease-in-out infinite .5s; }
+
+@keyframes blEcP {
+    0%,100% { transform: scale(.95); opacity: .05; }
+    50%     { transform: scale(1.06); opacity: .12; }
+}
+
+.bl-ea-icon {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.7rem;
+    color: var(--bl-s400);
+    background: var(--bl-s100);
+    border-radius: 50%;
+}
+
+.bl-empty h5 { font-size: .9rem; font-weight: 600; color: var(--bl-dark); margin-bottom: 6px; }
+.bl-empty p  { font-size: .74rem; font-weight: 400; color: var(--bl-s500); margin-bottom: 14px; }
+
+/* ══════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════ */
+@media (max-width: 1200px) {
+    .bl-summary-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 960px) {
+    .bl-panels { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 768px) {
+    .bl-header { flex-direction: column; align-items: flex-start; }
+    .bl-header-right { width: 100%; }
+    .bl-header-right .bl-btn { flex: 1; justify-content: center; }
+    .bl-title { font-size: 1.15rem; }
+    .bl-srch-kbd { display: none; }
+    .bl-tbl-sort-hint { display: none; }
+}
+
+@media (max-width: 640px) {
+    .bl-summary-grid { grid-template-columns: 1fr; }
+    .bl-header-right .bl-btn:last-child { display: none; }
+}
+
+</style>
 {% endblock %}
-
-   
-
-
-
-
-
-
-
-
-
-
-</body>
-</html>

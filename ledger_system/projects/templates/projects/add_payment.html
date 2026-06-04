@@ -5,273 +5,995 @@
 {% block page_title %}Financial Ledger{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 py-2">
-    <div class="row g-4">
-        
-        <div class="col-lg-4">
-            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden border-top border-success border-4">
-                <div class="card-header bg-white border-0 pt-4 px-4">
-                    <div class="d-flex align-items-center">
-                        <div class="icon-box bg-success-soft text-success me-3">
-                            <i class="bi bi-cash-stack"></i>
-                        </div>
-                        <h5 class="fw-bold mb-0">Record Payment</h5>
+
+<div class="pl-page">
+
+    <!-- ════════════════════════════════════════
+         PAGE HEADER
+    ════════════════════════════════════════ -->
+    <div class="pl-header">
+        <div class="pl-header-left">
+            <div class="pl-header-icon">
+                <i class="bi bi-journal-text"></i>
+                <div class="pl-icon-ring"></div>
+            </div>
+            <div>
+                <p class="pl-eyebrow">Finance</p>
+                <h1 class="pl-title">Payment Ledger</h1>
+                <p class="pl-subtitle">Record payments & view transaction history</p>
+            </div>
+        </div>
+        {% if selected_project_id %}
+        <div class="pl-header-right">
+            <div class="pl-client-badge">
+                <div class="pl-cb-avatar">
+                    {{ selected_project.client_name|first|upper }}
+                </div>
+                <div>
+                    <span class="pl-cb-name">{{ selected_project.client_name }}</span>
+                    <span class="pl-cb-project">{{ selected_project.name }}</span>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- ════════════════════════════════════════
+         MAIN LAYOUT
+    ════════════════════════════════════════ -->
+    <div class="pl-layout">
+
+        <!-- ── LEFT: Payment Form ── -->
+        <div class="pl-form-col">
+            <div class="pl-form-card">
+
+                <div class="pl-form-accent"></div>
+
+                <div class="pl-form-header">
+                    <div class="pl-form-hdr-icon">
+                        <i class="bi bi-cash-stack"></i>
+                    </div>
+                    <div>
+                        <h5 class="pl-form-title">Record Payment</h5>
+                        <p class="pl-form-sub">Log a new payment entry</p>
                     </div>
                 </div>
 
-                <div class="card-body p-4">
-                    {% if messages %}
-                        {% for message in messages %}
-                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-3 small fw-bold mb-4" role="alert">
-                            {{ message }}
-                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                        </div>
-                        {% endfor %}
-                    {% endif %}
+                <form method="post"
+                      action="{% url 'add_payment' %}"
+                      id="paymentForm"
+                      class="pl-form">
+                    {% csrf_token %}
 
-                    <form method="post" action="{% url 'add_payment' %}" id="paymentForm">
-                        {% csrf_token %}
-
-                        <div class="mb-4">
-                            <label class="form-label small fw-bold text-muted text-uppercase">Select Client Profile</label>
-                            <select name="project" class="form-select form-select-lg custom-select" required onchange="this.form.submit()">
-                                <option value="" disabled {% if not selected_project_id %}selected{% endif %}>Choose Client...</option>
+                    <!-- Client Selector -->
+                    <div class="pl-field">
+                        <label class="pl-label">
+                            <i class="bi bi-person-circle"></i> Client Profile
+                        </label>
+                        <div class="pl-select-wrap">
+                            <div class="pl-select-icon">
+                                <i class="bi bi-people-fill"></i>
+                            </div>
+                            <select name="project"
+                                    class="pl-select"
+                                    required
+                                    onchange="this.form.submit()">
+                                <option value="" disabled
+                                    {% if not selected_project_id %}selected{% endif %}>
+                                    Choose Client…
+                                </option>
                                 {% for project in projects %}
-                                <option value="{{ project.id }}" {% if project.id == selected_project_id %}selected{% endif %}>
+                                <option value="{{ project.id }}"
+                                    {% if project.id == selected_project_id %}selected{% endif %}>
                                     {{ project.client_name }} ({{ project.name }})
                                 </option>
                                 {% endfor %}
                             </select>
-                        </div>
-
-                        {% if selected_project_id %}
-                        <div class="row g-3 mb-4">
-                            <div class="col-12">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Payment Amount</label>
-                                    <div class="input-group">
-                                        <span class="input-group-text bg-light border-end-0 text-success fw-bold">₹</span>
-                                        <input type="number" id="amountInput" name="amount" step="0.01"
-                                            class="form-control form-control-lg border-start-0 custom-input fw-bold"
-                                            placeholder="0.00" required>
-                                    </div>
-
-                                    <!-- 🔥 Amount in words -->
-                                    <div id="amountWords" style="font-size: 0.85rem; color:red; margin-top:6px;">
-                                        <!-- words appear here -->
-                                    </div>
-
-                            </div>
-                            <div class="col-12">
-                                <label class="form-label small fw-bold text-muted text-uppercase">Mode of Payment</label>
-                                <div class="input-group">
-                                    <span class="input-group-text bg-light border-end-0 text-muted"><i class="bi bi-wallet2"></i></span>
-                                    <select name="payment_mode" class="form-select form-select-lg border-start-0 custom-input" required>
-                                        <option value="" disabled selected>Select mode</option>
-                                        <option value="Cash">Cash</option>
-                                        <option value="Bank Transfer">Bank Transfer</option>
-                                        <option value="Cheque">Cheque</option>
-                                        <option value="UPI">UPI / Online</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success btn-lg w-100 rounded-3 fw-bold shadow-sm py-3 hover-lift">
-                            <i class="bi bi-plus-circle-fill me-2"></i> Post Payment
-                        </button>
-                        {% else %}
-                        <div class="text-center py-4 bg-light rounded-4 border border-dashed">
-                            <i class="bi bi-arrow-up-circle text-muted display-6"></i>
-                            <p class="text-muted small mt-2 px-3">Please select a client to enable payment entry</p>
-                        </div>
-                        {% endif %}
-                    </form>
-                </div>
-            </div>
-        </div>
-
-        <div class="col-lg-8">
-            {% if selected_project_id %}
-            <div class="row g-3 mb-4">
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm rounded-4 bg-primary text-white p-4 h-100">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="text-white-50 small text-uppercase fw-bold">Total Collected</h6>
-                                <h2 class="fw-bold mb-0">{{ total_paid|indian_currency }}</h2>
-                            </div>
-                            <i class="bi bi-check-all display-6 text-white-50"></i>
+                            <i class="bi bi-chevron-down pl-select-arrow"></i>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm rounded-4 {% if selected_project.remaining < 0 %}bg-danger{% else %}bg-dark{% endif %} text-white p-4 h-100">
-                        <div class="d-flex justify-content-between">
-                            <div>
-                                <h6 class="text-white-50 small text-uppercase fw-bold">Balance Receivable</h6>
-                                <h2 class="fw-bold mb-0">{{ selected_project.remaining|indian_currency }}</h2>
+
+                    {% if selected_project_id %}
+
+                    <!-- Amount -->
+                    <div class="pl-field">
+                        <label class="pl-label">
+                            <i class="bi bi-currency-rupee"></i> Payment Amount
+                        </label>
+                        <div class="pl-prefix-group">
+                            <span class="pl-prefix-box pl-prefix-green">₹</span>
+                            <input type="number"
+                                   id="amountInput"
+                                   name="amount"
+                                   step="0.01"
+                                   class="pl-input pl-prefix-input pl-money"
+                                   placeholder="0.00"
+                                   required>
+                        </div>
+                        <!-- Amount in words -->
+                        <div class="pl-amount-words" id="amountWords"></div>
+                    </div>
+
+                    <!-- Payment Mode -->
+                    <div class="pl-field">
+                        <label class="pl-label">
+                            <i class="bi bi-wallet2"></i> Mode of Payment
+                        </label>
+                        <div class="pl-select-wrap">
+                            <div class="pl-select-icon">
+                                <i class="bi bi-credit-card-2-front"></i>
                             </div>
-                            <i class="bi bi-hourglass-split display-6 text-white-50"></i>
+                            <select name="payment_mode"
+                                    class="pl-select"
+                                    required>
+                                <option value="" disabled selected>Select mode…</option>
+                                <option value="Cash">💵 Cash</option>
+                                <option value="Bank Transfer">🏦 Bank Transfer</option>
+                                <option value="Cheque">📄 Cheque</option>
+                                <option value="UPI">📱 UPI / Online</option>
+                            </select>
+                            <i class="bi bi-chevron-down pl-select-arrow"></i>
                         </div>
                     </div>
-                </div>
-            </div>
 
-            <div class="card border-0 shadow-sm rounded-4">
-                <div class="card-header bg-white border-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <h5 class="fw-bold mb-0">Payment Log — <span class="text-primary">{{ selected_project.client_name }}</span></h5>
-                    <span class="badge bg-light text-dark rounded-pill px-3">{{ payments|length }} Entries</span>
-                </div>
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle mb-0">
-                            <thead class="bg-light text-muted small text-uppercase">
-                                <tr>
-                                    <th class="border-0 px-4 py-3">Date</th>
-                                    <th class="border-0 py-3">Amount</th>
-                                    <th class="border-0 py-3">Method</th>
-                                    <th class="border-0 px-4 py-3 text-end">Manage</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for payment in payments %}
-                                <tr>
-                                    <td class="px-4 fw-medium text-muted small">{{ payment.date|date:"d M Y" }}</td>
-                                    <td class="fw-bold text-dark">{{ payment.amount|indian_currency }}</td>
-                                    <td>
-                                        <span class="badge bg-light text-muted fw-normal rounded-pill px-3">{{ payment.payment_mode }}</span>
-                                    </td>
-                                    <td class="px-4 text-end">
-                                        <div class="d-flex justify-content-end gap-2">
-                                            <a href="{% url 'edit_payment' payment.id %}" class="btn btn-sm btn-light border-0" title="Edit">
-                                                <i class="bi bi-pencil-square text-primary"></i>
-                                            </a>
-                                            <form method="post" action="{% url 'delete_payment' payment.id %}" class="d-inline">
-                                                {% csrf_token %}
-                                                <button type="submit" class="btn btn-sm btn-light border-0" onclick="return confirm('Delete record?');">
-                                                    <i class="bi bi-trash text-danger"></i>
-                                                </button>
-                                            </form>
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
+                    <button type="submit" class="pl-submit-btn">
+                        <i class="bi bi-plus-circle-fill"></i>
+                        <span>Post Payment</span>
+                    </button>
+
+                    {% else %}
+
+                    <!-- No client selected prompt -->
+                    <div class="pl-prompt">
+                        <div class="pl-prompt-icon">
+                            <i class="bi bi-arrow-up-circle"></i>
+                        </div>
+                        <p>Select a client above to enable payment entry</p>
                     </div>
-                    {% if not payments %}
-                    <div class="text-center py-5 opacity-50">
-                        <i class="bi bi-receipt display-4"></i>
-                        <p class="mt-2">No transaction history found for this client.</p>
-                    </div>
+
                     {% endif %}
-                </div>
+
+                </form>
             </div>
-            {% else %}
-            <div class="card border-0 shadow-sm rounded-4 h-100 d-flex align-items-center justify-content-center text-center p-5">
-                <div class="bg-light icon-box-lg mb-4 rounded-circle">
-                    <i class="bi bi-search display-5 text-muted"></i>
-                </div>
-                <h4 class="fw-bold text-dark">Client Ledger</h4>
-                <p class="text-muted mx-auto" style="max-width: 300px;">Select a client from the left panel to view their detailed payment history and financial standing.</p>
-            </div>
-            {% endif %}
         </div>
+
+        <!-- ── RIGHT: Ledger ── -->
+        <div class="pl-ledger-col">
+
+            {% if selected_project_id %}
+
+            <!-- Stats Cards -->
+            <div class="pl-stats-row">
+                <div class="pl-stat-card pl-stat-collected">
+                    <div class="pl-stat-bg">
+                        <div class="pl-stat-orb"></div>
+                    </div>
+                    <div class="pl-stat-content">
+                        <div class="pl-stat-icon">
+                            <i class="bi bi-check2-all"></i>
+                        </div>
+                        <div>
+                            <span class="pl-stat-label">Total Collected</span>
+                            <h3 class="pl-stat-value">{{ total_paid|indian_currency }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pl-stat-card {% if selected_project.remaining < 0 %}pl-stat-danger{% else %}pl-stat-pending{% endif %}">
+                    <div class="pl-stat-bg">
+                        <div class="pl-stat-orb"></div>
+                    </div>
+                    <div class="pl-stat-content">
+                        <div class="pl-stat-icon">
+                            <i class="bi bi-hourglass-split"></i>
+                        </div>
+                        <div>
+                            <span class="pl-stat-label">Balance Receivable</span>
+                            <h3 class="pl-stat-value">{{ selected_project.remaining|indian_currency }}</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Table -->
+            <div class="pl-table-card">
+
+                <div class="pl-table-header">
+                    <div class="pl-tbl-hdr-left">
+                        <div class="pl-tbl-icon">
+                            <i class="bi bi-list-ul"></i>
+                        </div>
+                        <div>
+                            <span class="pl-tbl-title">
+                                Payment Log — {{ selected_project.client_name }}
+                            </span>
+                            <span class="pl-tbl-count">{{ payments|length }} entries</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="pl-table-scroll">
+                    <table class="pl-table">
+                        <thead>
+                            <tr>
+                                <th class="pl-th-sno">#</th>
+                                <th>
+                                    <div class="pl-th"><i class="bi bi-calendar3"></i> Date</div>
+                                </th>
+                                <th>
+                                    <div class="pl-th"><i class="bi bi-cash-stack"></i> Amount</div>
+                                </th>
+                                <th>
+                                    <div class="pl-th"><i class="bi bi-wallet2"></i> Method</div>
+                                </th>
+                                <th class="text-end">
+                                    <div class="pl-th pl-th-end"><i class="bi bi-gear"></i> Actions</div>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for payment in payments %}
+                            <tr class="pl-tr" style="animation-delay:{{ forloop.counter0 }}0ms">
+
+                                <td>
+                                    <span class="pl-sno">{{ forloop.counter }}</span>
+                                </td>
+
+                                <!-- Date -->
+                                <td>
+                                    <div class="pl-date-cell">
+                                        <div class="pl-date-icon">
+                                            <i class="bi bi-calendar3"></i>
+                                        </div>
+                                        <div>
+                                            <span class="pl-date-main">{{ payment.date|date:"d M Y" }}</span>
+                                            <span class="pl-date-day">{{ payment.date|date:"l" }}</span>
+                                        </div>
+                                    </div>
+                                </td>
+
+                                <!-- Amount -->
+                                <td>
+                                    <span class="pl-amount">{{ payment.amount|indian_currency }}</span>
+                                </td>
+
+                                <!-- Method -->
+                                <td>
+                                    <span class="pl-method-badge
+                                        {% if payment.payment_mode == 'Cash' %}pl-mode-cash
+                                        {% elif payment.payment_mode == 'UPI' %}pl-mode-upi
+                                        {% elif payment.payment_mode == 'Bank Transfer' %}pl-mode-bank
+                                        {% else %}pl-mode-default{% endif %}">
+                                        <span class="pl-mode-dot"></span>
+                                        {{ payment.payment_mode }}
+                                    </span>
+                                </td>
+
+                                <!-- Actions -->
+                                <td class="text-end">
+                                    <div class="pl-action-group">
+                                        <a href="{% url 'edit_payment' payment.id %}"
+                                           class="pl-action-btn pl-act-edit" title="Edit">
+                                            <i class="bi bi-pencil-square"></i>
+                                        </a>
+                                        <form method="post"
+                                              action="{% url 'delete_payment' payment.id %}"
+                                              class="d-inline delete-form">
+                                            {% csrf_token %}
+                                            <button type="submit"
+                                                    class="pl-action-btn pl-act-delete"
+                                                    title="Delete">
+                                                <i class="bi bi-trash3"></i>
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="5">
+                                    <div class="pl-empty">
+                                        <div class="pl-empty-art">
+                                            <div class="pl-ea-ring pl-ear-1"></div>
+                                            <div class="pl-ea-ring pl-ear-2"></div>
+                                            <div class="pl-ea-icon">
+                                                <i class="bi bi-receipt"></i>
+                                            </div>
+                                        </div>
+                                        <h5>No Payments Yet</h5>
+                                        <p>Record the first payment using the form</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+            </div>
+
+            {% else %}
+
+            <!-- No Client Selected State -->
+            <div class="pl-no-client">
+                <div class="pl-nc-art">
+                    <div class="pl-nc-ring pl-ncr-1"></div>
+                    <div class="pl-nc-ring pl-ncr-2"></div>
+                    <div class="pl-nc-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                </div>
+                <h4 class="pl-nc-title">Client Ledger</h4>
+                <p class="pl-nc-desc">
+                    Select a client from the left panel to view their
+                    payment history and financial standing.
+                </p>
+            </div>
+
+            {% endif %}
+
+        </div>
+
     </div>
+
 </div>
 
 
+<!-- ════════════════════════════════════════════
+     STYLES
+════════════════════════════════════════════ -->
+<style>
 
-<script>
-function numberToWords(num) {
-    const ones = [
-        "", "One", "Two", "Three", "Four", "Five", "Six",
-        "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve",
-        "Thirteen", "Fourteen", "Fifteen", "Sixteen",
-        "Seventeen", "Eighteen", "Nineteen"
-    ];
-
-    const tens = [
-        "", "", "Twenty", "Thirty", "Forty", "Fifty",
-        "Sixty", "Seventy", "Eighty", "Ninety"
-    ];
-
-    function convertBelowThousand(n) {
-        let str = "";
-
-        if (n > 99) {
-            str += ones[Math.floor(n / 100)] + " Hundred ";
-            n %= 100;
-        }
-
-        if (n > 19) {
-            str += tens[Math.floor(n / 10)] + " ";
-            n %= 10;
-        }
-
-        if (n > 0) {
-            str += ones[n] + " ";
-        }
-
-        return str;
-    }
-
-    if (num === 0) return "Zero Only";
-
-    let result = "";
-
-    let crore = Math.floor(num / 10000000);
-    num %= 10000000;
-
-    let lakh = Math.floor(num / 100000);
-    num %= 100000;
-
-    let thousand = Math.floor(num / 1000);
-    num %= 1000;
-
-    let remainder = num;
-
-    if (crore) result += convertBelowThousand(crore) + "Crore ";
-    if (lakh) result += convertBelowThousand(lakh) + "Lakh ";
-    if (thousand) result += convertBelowThousand(thousand) + "Thousand ";
-    if (remainder) result += convertBelowThousand(remainder);
-
-    return result.trim() + " Only";
+:root {
+    --pl-indigo:    #4f46e5;
+    --pl-indigo-lt: #eef2ff;
+    --pl-indigo-md: #c7d2fe;
+    --pl-indigo-dk: #3730a3;
+    --pl-emerald:   #059669;
+    --pl-emerald-lt:#ecfdf5;
+    --pl-amber:     #d97706;
+    --pl-amber-lt:  #fffbeb;
+    --pl-red:       #dc2626;
+    --pl-red-lt:    #fef2f2;
+    --pl-sky:       #0284c7;
+    --pl-sky-lt:    #f0f9ff;
+    --pl-violet:    #7c3aed;
+    --pl-violet-lt: #f5f3ff;
+    --pl-s50:  #f8fafc;
+    --pl-s100: #f1f5f9;
+    --pl-s200: #e2e8f0;
+    --pl-s300: #cbd5e1;
+    --pl-s400: #94a3b8;
+    --pl-s500: #64748b;
+    --pl-s600: #475569;
+    --pl-dark: #0f172a;
+    --pl-r-sm: 8px;
+    --pl-r-md: 12px;
+    --pl-r-lg: 16px;
+    --pl-r-xl: 20px;
+    --pl-ease: cubic-bezier(.4,0,.2,1);
+    --pl-sh-sm: 0 1px 3px rgba(0,0,0,.05);
+    --pl-sh-md: 0 4px 12px rgba(0,0,0,.07);
+    --pl-sh-lg: 0 12px 32px rgba(0,0,0,.1);
 }
 
-// Live update
-document.getElementById("amountInput").addEventListener("input", function () {
-    let value = parseInt(this.value);
+/* ── Page ── */
+.pl-page {
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+    max-width: 1440px;
+    margin: 0 auto;
+    padding-bottom: 48px;
+}
 
-    if (!isNaN(value)) {
-        document.getElementById("amountWords").innerText = numberToWords(value);
-    } else {
-        document.getElementById("amountWords").innerText = "";
+/* ── Header ── */
+.pl-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    flex-wrap: wrap;
+}
+
+.pl-header-left { display: flex; align-items: center; gap: 14px; }
+
+.pl-header-icon {
+    position: relative;
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--pl-emerald), #047857);
+    border-radius: var(--pl-r-lg);
+    display: flex; align-items: center; justify-content: center;
+    color: white; font-size: 1.15rem;
+    box-shadow: 0 6px 18px rgba(5,150,105,.3);
+    flex-shrink: 0;
+}
+
+.pl-icon-ring {
+    position: absolute; inset: -5px;
+    border: 2px solid rgba(5,150,105,.2);
+    border-radius: calc(var(--pl-r-lg) + 5px);
+    animation: plRing 2.5s ease-in-out infinite;
+}
+
+@keyframes plRing {
+    0%,100% { opacity:.4; transform:scale(1); }
+    50%     { opacity:1;  transform:scale(1.04); }
+}
+
+.pl-eyebrow {
+    font-size: .6rem; font-weight: 600;
+    text-transform: uppercase; letter-spacing: .09em;
+    color: var(--pl-emerald); margin: 0 0 2px;
+}
+
+.pl-title {
+    font-size: 1.3rem; font-weight: 700;
+    color: var(--pl-dark); letter-spacing: -.025em;
+    margin: 0 0 2px; line-height: 1.2;
+}
+
+.pl-subtitle {
+    font-size: .72rem; font-weight: 400;
+    color: var(--pl-s500); margin: 0;
+}
+
+/* Client Badge */
+.pl-client-badge {
+    display: flex; align-items: center; gap: 10px;
+    padding: 10px 16px;
+    background: white; border: 1px solid var(--pl-s200);
+    border-radius: var(--pl-r-lg);
+    box-shadow: var(--pl-sh-sm);
+}
+
+.pl-cb-avatar {
+    width: 34px; height: 34px; min-width: 34px;
+    background: linear-gradient(135deg, #d1fae5, #a7f3d0);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; font-size: .78rem; color: #065f46;
+}
+
+.pl-cb-name {
+    display: block; font-size: .8rem; font-weight: 600;
+    color: var(--pl-dark); line-height: 1.2;
+}
+
+.pl-cb-project {
+    display: block; font-size: .6rem; font-weight: 400;
+    color: var(--pl-s500);
+}
+
+/* ── Layout ── */
+.pl-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
+    align-items: start;
+}
+
+/* ══════════════════════════════
+   FORM CARD
+══════════════════════════════ */
+.pl-form-col {
+    position: sticky;
+    top: 20px;
+    z-index: 5;
+}
+
+.pl-form-card {
+    background: white;
+    border: 1px solid var(--pl-s200);
+    border-radius: var(--pl-r-xl);
+    overflow: hidden;
+    box-shadow: var(--pl-sh-md);
+}
+
+.pl-form-accent {
+    height: 3px;
+    background: linear-gradient(90deg, var(--pl-emerald), #34d399, #06b6d4);
+}
+
+.pl-form-header {
+    display: flex; align-items: center; gap: 12px;
+    padding: 18px 22px 0;
+}
+
+.pl-form-hdr-icon {
+    width: 36px; height: 36px;
+    background: var(--pl-emerald-lt);
+    border-radius: var(--pl-r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pl-emerald); font-size: .92rem;
+    flex-shrink: 0;
+}
+
+.pl-form-title {
+    font-size: .86rem; font-weight: 700;
+    color: var(--pl-dark); margin: 0 0 2px;
+}
+
+.pl-form-sub {
+    font-size: .64rem; font-weight: 400;
+    color: var(--pl-s500); margin: 0;
+}
+
+/* Form */
+.pl-form {
+    padding: 18px 22px 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+}
+
+.pl-field { display: flex; flex-direction: column; gap: 6px; }
+
+.pl-label {
+    display: flex; align-items: center; gap: 5px;
+    font-size: .64rem; font-weight: 600;
+    color: var(--pl-s500); text-transform: uppercase;
+    letter-spacing: .06em;
+}
+
+.pl-label i { color: var(--pl-emerald); font-size: .7rem; }
+
+/* Select */
+.pl-select-wrap { position: relative; }
+
+.pl-select-icon {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    width: 40px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pl-s400); font-size: .82rem;
+    background: var(--pl-s100);
+    border: 1.5px solid var(--pl-s200);
+    border-right: none;
+    border-radius: var(--pl-r-md) 0 0 var(--pl-r-md);
+    pointer-events: none;
+    transition: all .2s;
+}
+
+.pl-select {
+    width: 100%;
+    padding: 10px 36px 10px 48px;
+    border: 1.5px solid var(--pl-s200);
+    border-radius: var(--pl-r-md);
+    font-size: .82rem; font-weight: 500;
+    color: var(--pl-dark); background: var(--pl-s50);
+    font-family: inherit; appearance: none;
+    -webkit-appearance: none; outline: none;
+    cursor: pointer; transition: all .2s;
+}
+
+.pl-select:focus {
+    border-color: var(--pl-emerald);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.1);
+}
+
+.pl-select-wrap:focus-within .pl-select-icon {
+    border-color: var(--pl-emerald);
+    color: var(--pl-emerald);
+    background: var(--pl-emerald-lt);
+}
+
+.pl-select-arrow {
+    position: absolute; right: 12px; top: 50%;
+    transform: translateY(-50%); color: var(--pl-s400);
+    font-size: .6rem; pointer-events: none;
+}
+
+/* Prefix Group (same flexbox fix) */
+.pl-prefix-group {
+    display: flex;
+    align-items: stretch;
+}
+
+.pl-prefix-box {
+    display: flex; align-items: center; justify-content: center;
+    padding: 0 12px; min-width: 42px;
+    background: var(--pl-s100);
+    border: 1.5px solid var(--pl-s200);
+    border-right: none;
+    border-radius: var(--pl-r-md) 0 0 var(--pl-r-md);
+    color: var(--pl-s500); font-size: .88rem;
+    font-weight: 700; flex-shrink: 0;
+    transition: all .2s;
+}
+
+.pl-prefix-green { color: var(--pl-emerald); }
+
+.pl-prefix-input {
+    flex: 1; min-width: 0;
+    border-radius: 0 var(--pl-r-md) var(--pl-r-md) 0;
+    border-left: none !important;
+    padding-left: 12px;
+}
+
+.pl-prefix-group:focus-within .pl-prefix-box {
+    border-color: var(--pl-emerald);
+    color: var(--pl-emerald);
+    background: var(--pl-emerald-lt);
+}
+
+.pl-prefix-group:focus-within .pl-prefix-input {
+    border-color: var(--pl-emerald);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.1);
+}
+
+.pl-input {
+    width: 100%; padding: 10px 14px;
+    border: 1.5px solid var(--pl-s200);
+    border-radius: var(--pl-r-md);
+    font-size: .84rem; font-weight: 500;
+    color: var(--pl-dark); background: var(--pl-s50);
+    font-family: inherit; outline: none;
+    appearance: none; -webkit-appearance: none;
+    transition: all .2s;
+}
+
+.pl-input:focus {
+    border-color: var(--pl-emerald);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(5,150,105,.1);
+}
+
+.pl-money {
+    font-family: 'Monaco','Menlo',monospace;
+    font-weight: 600; letter-spacing: -.01em;
+}
+
+.pl-input::placeholder { color: var(--pl-s400); font-weight: 400; }
+
+/* Amount in words */
+.pl-amount-words {
+    font-size: .7rem;
+    font-weight: 500;
+    color: var(--pl-red);
+    min-height: 18px;
+    transition: all .2s;
+}
+
+/* Submit */
+.pl-submit-btn {
+    display: flex; align-items: center; justify-content: center;
+    gap: 8px; width: 100%; padding: 12px;
+    background: linear-gradient(135deg, var(--pl-emerald), #047857);
+    color: white; border: none; border-radius: var(--pl-r-md);
+    font-size: .82rem; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+    transition: all .2s var(--pl-ease);
+    box-shadow: 0 4px 12px rgba(5,150,105,.28);
+    margin-top: 4px;
+}
+
+.pl-submit-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(5,150,105,.38);
+}
+
+.pl-submit-btn:active { transform: translateY(0); }
+.pl-submit-btn i { font-size: 1rem; }
+
+/* Prompt (no client) */
+.pl-prompt {
+    text-align: center;
+    padding: 24px 16px;
+    background: var(--pl-s50);
+    border: 1.5px dashed var(--pl-s200);
+    border-radius: var(--pl-r-lg);
+}
+
+.pl-prompt-icon {
+    color: var(--pl-s400);
+    font-size: 2rem;
+    margin-bottom: 8px;
+}
+
+.pl-prompt p {
+    font-size: .72rem; font-weight: 400;
+    color: var(--pl-s500); margin: 0;
+}
+
+/* ══════════════════════════════
+   STATS ROW
+══════════════════════════════ */
+.pl-stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 18px;
+}
+
+.pl-stat-card {
+    position: relative;
+    border-radius: var(--pl-r-xl);
+    padding: 20px 22px;
+    overflow: hidden;
+    box-shadow: var(--pl-sh-md);
+}
+
+.pl-stat-collected {
+    background: linear-gradient(135deg, var(--pl-indigo), var(--pl-indigo-dk));
+}
+
+.pl-stat-pending {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+}
+
+.pl-stat-danger {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+}
+
+.pl-stat-bg {
+    position: absolute; inset: 0;
+    pointer-events: none; overflow: hidden;
+}
+
+.pl-stat-orb {
+    position: absolute;
+    width: 120px; height: 120px;
+    top: -30px; right: -20px;
+    background: radial-gradient(circle, rgba(255,255,255,.1), transparent 70%);
+    border-radius: 50%;
+}
+
+.pl-stat-content {
+    position: relative; z-index: 2;
+    display: flex; align-items: center; gap: 14px;
+}
+
+.pl-stat-icon {
+    width: 40px; height: 40px; min-width: 40px;
+    background: rgba(255,255,255,.12);
+    border-radius: var(--pl-r-md);
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,.8); font-size: 1.1rem;
+}
+
+.pl-stat-label {
+    display: block; font-size: .6rem; font-weight: 600;
+    color: rgba(255,255,255,.5);
+    text-transform: uppercase; letter-spacing: .06em;
+    margin-bottom: 3px;
+}
+
+.pl-stat-value {
+    font-size: 1.2rem; font-weight: 700;
+    color: white;
+    font-family: 'Monaco','Menlo',monospace;
+    letter-spacing: -.02em; margin: 0;
+    line-height: 1.1;
+}
+
+/* ══════════════════════════════
+   TABLE CARD
+══════════════════════════════ */
+.pl-table-card {
+    background: white;
+    border: 1px solid var(--pl-s200);
+    border-radius: var(--pl-r-xl);
+    overflow: hidden;
+    box-shadow: var(--pl-sh-md);
+}
+
+.pl-table-header {
+    display: flex; align-items: center;
+    justify-content: space-between;
+    padding: 16px 22px;
+    border-bottom: 1px solid var(--pl-s100);
+    background: var(--pl-s50);
+}
+
+.pl-tbl-hdr-left { display: flex; align-items: center; gap: 10px; }
+
+.pl-tbl-icon {
+    width: 30px; height: 30px;
+    background: var(--pl-emerald-lt);
+    border-radius: var(--pl-r-sm);
+    display: flex; align-items: center; justify-content: center;
+    color: var(--pl-emerald); font-size: .75rem;
+}
+
+.pl-tbl-title {
+    display: block; font-size: .82rem; font-weight: 600;
+    color: var(--pl-dark); line-height: 1.2;
+}
+
+.pl-tbl-count {
+    display: block; font-size: .6rem; font-weight: 500;
+    color: var(--pl-s400); margin-top: 1px;
+}
+
+/* Table scroll */
+.pl-table-scroll { overflow-x: auto; max-height: 55vh; }
+.pl-table-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+.pl-table-scroll::-webkit-scrollbar-thumb { background: var(--pl-s200); border-radius: 10px; }
+
+/* Table */
+.pl-table { width: 100%; border-collapse: collapse; font-size: .78rem; }
+.pl-table thead { position: sticky; top: 0; z-index: 10; }
+.pl-table thead tr { background: var(--pl-s50); border-bottom: 2px solid var(--pl-s200); }
+.pl-table thead th { padding: 10px 12px; border: none; background: var(--pl-s50); white-space: nowrap; font-weight: normal; }
+
+.pl-th { display: inline-flex; align-items: center; gap: 5px; font-size: .58rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--pl-s400); }
+.pl-th-end { justify-content: flex-end; width: 100%; }
+.pl-th-sno { width: 40px; text-align: center; }
+
+.pl-table tbody tr { border-bottom: 1px solid var(--pl-s100); transition: background .12s; animation: plRowFade .3s var(--pl-ease) both; }
+@keyframes plRowFade { from{opacity:0;transform:translateY(4px);} to{opacity:1;transform:translateY(0);} }
+.pl-table tbody tr:last-child { border-bottom: none; }
+.pl-table tbody tr:hover { background: var(--pl-s50); }
+.pl-table tbody td { padding: 12px; vertical-align: middle; border: none; color: var(--pl-dark); }
+
+.pl-sno { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; background: var(--pl-s100); border-radius: 7px; font-size: .62rem; font-weight: 600; color: var(--pl-s500); }
+
+/* Date */
+.pl-date-cell { display: flex; align-items: center; gap: 8px; }
+.pl-date-icon { width: 28px; height: 28px; background: var(--pl-s100); border-radius: 7px; display: flex; align-items: center; justify-content: center; color: var(--pl-s500); font-size: .72rem; flex-shrink: 0; }
+.pl-date-main { display: block; font-size: .76rem; font-weight: 600; color: var(--pl-dark); white-space: nowrap; }
+.pl-date-day  { display: block; font-size: .58rem; font-weight: 400; color: var(--pl-s400); }
+
+/* Amount */
+.pl-amount { font-size: .82rem; font-weight: 600; color: var(--pl-emerald); font-family: 'Monaco','Menlo',monospace; }
+
+/* Method Badge */
+.pl-method-badge { display: inline-flex; align-items: center; gap: 5px; padding: 4px 10px; border-radius: 20px; font-size: .62rem; font-weight: 500; }
+.pl-mode-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.pl-mode-cash    { background: var(--pl-emerald-lt); color: var(--pl-emerald); border: 1px solid rgba(5,150,105,.15); }
+.pl-mode-cash    .pl-mode-dot { background: var(--pl-emerald); }
+.pl-mode-upi     { background: var(--pl-violet-lt); color: var(--pl-violet); border: 1px solid rgba(124,58,237,.15); }
+.pl-mode-upi     .pl-mode-dot { background: var(--pl-violet); }
+.pl-mode-bank    { background: var(--pl-sky-lt); color: var(--pl-sky); border: 1px solid rgba(2,132,199,.15); }
+.pl-mode-bank    .pl-mode-dot { background: var(--pl-sky); }
+.pl-mode-default { background: var(--pl-s100); color: var(--pl-s600); border: 1px solid var(--pl-s200); }
+.pl-mode-default .pl-mode-dot { background: var(--pl-s400); }
+
+/* Actions */
+.pl-action-group { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
+.pl-action-btn { width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; border-radius: var(--pl-r-sm); border: 1px solid var(--pl-s200); background: white; color: var(--pl-s400); font-size: .78rem; text-decoration: none; transition: all .18s; cursor: pointer; }
+.pl-act-edit:hover { background: var(--pl-indigo-lt); color: var(--pl-indigo); border-color: var(--pl-indigo-md); transform: translateY(-1px); }
+.pl-act-delete:hover { background: var(--pl-red-lt); color: var(--pl-red); border-color: rgba(220,38,38,.2); transform: translateY(-1px); }
+
+/* Empty */
+.pl-empty { text-align: center; padding: 48px 24px; }
+.pl-empty-art { position: relative; width: 70px; height: 70px; margin: 0 auto 16px; }
+.pl-ea-ring { position: absolute; border-radius: 50%; opacity: .06; }
+.pl-ear-1 { inset: 0; background: var(--pl-emerald); animation: plEcP 3s ease-in-out infinite; }
+.pl-ear-2 { inset: 10px; background: var(--pl-indigo); animation: plEcP 3s ease-in-out infinite .5s; }
+@keyframes plEcP { 0%,100%{transform:scale(.95);opacity:.05;} 50%{transform:scale(1.06);opacity:.12;} }
+.pl-ea-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; color: var(--pl-s400); background: var(--pl-s100); border-radius: 50%; }
+.pl-empty h5 { font-size: .88rem; font-weight: 600; color: var(--pl-dark); margin-bottom: 5px; }
+.pl-empty p  { font-size: .72rem; font-weight: 400; color: var(--pl-s500); margin: 0; }
+
+/* No Client */
+.pl-no-client { text-align: center; padding: 60px 24px; background: white; border: 1px solid var(--pl-s200); border-radius: var(--pl-r-xl); box-shadow: var(--pl-sh-sm); }
+.pl-nc-art { position: relative; width: 80px; height: 80px; margin: 0 auto 20px; }
+.pl-nc-ring { position: absolute; border-radius: 50%; opacity: .06; }
+.pl-ncr-1 { inset: 0; background: var(--pl-indigo); animation: plEcP 3s ease-in-out infinite; }
+.pl-ncr-2 { inset: 10px; background: var(--pl-emerald); animation: plEcP 3s ease-in-out infinite .5s; }
+.pl-nc-icon { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--pl-s400); background: var(--pl-s100); border-radius: 50%; }
+.pl-nc-title { font-size: 1.1rem; font-weight: 700; color: var(--pl-dark); margin-bottom: 6px; }
+.pl-nc-desc { font-size: .78rem; font-weight: 400; color: var(--pl-s500); margin: 0 auto; max-width: 280px; line-height: 1.6; }
+
+/* Number spinner hide */
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button { -webkit-appearance:none; margin:0; }
+input[type="number"] { -moz-appearance:textfield; }
+
+/* ── Responsive ── */
+@media (max-width:1024px) { .pl-layout{grid-template-columns:1fr;} .pl-form-col{position:static;} }
+@media (max-width:768px) { .pl-header{flex-direction:column;align-items:flex-start;} .pl-stats-row{grid-template-columns:1fr;} .pl-client-badge{display:none;} }
+@media (max-width:480px) { .pl-stat-value{font-size:1rem;} }
+
+</style>
+
+
+<!-- ════════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════════ -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    /* ── Row animation ── */
+    document.querySelectorAll('.pl-tr').forEach((row, idx) => {
+        row.style.animationDelay = `${idx * 20}ms`;
+    });
+
+    /* ── Amount in words ── */
+    function numberToWords(num) {
+        const ones = ["","One","Two","Three","Four","Five","Six","Seven","Eight","Nine","Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"];
+        const tens = ["","","Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"];
+
+        function below1000(n) {
+            let s = "";
+            if (n > 99) { s += ones[Math.floor(n/100)]+" Hundred "; n %= 100; }
+            if (n > 19) { s += tens[Math.floor(n/10)]+" "; n %= 10; }
+            if (n > 0)  { s += ones[n]+" "; }
+            return s;
+        }
+
+        if (num === 0) return "Zero Only";
+        let r = "";
+        const cr = Math.floor(num/10000000); num %= 10000000;
+        const lk = Math.floor(num/100000);   num %= 100000;
+        const th = Math.floor(num/1000);     num %= 1000;
+        if (cr) r += below1000(cr)+"Crore ";
+        if (lk) r += below1000(lk)+"Lakh ";
+        if (th) r += below1000(th)+"Thousand ";
+        if (num) r += below1000(num);
+        return r.trim() + " Only";
     }
+
+    const amtInput = document.getElementById("amountInput");
+    const amtWords = document.getElementById("amountWords");
+
+    if (amtInput && amtWords) {
+        amtInput.addEventListener("input", function () {
+            const val = parseInt(this.value);
+            amtWords.textContent = !isNaN(val) && val > 0
+                ? numberToWords(val) : "";
+        });
+    }
+
+    /* ── Delete confirmation ── */
+    document.querySelectorAll('.delete-form').forEach(form => {
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const f = this;
+
+            Swal.fire({
+                title: '<div style="font-size:1rem;font-weight:700;color:#0f172a;">Delete Payment?</div>',
+                html: '<p style="font-size:.82rem;color:#64748b;">This payment record will be <strong>permanently removed</strong>.</p>',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: '<i class="bi bi-trash3 me-1"></i> Delete',
+                cancelButtonText: 'Cancel',
+                confirmButtonColor: '#dc2626',
+                cancelButtonColor: '#e2e8f0',
+                customClass: {
+                    popup: 'rounded-4 border-0 shadow-lg',
+                    cancelButton: 'text-dark',
+                },
+                padding: '1.5rem',
+            }).then(result => {
+                if (result.isConfirmed) f.submit();
+            });
+        });
+    });
+
+    /* ── Django Messages ── */
+    {% if messages %}
+        {% for message in messages %}
+        Swal.mixin({
+            toast: true, position: 'top-end',
+            showConfirmButton: false, timer: 3000,
+            timerProgressBar: true,
+            customClass: { popup: 'rounded-3' }
+        }).fire({
+            icon: '{{ message.tags }}',
+            title: '{{ message|escapejs }}'
+        });
+        {% endfor %}
+    {% endif %}
+
+    /* ── Label focus ── */
+    document.querySelectorAll('.pl-input, .pl-select').forEach(el => {
+        el.addEventListener('focus', function () {
+            const lbl = this.closest('.pl-field')?.querySelector('.pl-label');
+            if (lbl) lbl.style.color = 'var(--pl-emerald)';
+        });
+        el.addEventListener('blur', function () {
+            const lbl = this.closest('.pl-field')?.querySelector('.pl-label');
+            if (lbl) lbl.style.color = '';
+        });
+    });
+
 });
 </script>
 
-
-
-<style>
-    .icon-box { width: 42px; height: 42px; display: flex; align-items: center; justify-content: center; border-radius: 12px; }
-    .icon-box-lg { width: 100px; height: 100px; display: flex; align-items: center; justify-content: center; }
-    .bg-success-soft { background-color: rgba(25, 135, 84, 0.1); }
-    
-    .custom-select, .custom-input { 
-        border: 1px solid #e9ecef; 
-        background-color: #fbfbfb; 
-        transition: all 0.2s ease;
-    }
-    .custom-select:focus, .custom-input:focus { 
-        background-color: #fff; 
-        border-color: #198754; 
-        box-shadow: 0 0 0 4px rgba(25, 135, 84, 0.05); 
-    }
-
-    .hover-lift { transition: transform 0.2s ease; }
-    .hover-lift:hover { transform: translateY(-2px); }
-    
-    .table thead th { font-size: 0.75rem; letter-spacing: 0.5px; }
-    .bg-dark { background-color: #0f172a !important; }
-</style>
 {% endblock %}

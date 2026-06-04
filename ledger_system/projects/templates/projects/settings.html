@@ -2,120 +2,917 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-4">
-    <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+<style>
+    :root {
+        --primary: #4f46e5;
+        --primary-light: #eef2ff;
+        --primary-hover: #4338ca;
+        --success: #059669;
+        --success-light: #ecfdf5;
+        --warning: #d97706;
+        --warning-light: #fffbeb;
+        --danger: #dc2626;
+        --danger-light: #fef2f2;
+        --info: #0284c7;
+        --info-light: #f0f9ff;
+
+        --surface: #ffffff;
+        --surface-secondary: #f8fafc;
+        --surface-hover: #f1f5f9;
+        --border: #e2e8f0;
+        --border-light: #f1f5f9;
+
+        --text-primary: #0f172a;
+        --text-secondary: #475569;
+        --text-muted: #94a3b8;
+        --text-xs: #64748b;
+
+        --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+        --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+        --shadow-lg: 0 10px 40px rgba(0,0,0,0.08);
+        --shadow-xl: 0 20px 60px rgba(0,0,0,0.1);
+
+        --radius-sm: 10px;
+        --radius-md: 14px;
+        --radius-lg: 18px;
+        --radius-xl: 22px;
+    }
+
+    /* ─── Base Card ─── */
+    .s-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-lg);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        overflow: hidden;
+    }
+
+    .s-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: var(--shadow-lg);
+        transform: translateY(-2px);
+    }
+
+    /* ─── Metric Card ─── */
+    .metric-card {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1.5rem;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+
+    .metric-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: var(--shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .metric-card:hover::after {
+        opacity: 1;
+    }
+
+    .metric-card.accent-primary::after { background: var(--primary); }
+    .metric-card.accent-success::after { background: var(--success); }
+    .metric-card.accent-warning::after { background: var(--warning); }
+    .metric-card.accent-danger::after { background: var(--danger); }
+    .metric-card.accent-info::after { background: var(--info); }
+
+    .metric-icon {
+        width: 46px;
+        height: 46px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.1rem;
+    }
+
+    .icon-primary { background: var(--primary-light); color: var(--primary); }
+    .icon-success { background: var(--success-light); color: var(--success); }
+    .icon-warning { background: var(--warning-light); color: var(--warning); }
+    .icon-danger  { background: var(--danger-light);  color: var(--danger); }
+    .icon-info    { background: var(--info-light);     color: var(--info); }
+
+    .metric-value {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        letter-spacing: -0.5px;
+        line-height: 1;
+    }
+
+    .metric-label {
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        font-weight: 700;
+    }
+
+    .metric-sub {
+        font-size: 0.8rem;
+        color: var(--text-xs);
+    }
+
+    /* ─── Status Dot ─── */
+    .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        display: inline-block;
+        position: relative;
+    }
+
+    .status-dot.pulse::after {
+        content: '';
+        position: absolute;
+        inset: -3px;
+        border-radius: 50%;
+        animation: pulse-ring 2s ease infinite;
+    }
+
+    .status-dot.healthy { background: var(--success); }
+    .status-dot.healthy::after { border: 2px solid var(--success); }
+    .status-dot.warning { background: var(--warning); }
+    .status-dot.warning::after { border: 2px solid var(--warning); }
+    .status-dot.danger  { background: var(--danger); }
+    .status-dot.danger::after  { border: 2px solid var(--danger); }
+
+    @keyframes pulse-ring {
+        0%   { transform: scale(1);   opacity: 0.5; }
+        100% { transform: scale(1.8); opacity: 0; }
+    }
+
+    /* ─── Tags ─── */
+    .tag {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.25rem 0.7rem;
+        border-radius: 8px;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+    }
+
+    .tag-primary { background: var(--primary-light); color: var(--primary); }
+    .tag-success { background: var(--success-light); color: var(--success); }
+    .tag-warning { background: var(--warning-light); color: var(--warning); }
+    .tag-danger  { background: var(--danger-light);  color: var(--danger); }
+    .tag-info    { background: var(--info-light);     color: var(--info); }
+    .tag-neutral { background: var(--surface-secondary); color: var(--text-secondary); }
+
+    /* ─── Buttons ─── */
+    .btn-primary-glow {
+        background: var(--primary);
+        border: none;
+        color: white;
+        padding: 0.6rem 1.4rem;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.3);
+    }
+
+    .btn-primary-glow:hover {
+        background: var(--primary-hover);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(79, 70, 229, 0.35);
+        color: white;
+    }
+
+    .btn-outline-light-custom {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 0.4rem 1rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.25s ease;
+    }
+
+    .btn-outline-light-custom:hover {
+        background: var(--surface-secondary);
+        border-color: #cbd5e1;
+        color: var(--text-primary);
+    }
+
+    .btn-outline-light-custom.active {
+        background: var(--primary-light);
+        border-color: var(--primary);
+        color: var(--primary);
+        font-weight: 600;
+    }
+
+    .btn-outline-success-custom {
+        background: var(--surface);
+        border: 1px solid #d1fae5;
+        color: var(--success);
+        padding: 0.4rem 0.9rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.25s ease;
+    }
+
+    .btn-outline-success-custom:hover {
+        background: var(--success-light);
+        border-color: #a7f3d0;
+        color: var(--success);
+    }
+
+    .btn-outline-danger-custom {
+        background: var(--surface);
+        border: 1px solid #fecaca;
+        color: var(--danger);
+        padding: 0.4rem 0.9rem;
+        border-radius: var(--radius-sm);
+        font-size: 0.8rem;
+        font-weight: 500;
+        transition: all 0.25s ease;
+    }
+
+    .btn-outline-danger-custom:hover {
+        background: var(--danger-light);
+        border-color: #fca5a5;
+        color: var(--danger);
+    }
+
+    /* ─── Progress ─── */
+    .progress-slim {
+        height: 6px;
+        background: var(--border-light);
+        border-radius: 3px;
+        overflow: hidden;
+    }
+
+    .progress-slim .progress-fill {
+        height: 100%;
+        border-radius: 3px;
+        transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .fill-primary { background: linear-gradient(90deg, var(--primary), #818cf8); }
+    .fill-success { background: linear-gradient(90deg, var(--success), #34d399); }
+    .fill-warning { background: linear-gradient(90deg, var(--warning), #fbbf24); }
+    .fill-info    { background: linear-gradient(90deg, var(--info), #38bdf8); }
+
+    /* ─── Table ─── */
+    .backup-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .backup-table thead th {
+        background: var(--surface-secondary);
+        padding: 0.9rem 1.25rem;
+        font-size: 0.68rem;
+        text-transform: uppercase;
+        letter-spacing: 1.5px;
+        color: var(--text-muted);
+        font-weight: 700;
+        border: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .backup-table thead th:first-child {
+        border-radius: 0;
+    }
+
+    .backup-table tbody tr {
+        transition: all 0.2s ease;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .backup-table tbody tr:hover {
+        background: var(--surface-secondary);
+    }
+
+    .backup-table tbody td {
+        padding: 1rem 1.25rem;
+        color: var(--text-primary);
+        border: none;
+        vertical-align: middle;
+        font-size: 0.88rem;
+    }
+
+    .backup-table tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    /* ─── Section Header ─── */
+    .section-title {
+        font-size: 1rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .section-title i {
+        font-size: 0.9rem;
+    }
+
+    /* ─── System Info ─── */
+    .sys-info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.7rem 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .sys-info-item:last-child {
+        border-bottom: none;
+    }
+
+    .sys-info-label {
+        font-size: 0.8rem;
+        color: var(--text-muted);
+        font-weight: 500;
+    }
+
+    .sys-info-value {
+        font-size: 0.8rem;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    }
+
+    /* ─── Chart ─── */
+    .chart-container {
+        position: relative;
+        height: 220px;
+        width: 100%;
+    }
+
+    /* ─── Empty State ─── */
+    .empty-state {
+        padding: 4rem 2rem;
+        text-align: center;
+    }
+
+    .empty-state .empty-icon {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        background: var(--surface-secondary);
+        border: 2px dashed var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 1.8rem;
+        color: var(--text-muted);
+    }
+
+    /* ─── File Extension ─── */
+    .file-ext {
+        font-family: 'JetBrains Mono', monospace;
+        font-size: 0.7rem;
+        color: var(--text-muted);
+    }
+
+    /* ─── Live Badge ─── */
+    .live-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 0.7rem;
+        color: var(--success);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+    }
+
+    .live-badge .live-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: var(--success);
+        animation: live-pulse 1.5s ease infinite;
+    }
+
+    @keyframes live-pulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: 0.3; }
+    }
+
+    /* ─── Animations ─── */
+    .fade-in-up {
+        animation: fadeInUp 0.5s ease forwards;
+        opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+        from { opacity: 0; transform: translateY(16px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .delay-1 { animation-delay: 0.04s; }
+    .delay-2 { animation-delay: 0.08s; }
+    .delay-3 { animation-delay: 0.12s; }
+    .delay-4 { animation-delay: 0.16s; }
+    .delay-5 { animation-delay: 0.2s; }
+    .delay-6 { animation-delay: 0.24s; }
+
+    /* ─── Search Input ─── */
+    .search-input {
+        background: var(--surface-secondary);
+        border: 1px solid var(--border);
+        color: var(--text-primary);
+        border-radius: var(--radius-sm);
+        padding: 0.45rem 0.75rem 0.45rem 2.2rem;
+        font-size: 0.8rem;
+        width: 220px;
+        transition: all 0.25s ease;
+    }
+
+    .search-input:focus {
+        outline: none;
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        background: var(--surface);
+    }
+
+    .search-input::placeholder {
+        color: var(--text-muted);
+    }
+
+    /* ─── Alert Banner ─── */
+    .alert-banner {
+        border-radius: var(--radius-md);
+        border: 1px solid;
+        overflow: hidden;
+    }
+
+    .alert-banner.alert-warning-custom {
+        background: var(--warning-light);
+        border-color: #fde68a;
+    }
+
+    .alert-banner.alert-danger-custom {
+        background: var(--danger-light);
+        border-color: #fecaca;
+    }
+
+    /* ─── Avatar ─── */
+    .avatar-initials {
+        width: 52px;
+        height: 52px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, var(--primary), #818cf8);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        color: white;
+        font-weight: 800;
+        flex-shrink: 0;
+    }
+
+    /* ─── Toast ─── */
+    .toast-container {
+        position: fixed;
+        top: 1.5rem;
+        right: 1.5rem;
+        z-index: 9999;
+    }
+
+    .custom-toast {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        color: var(--text-primary);
+        font-size: 0.85rem;
+        box-shadow: var(--shadow-xl);
+        animation: slideIn 0.4s ease;
+    }
+
+    @keyframes slideIn {
+        from { transform: translateX(100%); opacity: 0; }
+        to   { transform: translateX(0);    opacity: 1; }
+    }
+
+    /* ─── Scrollbar ─── */
+    .custom-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
+    .custom-scroll::-webkit-scrollbar-track { background: transparent; }
+    .custom-scroll::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    /* ─── Responsive ─── */
+    @media (max-width: 768px) {
+        .metric-value { font-size: 1.4rem !important; }
+        .search-input { width: 160px; }
+    }
+</style>
+
+<div class="container-fluid py-4 px-lg-5">
+
+    <!-- ═══════════════════════════════════════
+         PAGE HEADER
+    ═══════════════════════════════════════ -->
+    <div class="d-flex flex-wrap justify-content-between align-items-start mb-4 fade-in-up delay-1">
         <div>
-            <h2 class="fw-bold text-dark mb-1"><i class="fas fa-cogs text-primary me-2"></i>System Settings</h2>
-            <p class="text-secondary mb-0">Monitor database health and manage system backups.</p>
+            <div class="d-flex align-items-center gap-3 mb-1">
+                <h1 class="fw-bold mb-0" style="color: var(--text-primary); font-size: 1.7rem; letter-spacing: -0.5px;">
+                    <i class="fas fa-cog me-2" style="color: var(--primary);"></i>Settings
+                </h1>
+                <span class="live-badge">
+                    <span class="live-dot"></span>
+                    Live
+                </span>
+            </div>
+            <p class="mb-0" style="color: var(--text-muted); font-size: 0.88rem;">
+                System monitoring, backups & infrastructure management
+            </p>
         </div>
-        <div class="mt-3 mt-md-0">
-            <a href="{% url 'run_backup' %}" class="btn btn-primary px-4 rounded-pill shadow-sm hover-lift">
-                <i class="fas fa-sync-alt me-2"></i>Run Backup Now
+        <div class="d-flex gap-2 mt-3 mt-md-0 align-items-center">
+            <span class="tag tag-primary">
+                <i class="fas fa-clock me-1"></i>
+                Last: {{ latest_backup_ago }}
+            </span>
+            <a href="{% url 'run_backup' %}" class="btn btn-primary-glow" id="runBackupBtn">
+                <i class="fas fa-bolt me-2"></i>Run Backup
             </a>
         </div>
     </div>
 
+    <!-- ═══════════════════════════════════════
+         STATUS BANNER (if not healthy)
+    ═══════════════════════════════════════ -->
+    {% if backup_status != "healthy" %}
+    <div class="alert-banner {% if backup_status == 'warning' %}alert-warning-custom{% else %}alert-danger-custom{% endif %} mb-4 fade-in-up delay-2">
+        <div class="d-flex align-items-center gap-3 p-3">
+            <div class="metric-icon {% if backup_status == 'warning' %}icon-warning{% else %}icon-danger{% endif %}">
+                <i class="fas {% if backup_status == 'warning' %}fa-exclamation-triangle{% else %}fa-shield-alt{% endif %}"></i>
+            </div>
+            <div class="flex-grow-1">
+                <p class="mb-0 fw-semibold" style="color: var(--text-primary); font-size: 0.9rem;">
+                    {{ backup_message }}
+                </p>
+                <p class="mb-0" style="color: var(--text-secondary); font-size: 0.78rem;">
+                    We recommend running a backup immediately to protect your data.
+                </p>
+            </div>
+            <a href="{% url 'run_backup' %}" class="{% if backup_status == 'warning' %}btn-outline-danger-custom{% else %}btn-outline-danger-custom{% endif %} btn" style="white-space: nowrap;">
+                Fix Now <i class="fas fa-arrow-right ms-1"></i>
+            </a>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- ═══════════════════════════════════════
+         METRIC CARDS
+    ═══════════════════════════════════════ -->
     <div class="row g-3 mb-4">
-        <div class="col-md-4">
-            <div class="card h-100 bg-dark text-white border-0 shadow-sm rounded-4">
-                <div class="card-body">
-                    <h6 class="text-secondary text-uppercase small fw-bold mb-3">Admin Profile</h6>
-                    <div class="d-flex align-items-center">
-                        <div class="avatar-sm bg-primary-subtle rounded-circle p-2 me-3">
-                            <i class="fas fa-user-shield text-primary"></i>
+
+        <!-- System Health -->
+        <div class="col-6 col-lg-3 fade-in-up delay-1">
+            <div class="metric-card h-100 {% if backup_status == 'healthy' %}accent-success{% elif backup_status == 'warning' %}accent-warning{% else %}accent-danger{% endif %}">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="metric-icon {% if backup_status == 'healthy' %}icon-success{% elif backup_status == 'warning' %}icon-warning{% else %}icon-danger{% endif %}">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                    <span class="status-dot pulse {{ backup_status }}"></span>
+                </div>
+                <div class="metric-label mb-1">System Status</div>
+                <div class="metric-value" style="color: {% if backup_status == 'healthy' %}var(--success){% elif backup_status == 'warning' %}var(--warning){% else %}var(--danger){% endif %};">
+                    {% if backup_status == "healthy" %}Healthy{% elif backup_status == "warning" %}Warning{% else %}Critical{% endif %}
+                </div>
+                <div class="metric-sub mt-1">{{ backup_message }}</div>
+            </div>
+        </div>
+
+        <!-- Total Backups -->
+        <div class="col-6 col-lg-3 fade-in-up delay-2">
+            <div class="metric-card h-100 accent-primary">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="metric-icon icon-primary">
+                        <i class="fas fa-archive"></i>
+                    </div>
+                    <span class="tag tag-primary">Total</span>
+                </div>
+                <div class="metric-label mb-1">Backup Count</div>
+                <div class="metric-value">{{ total_backup_count }}</div>
+                <div class="metric-sub mt-1">Compressed snapshots</div>
+            </div>
+        </div>
+
+        <!-- Storage -->
+        <div class="col-6 col-lg-3 fade-in-up delay-3">
+            <div class="metric-card h-100 accent-warning">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="metric-icon icon-warning">
+                        <i class="fas fa-database"></i>
+                    </div>
+                    <span class="tag tag-warning">{{ storage_display }}</span>
+                </div>
+                <div class="metric-label mb-1">Backup Storage</div>
+                <div class="metric-value">{{ total_storage }}</div>
+                <div class="metric-sub mt-1">KB consumed</div>
+            </div>
+        </div>
+
+        <!-- Database Size -->
+        <div class="col-6 col-lg-3 fade-in-up delay-4">
+            <div class="metric-card h-100 accent-info">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <div class="metric-icon icon-info">
+                        <i class="fas fa-server"></i>
+                    </div>
+                    <span class="tag tag-info">Live</span>
+                </div>
+                <div class="metric-label mb-1">Database Size</div>
+                <div class="metric-value">{{ db_size }}</div>
+                <div class="metric-sub mt-1">MB ({{ db_engine }})</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         CHART + RESOURCE MONITOR
+    ═══════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+
+        <!-- Chart -->
+        <div class="col-lg-8 fade-in-up delay-3">
+            <div class="s-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="section-title">
+                            <i class="fas fa-chart-area" style="color: var(--primary);"></i>
+                            Backup Analytics
                         </div>
-                        <div>
-                            <p class="mb-0 fw-bold">{{ admin_user.username }}</p>
-                            <p class="mb-0 small text-secondary">{{ admin_user.email }}</p>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-outline-light-custom btn-sm active" data-chart="size" onclick="switchChart('size')">
+                                <i class="fas fa-weight-hanging me-1"></i>Size
+                            </button>
+                            <button class="btn btn-outline-light-custom btn-sm" data-chart="count" onclick="switchChart('count')">
+                                <i class="fas fa-hashtag me-1"></i>Count
+                            </button>
                         </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="backupChart"></canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-md-4">
-            <div class="card h-100 bg-dark text-white border-0 shadow-sm rounded-4">
-                <div class="card-body">
-                    <h6 class="text-secondary text-uppercase small fw-bold mb-3">System Health</h6>
-                    <div class="d-flex align-items-center">
-                        {% if backup_status == "healthy" %}
-                            <div class="status-icon bg-success-subtle rounded-circle p-2 me-3 text-success">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <span class="badge bg-success rounded-pill px-3">Healthy</span>
-                        {% elif backup_status == "warning" %}
-                            <div class="status-icon bg-warning-subtle rounded-circle p-2 me-3 text-warning">
-                                <i class="fas fa-exclamation-triangle"></i>
-                            </div>
-                            <span class="badge bg-warning text-dark rounded-pill px-3">Action Required</span>
+        <!-- Resource Monitor -->
+        <div class="col-lg-4 fade-in-up delay-4">
+            <div class="s-card h-100">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="section-title">
+                            <i class="fas fa-microchip" style="color: var(--info);"></i>
+                            Resource Monitor
+                        </div>
+                        {% if psutil_available %}
+                        <span class="live-badge">
+                            <span class="live-dot"></span>Live
+                        </span>
                         {% else %}
-                            <div class="status-icon bg-danger-subtle rounded-circle p-2 me-3 text-danger">
-                                <i class="fas fa-times-circle"></i>
-                            </div>
-                            <span class="badge bg-danger rounded-pill px-3">Critical</span>
+                        <span class="tag tag-warning">
+                            <i class="fas fa-exclamation-triangle me-1"></i>Limited
+                        </span>
                         {% endif %}
                     </div>
-                    {% if backup_status == "warning" %}
-                    <p class="small text-secondary mt-2 mb-0">No backup in last 2 days</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
 
-        <div class="col-md-4">
-            <div class="card h-100 bg-dark text-white border-0 shadow-sm rounded-4 text-white">
-                <div class="card-body">
-                    <h6 class="text-secondary text-uppercase small fw-bold mb-3">Storage Consumption</h6>
-                    <div class="d-flex align-items-center">
-                        <div class="bg-info-subtle rounded-circle p-2 me-3 text-info">
-                            <i class="fas fa-hdd"></i>
+                   
+                    <!-- CPU -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 500;">
+                                <i class="fas fa-microchip me-1" style="color: var(--primary); font-size: 0.7rem;"></i>CPU
+                            </span>
+                            <span class="fw-bold" style="color: var(--text-primary); font-size: 0.82rem;" id="cpuValue">{{ system_metrics.cpu_usage }}%</span>
                         </div>
-                        <h4 class="mb-0 fw-bold">{{ total_storage }} <small class="fw-light text-secondary">KB</small></h4>
+                        <div class="progress-slim">
+                            <div class="progress-fill fill-primary" id="cpuBar" style="width: {{ system_metrics.cpu_usage }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Memory -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 500;">
+                                <i class="fas fa-memory me-1" style="color: var(--success); font-size: 0.7rem;"></i>Memory
+                            </span>
+                            <span class="fw-bold" style="color: var(--text-primary); font-size: 0.82rem;" id="memValue">{{ system_metrics.memory_used }} / {{ system_metrics.memory_total }} GB</span>
+                        </div>
+                        <div class="progress-slim">
+                            <div class="progress-fill fill-success" id="memBar" style="width: {{ system_metrics.memory_percent }}%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Disk -->
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span style="color: var(--text-secondary); font-size: 0.8rem; font-weight: 500;">
+                                <i class="fas fa-hdd me-1" style="color: var(--warning); font-size: 0.7rem;"></i>Disk
+                            </span>
+                            <span class="fw-bold" style="color: var(--text-primary); font-size: 0.82rem;" id="diskValue">{{ system_metrics.disk_used }} / {{ system_metrics.disk_total }} GB</span>
+                        </div>
+                        <div class="progress-slim">
+                            <div class="progress-fill fill-warning" id="diskBar" style="width: {{ system_metrics.disk_percent }}%;"></div>
+                        </div>
+                    </div>
+
+
+                    <hr style="border-color: var(--border-light); margin: 1rem 0;">
+
+                    <!-- System Info -->
+                    <div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label"><i class="fab fa-python me-1" style="color: var(--warning);"></i>Python</span>
+                            <span class="sys-info-value">{{ python_version }}</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label"><i class="fas fa-fire me-1" style="color: var(--success);"></i>Django</span>
+                            <span class="sys-info-value">{{ django_version }}</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label"><i class="fas fa-desktop me-1" style="color: var(--info);"></i>OS</span>
+                            <span class="sys-info-value">{{ server_os }}</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label"><i class="fas fa-database me-1" style="color: var(--primary);"></i>Database</span>
+                            <span class="sys-info-value">{{ db_engine }}</span>
+                        </div>
+                        <div class="sys-info-item">
+                            <span class="sys-info-label"><i class="fas fa-users me-1" style="color: var(--danger);"></i>Users</span>
+                            <span class="sys-info-value">{{ total_users }}</span>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="card bg-dark text-white border-0 shadow-sm rounded-4 overflow-hidden">
-        <div class="card-header bg-transparent border-0 p-4 pb-0">
-            <h5 class="fw-bold mb-0"><i class="fas fa-history text-warning me-2"></i>Backup History</h5>
+    <!-- ═══════════════════════════════════════
+         ADMIN PROFILE + BACKUP SUMMARY
+    ═══════════════════════════════════════ -->
+    <div class="row g-3 mb-4">
+
+        <!-- Admin Profile -->
+        <div class="col-lg-6 fade-in-up delay-4">
+            <div class="s-card">
+                <div class="card-body p-4">
+                    <div class="section-title mb-3">
+                        <i class="fas fa-user-shield" style="color: var(--primary);"></i>
+                        Admin Profile
+                    </div>
+                    <div class="d-flex align-items-center gap-3">
+                        <div class="avatar-initials">
+                            {{ admin_user.username|first|upper }}
+                        </div>
+                        <div>
+                            <h6 class="mb-0 fw-bold" style="color: var(--text-primary);">{{ admin_user.username }}</h6>
+                            <p class="mb-0" style="color: var(--text-muted); font-size: 0.8rem;">
+                                {{ admin_user.email|default:"No email configured" }}
+                            </p>
+                            <div class="d-flex gap-2 mt-2">
+                                <span class="tag tag-success"><i class="fas fa-shield-alt me-1"></i>Superuser</span>
+                                <span class="tag tag-primary"><i class="fas fa-key me-1"></i>Full Access</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
+
+        <!-- Backup Summary -->
+        <div class="col-lg-6 fade-in-up delay-5">
+            <div class="s-card">
+                <div class="card-body p-4">
+                    <div class="section-title mb-3">
+                        <i class="fas fa-clock" style="color: var(--success);"></i>
+                        Backup Summary
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-6">
+                            <div class="metric-label mb-1" style="font-size: 0.72rem;">Latest Backup</div>
+                            <div class="fw-bold" style="color: var(--text-primary); font-size: 0.88rem;">{{ latest_backup }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-label mb-1" style="font-size: 0.72rem;">Time Ago</div>
+                            <div class="fw-bold" style="color: var(--success); font-size: 0.88rem;">{{ latest_backup_ago }}</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-label mb-1" style="font-size: 0.72rem;">Total Files</div>
+                            <div class="fw-bold" style="color: var(--text-primary); font-size: 0.88rem;">{{ total_backup_count }} backups</div>
+                        </div>
+                        <div class="col-6">
+                            <div class="metric-label mb-1" style="font-size: 0.72rem;">Storage Used</div>
+                            <div class="fw-bold" style="color: var(--text-primary); font-size: 0.88rem;">{{ storage_display }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════
+         BACKUP HISTORY TABLE
+    ═══════════════════════════════════════ -->
+    <div class="s-card fade-in-up delay-5">
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-dark table-hover align-middle mb-0">
-                    <thead class="bg-black bg-opacity-25 text-secondary small text-uppercase">
+
+            <!-- Table Header -->
+            <div class="d-flex flex-wrap justify-content-between align-items-center p-4 pb-0">
+                <div class="section-title">
+                    <i class="fas fa-history" style="color: var(--warning);"></i>
+                    Backup History
+                </div>
+                <div class="d-flex gap-2 align-items-center mt-2 mt-md-0">
+                    <div class="position-relative">
+                        <i class="fas fa-search position-absolute" style="left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.72rem;"></i>
+                        <input type="text" id="searchBackups" placeholder="Search backups..."
+                               class="search-input form-control form-control-sm"
+                               onkeyup="filterBackups()">
+                    </div>
+                    <span class="tag tag-primary">{{ total_backup_count }} files</span>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive custom-scroll mt-3">
+                <table class="backup-table" id="backupTable">
+                    <thead>
                         <tr>
-                            <th class="ps-4 py-3">File Name</th>
-                            <th class="py-3">Size</th>
-                            <th class="py-3">Date Created</th>
-                            <th class="text-end pe-4 py-3">Actions</th>
+                            <th style="padding-left: 1.75rem;">File</th>
+                            <th>Size</th>
+                            <th>Created</th>
+                            <th>Age</th>
+                            <th class="text-end" style="padding-right: 1.75rem;">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for file in files %}
-                        <tr>
-                            <td class="ps-4">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-file-archive text-primary me-3"></i>
-                                    <span class="fw-medium">{{ file.name }}</span>
+                        <tr class="backup-row">
+                            <td style="padding-left: 1.75rem;">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="metric-icon icon-primary" style="width: 38px; height: 38px; border-radius: 10px; font-size: 0.9rem;">
+                                        <i class="fas fa-file-archive"></i>
+                                    </div>
+                                    <div>
+                                        <span class="fw-semibold d-block" style="font-size: 0.85rem; color: var(--text-primary);">{{ file.name }}</span>
+                                        <span class="file-ext">.gz compressed</span>
+                                    </div>
                                 </div>
                             </td>
-                            <td><span class="badge bg-secondary-subtle text-secondary">{{ file.size }} KB</span></td>
-                            <td class="text-secondary small">{{ file.date }}</td>
-                            <td class="text-end pe-4">
-                                <a href="{% url 'download_backup' file.name %}" class="btn btn-sm btn-outline-success rounded-pill px-3 hover-lift">
-                                    <i class="fas fa-cloud-download-alt me-1"></i> Download
+                            <td>
+                                <span class="fw-semibold" style="color: var(--text-primary); font-size: 0.85rem;">{{ file.size }} KB</span>
+                                {% if file.size_mb >= 1 %}
+                                <span class="d-block file-ext">{{ file.size_mb }} MB</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span style="color: var(--text-secondary); font-size: 0.85rem;">{{ file.date }}</span>
+                            </td>
+                            <td>
+                                <span class="tag tag-success">{{ file.time_ago }}</span>
+                            </td>
+                            <td class="text-end" style="padding-right: 1.75rem;">
+                                <a href="{% url 'download_backup' file.name %}" class="btn btn-outline-success-custom btn-sm" title="Download">
+                                    <i class="fas fa-download me-1"></i> Download
                                 </a>
                             </td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="4" class="text-center py-5">
-                                <div class="opacity-50">
-                                    <i class="fas fa-folder-open fa-3x mb-3"></i>
-                                    <h5>No backups available</h5>
-                                    <p class="small">Run a manual backup to see history.</p>
+                            <td colspan="5">
+                                <div class="empty-state">
+                                    <div class="empty-icon">
+                                        <i class="fas fa-cloud-upload-alt"></i>
+                                    </div>
+                                    <h5 class="fw-bold mb-2" style="color: var(--text-primary);">No backups yet</h5>
+                                    <p class="mb-3" style="color: var(--text-muted); max-width: 320px; margin: 0 auto;">
+                                        Start protecting your data by running your first backup.
+                                    </p>
+                                    <a href="{% url 'run_backup' %}" class="btn btn-primary-glow btn-sm">
+                                        <i class="fas fa-bolt me-2"></i>Create First Backup
+                                    </a>
                                 </div>
                             </td>
                         </tr>
@@ -125,5 +922,184 @@
             </div>
         </div>
     </div>
+
 </div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+
+<script>
+    // ═══ Chart ═══
+    const chartLabels = {{ chart_labels|safe }};
+    const chartSizes  = {{ chart_sizes|safe }};
+    const chartCounts = {{ chart_counts|safe }};
+    let currentChart  = 'size';
+
+    const ctx = document.getElementById('backupChart');
+
+    if (ctx) {
+        const g2d = ctx.getContext('2d');
+
+        const primaryGradient = g2d.createLinearGradient(0, 0, 0, 220);
+        primaryGradient.addColorStop(0, 'rgba(79, 70, 229, 0.15)');
+        primaryGradient.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+
+        const successGradient = g2d.createLinearGradient(0, 0, 0, 220);
+        successGradient.addColorStop(0, 'rgba(5, 150, 105, 0.15)');
+        successGradient.addColorStop(1, 'rgba(5, 150, 105, 0.0)');
+
+        window.backupChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: chartLabels,
+                datasets: [{
+                    label: 'Size (KB)',
+                    data: chartSizes,
+                    borderColor: '#4f46e5',
+                    backgroundColor: primaryGradient,
+                    borderWidth: 2.5,
+                    fill: true,
+                    tension: 0.4,
+                    pointRadius: 4,
+                    pointHoverRadius: 7,
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                interaction: {
+                    intersect: false,
+                    mode: 'index',
+                },
+                plugins: {
+                    legend: { display: false },
+                    tooltip: {
+                        backgroundColor: '#ffffff',
+                        titleColor: '#0f172a',
+                        bodyColor: '#475569',
+                        borderColor: '#e2e8f0',
+                        borderWidth: 1,
+                        padding: 12,
+                        cornerRadius: 12,
+                        displayColors: false,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                    }
+                },
+                scales: {
+                    x: {
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                        ticks: { color: '#94a3b8', font: { size: 11, weight: '500' } }
+                    },
+                    y: {
+                        grid: { color: '#f1f5f9', drawBorder: false },
+                        ticks: { color: '#94a3b8', font: { size: 11, weight: '500' } },
+                        beginAtZero: true,
+                    }
+                }
+            }
+        });
+    }
+
+    function switchChart(type) {
+        if (!window.backupChart) return;
+        currentChart = type;
+
+        document.querySelectorAll('[data-chart]').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        document.querySelector(`[data-chart="${type}"]`).classList.add('active');
+
+        const g2d = ctx.getContext('2d');
+
+        if (type === 'size') {
+            const g = g2d.createLinearGradient(0, 0, 0, 220);
+            g.addColorStop(0, 'rgba(79, 70, 229, 0.15)');
+            g.addColorStop(1, 'rgba(79, 70, 229, 0.0)');
+
+            window.backupChart.data.datasets[0].data = chartSizes;
+            window.backupChart.data.datasets[0].label = 'Size (KB)';
+            window.backupChart.data.datasets[0].borderColor = '#4f46e5';
+            window.backupChart.data.datasets[0].pointBackgroundColor = '#4f46e5';
+            window.backupChart.data.datasets[0].backgroundColor = g;
+        } else {
+            const g = g2d.createLinearGradient(0, 0, 0, 220);
+            g.addColorStop(0, 'rgba(5, 150, 105, 0.15)');
+            g.addColorStop(1, 'rgba(5, 150, 105, 0.0)');
+
+            window.backupChart.data.datasets[0].data = chartCounts;
+            window.backupChart.data.datasets[0].label = 'Backup Count';
+            window.backupChart.data.datasets[0].borderColor = '#059669';
+            window.backupChart.data.datasets[0].pointBackgroundColor = '#059669';
+            window.backupChart.data.datasets[0].backgroundColor = g;
+        }
+
+        window.backupChart.update('active');
+    }
+
+    // ═══ Search ═══
+    function filterBackups() {
+        const query = document.getElementById('searchBackups').value.toLowerCase();
+        document.querySelectorAll('.backup-row').forEach(row => {
+            const name = row.querySelector('td').textContent.toLowerCase();
+            row.style.display = name.includes(query) ? '' : 'none';
+        });
+    }
+
+    // ═══ Live Polling ═══
+    {% if psutil_available %}
+    function pollSystemHealth() {
+        fetch("{% url 'api_system_health' %}")
+            .then(r => r.json())
+            .then(data => {
+                if (!data.available) return;
+
+                const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+                const bar = (id, pct) => { const el = document.getElementById(id); if (el) el.style.width = pct + '%'; };
+
+                set('cpuValue', data.cpu_usage + '%');
+                bar('cpuBar', data.cpu_usage);
+
+                set('memValue', `${data.memory_used} / ${data.memory_total} GB`);
+                bar('memBar', data.memory_percent);
+
+                set('diskValue', `${data.disk_used} / ${data.disk_total} GB`);
+                bar('diskBar', data.disk_percent);
+            })
+            .catch(() => {});
+    }
+    setInterval(pollSystemHealth, 10000);
+    {% endif %}
+
+    // ═══ Backup Button ═══
+    document.getElementById('runBackupBtn')?.addEventListener('click', function () {
+        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Running...';
+        this.style.pointerEvents = 'none';
+        this.style.opacity = '0.7';
+    });
+
+    // ═══ Toast ═══
+    function showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const icons = { success: 'fa-check-circle', error: 'fa-times-circle', info: 'fa-info-circle', warning: 'fa-exclamation-triangle' };
+        const colors = { success: 'var(--success)', error: 'var(--danger)', info: 'var(--primary)', warning: 'var(--warning)' };
+
+        const toast = document.createElement('div');
+        toast.className = 'custom-toast d-flex align-items-center gap-3 mb-2';
+        toast.innerHTML = `<i class="fas ${icons[type]}" style="color:${colors[type]}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateX(100%)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+        }, 4000);
+    }
+</script>
 {% endblock %}

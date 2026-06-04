@@ -79,6 +79,7 @@ urlpatterns = [
 
 
     path("settings/", views.settings_page, name="settings"),
+    path('api/system-health/', views.api_system_health, name='api_system_health'),
     path("download-backup/<str:filename>/", views.download_backup, name="download_backup"),
     path("run-backup/", views.run_backup_now, name="run_backup"),
 
