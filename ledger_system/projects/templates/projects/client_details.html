@@ -2,446 +2,942 @@
 {% load static %}
 {% load indian_format %}
 
-{% block page_title %}Ledger: {{ project.client_name }}{% endblock %}
+{% block page_title %}Ledger — {{ project.client_name }}{% endblock %}
 
 {% block content %}
-<div class="container-fluid px-4 py-4">
 
-    <div class="row g-3 mb-5">
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="icon-box bg-primary-soft text-primary rounded-3 p-3">
-                        <i class="bi bi-wallet2 fs-4"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted fw-bold d-block mb-1 text-uppercase letter-spacing-1">Total Budget</small>
-                        <h4 class="fw-bold mb-0 text-dark">{{ total_expense|indian_currency }}</h4>
-                    </div>
+<style>
+    /* ════════════════════════════════════════
+       PAGE-LEVEL TOKENS
+    ════════════════════════════════════════ */
+    :root {
+        --ledger-primary: #2563eb;
+        --ledger-primary-light: #eff6ff;
+        --ledger-primary-ring: rgba(37,99,235,0.12);
+        --ledger-success: #059669;
+        --ledger-success-light: #ecfdf5;
+        --ledger-success-ring: rgba(5,150,105,0.12);
+        --ledger-danger: #dc2626;
+        --ledger-danger-light: #fef2f2;
+        --ledger-warning: #d97706;
+        --ledger-warning-light: #fffbeb;
+        --ledger-border: #e2e8f0;
+        --ledger-surface: #ffffff;
+        --ledger-muted: #94a3b8;
+        --ledger-text: #0f172a;
+        --ledger-text-2: #475569;
+        --ledger-bg: #f8fafc;
+        --ledger-radius: 16px;
+        --ledger-radius-sm: 10px;
+        --ledger-shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+        --ledger-shadow-md: 0 4px 16px rgba(0,0,0,0.07);
+        --ledger-transition: 0.22s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    /* ─── Soft colour helpers ─── */
+    .soft-primary { background: var(--ledger-primary-light); color: var(--ledger-primary); }
+    .soft-success  { background: var(--ledger-success-light); color: var(--ledger-success); }
+    .soft-danger   { background: var(--ledger-danger-light);  color: var(--ledger-danger); }
+    .soft-warning  { background: var(--ledger-warning-light); color: var(--ledger-warning); }
+    .soft-neutral  { background: #f1f5f9; color: #475569; }
+
+    /* ════════════════════════════════════════
+       SUMMARY METRIC CARDS
+    ════════════════════════════════════════ */
+    .metric-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 14px;
+        margin-bottom: 2rem;
+    }
+
+    @media (max-width: 768px) {
+        .metric-grid { grid-template-columns: 1fr; }
+    }
+
+    .metric-card {
+        background: var(--ledger-surface);
+        border: 1px solid var(--ledger-border);
+        border-radius: var(--ledger-radius);
+        padding: 1.35rem 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all var(--ledger-transition);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .metric-card::after {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0;
+        height: 3px;
+        border-radius: 3px 3px 0 0;
+        opacity: 0;
+        transition: opacity var(--ledger-transition);
+    }
+
+    .metric-card:hover {
+        border-color: #cbd5e1;
+        box-shadow: var(--ledger-shadow-md);
+        transform: translateY(-2px);
+    }
+
+    .metric-card:hover::after { opacity: 1; }
+
+    .metric-card.mc-primary::after { background: var(--ledger-primary); }
+    .metric-card.mc-success::after { background: var(--ledger-success); }
+    .metric-card.mc-danger::after  { background: var(--ledger-danger); }
+    .metric-card.mc-warning::after { background: var(--ledger-warning); }
+
+    .metric-icon-box {
+        width: 48px; height: 48px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        flex-shrink: 0;
+    }
+
+    .metric-label {
+        font-size: 0.65rem;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        color: var(--ledger-muted);
+        margin-bottom: 4px;
+    }
+
+    .metric-value {
+        font-size: 1.4rem;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: var(--ledger-text);
+        line-height: 1;
+    }
+
+    .metric-value.val-success { color: var(--ledger-success); }
+    .metric-value.val-danger  { color: var(--ledger-danger); }
+
+    /* ════════════════════════════════════════
+       SECTION CARD WRAPPER
+    ════════════════════════════════════════ */
+    .section-card {
+        background: var(--ledger-surface);
+        border: 1px solid var(--ledger-border);
+        border-radius: var(--ledger-radius);
+        overflow: hidden;
+        box-shadow: var(--ledger-shadow);
+        margin-bottom: 1.5rem;
+    }
+
+    .section-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--ledger-border);
+        flex-wrap: wrap;
+        gap: 10px;
+        background: var(--ledger-surface);
+    }
+
+    .section-head-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.92rem;
+        font-weight: 700;
+        color: var(--ledger-text);
+    }
+
+    .section-head-icon {
+        width: 34px; height: 34px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.9rem;
+    }
+
+    .section-head-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    /* ─── Filter Panel ─── */
+    .filter-panel {
+        padding: 1rem 1.5rem;
+        background: var(--ledger-bg);
+        border-bottom: 1px solid var(--ledger-border);
+    }
+
+    .filter-panel .form-control,
+    .filter-panel .form-select {
+        font-size: 0.82rem;
+        border: 1.5px solid var(--ledger-border);
+        border-radius: var(--ledger-radius-sm);
+        padding: 0.55rem 0.85rem;
+        color: var(--ledger-text);
+        background: var(--ledger-surface);
+        transition: all var(--ledger-transition);
+    }
+
+    .filter-panel .form-control:focus,
+    .filter-panel .form-select:focus {
+        border-color: var(--ledger-primary);
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.06);
+        outline: none;
+    }
+
+    /* ════════════════════════════════════════
+       DATA TABLES
+    ════════════════════════════════════════ */
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 0.84rem;
+    }
+
+    .data-table thead th {
+        padding: 0.75rem 1rem;
+        font-size: 0.65rem;
+        text-transform: uppercase;
+        letter-spacing: 1.2px;
+        font-weight: 700;
+        color: var(--ledger-muted);
+        background: var(--ledger-bg);
+        border-bottom: 1px solid var(--ledger-border);
+        white-space: nowrap;
+    }
+
+    .data-table thead th:first-child { padding-left: 1.5rem; }
+    .data-table thead th:last-child  { padding-right: 1.5rem; }
+
+    .data-table tbody tr {
+        transition: background var(--ledger-transition);
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .data-table tbody tr:hover { background: var(--ledger-bg); }
+    .data-table tbody tr:last-child td { border-bottom: none; }
+
+    .data-table tbody td {
+        padding: 0.9rem 1rem;
+        color: var(--ledger-text);
+        vertical-align: middle;
+    }
+
+    .data-table tbody td:first-child { padding-left: 1.5rem; }
+    .data-table tbody td:last-child  { padding-right: 1.5rem; }
+
+    /* Total row */
+    .data-table .total-row td {
+        padding: 0.85rem 1rem;
+        font-size: 0.8rem;
+        font-weight: 700;
+        background: #1e293b;
+        color: white;
+        letter-spacing: 0.3px;
+        border-bottom: none;
+    }
+
+    .data-table .total-row td:first-child { padding-left: 1.5rem; }
+    .data-table .total-row td:last-child  { padding-right: 1.5rem; }
+
+    /* ─── Badge ─── */
+    .data-badge {
+        display: inline-flex;
+        align-items: center;
+        padding: 0.28rem 0.65rem;
+        border-radius: 7px;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.2px;
+    }
+
+    /* ─── Action buttons ─── */
+    .action-group {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        justify-content: center;
+    }
+
+    .action-btn {
+        width: 32px; height: 32px;
+        border-radius: var(--ledger-radius-sm);
+        border: 1px solid var(--ledger-border);
+        background: var(--ledger-surface);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.85rem;
+        color: var(--ledger-text-2);
+        transition: all var(--ledger-transition);
+        text-decoration: none;
+    }
+
+    .action-btn:hover {
+        border-color: #cbd5e1;
+        background: var(--ledger-bg);
+        color: var(--ledger-text);
+        transform: translateY(-1px);
+        box-shadow: var(--ledger-shadow);
+    }
+
+    .action-btn.btn-edit:hover  { border-color: var(--ledger-primary); color: var(--ledger-primary); }
+    .action-btn.btn-del:hover   { border-color: var(--ledger-danger); color: var(--ledger-danger); background: var(--ledger-danger-light); }
+    .action-btn.btn-wa:hover    { border-color: #16a34a; color: #16a34a; background: var(--ledger-success-light); }
+    .action-btn.btn-inv:hover   { border-color: var(--ledger-primary); color: var(--ledger-primary); background: var(--ledger-primary-light); }
+
+    /* ─── Empty state ─── */
+    .empty-state {
+        padding: 3.5rem 2rem;
+        text-align: center;
+        color: var(--ledger-muted);
+    }
+
+    .empty-icon {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: var(--ledger-bg);
+        border: 2px dashed var(--ledger-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        font-size: 1.5rem;
+    }
+
+    /* ─── Inline buttons ─── */
+    .btn-s {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        padding: 0.42rem 0.85rem;
+        border-radius: var(--ledger-radius-sm);
+        font-size: 0.78rem;
+        font-weight: 600;
+        border: 1px solid;
+        transition: all var(--ledger-transition);
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+    .btn-s-primary {
+        background: var(--ledger-primary);
+        color: white;
+        border-color: var(--ledger-primary);
+        box-shadow: 0 4px 12px rgba(37,99,235,0.18);
+    }
+
+    .btn-s-primary:hover {
+        background: var(--ledger-primary-hover, #1d4ed8);
+        transform: translateY(-1px);
+        color: white;
+        box-shadow: 0 6px 18px rgba(37,99,235,0.22);
+    }
+
+    .btn-s-outline {
+        background: var(--ledger-surface);
+        color: var(--ledger-text-2);
+        border-color: var(--ledger-border);
+    }
+
+    .btn-s-outline:hover {
+        background: var(--ledger-bg);
+        border-color: #cbd5e1;
+        color: var(--ledger-text);
+    }
+
+    .btn-s-filter {
+        background: var(--ledger-surface);
+        color: var(--ledger-text-2);
+        border-color: var(--ledger-border);
+    }
+
+    .btn-s-filter:hover,
+    .btn-s-filter[aria-expanded="true"] {
+        background: var(--ledger-bg);
+        color: var(--ledger-primary);
+        border-color: var(--ledger-primary);
+    }
+
+    /* ════════════════════════════════════════
+       MEDIA GALLERY CARD (RIGHT PANEL)
+    ════════════════════════════════════════ */
+    .media-section-card {
+        background: var(--ledger-surface);
+        border: 1px solid var(--ledger-border);
+        border-radius: var(--ledger-radius);
+        overflow: hidden;
+        box-shadow: var(--ledger-shadow);
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .media-head {
+        padding: 1rem 1.5rem;
+        border-bottom: 1px solid var(--ledger-border);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        flex-wrap: wrap;
+        gap: 10px;
+        flex-shrink: 0;
+    }
+
+    .media-filter {
+        padding: 0.85rem 1.5rem;
+        background: var(--ledger-bg);
+        border-bottom: 1px solid var(--ledger-border);
+        flex-shrink: 0;
+    }
+
+    .media-filter .form-control {
+        font-size: 0.8rem;
+        border: 1.5px solid var(--ledger-border);
+        border-radius: var(--ledger-radius-sm);
+        padding: 0.45rem 0.75rem;
+        background: var(--ledger-surface);
+    }
+
+    .media-filter .form-control:focus {
+        border-color: var(--ledger-primary);
+        box-shadow: 0 0 0 4px rgba(37,99,235,0.06);
+        outline: none;
+    }
+
+    .media-swiper-wrap {
+        flex: 1;
+        padding: 1.25rem;
+        overflow: hidden;
+    }
+
+    .mySwiper {
+        width: 100%;
+        border-radius: var(--ledger-radius-sm);
+        overflow: hidden;
+    }
+
+    .swiper-slide {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .slide-img-box {
+        width: 100%;
+        height: 260px;
+        border-radius: var(--ledger-radius-sm);
+        overflow: hidden;
+        position: relative;
+        border: 1px solid var(--ledger-border);
+    }
+
+    .slide-img-box img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+
+    .slide-img-box:hover img {
+        transform: scale(1.03);
+    }
+
+    .slide-date-tag {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        background: rgba(15,23,42,0.65);
+        backdrop-filter: blur(8px);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 7px;
+        font-size: 0.65rem;
+        font-weight: 700;
+        letter-spacing: 0.3px;
+        border: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .slide-caption {
+        position: absolute;
+        bottom: 0;
+        left: 0; right: 0;
+        background: linear-gradient(transparent, rgba(15,23,42,0.88));
+        padding: 1.25rem 0.85rem 0.75rem;
+    }
+
+    .slide-caption p {
+        margin: 0;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.9);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    /* Swiper nav */
+    .slide-nav {
+        width: 34px !important;
+        height: 34px !important;
+        background: var(--ledger-surface) !important;
+        border: 1px solid var(--ledger-border) !important;
+        border-radius: 10px !important;
+        color: var(--ledger-text) !important;
+        box-shadow: var(--ledger-shadow) !important;
+    }
+
+    .slide-nav::after {
+        font-size: 12px !important;
+        font-weight: 900 !important;
+        color: var(--ledger-text-2) !important;
+    }
+
+    .slide-nav:hover {
+        background: var(--ledger-primary) !important;
+        border-color: var(--ledger-primary) !important;
+    }
+
+    .slide-nav:hover::after { color: white !important; }
+
+    .custom-pagination .swiper-pagination-bullet {
+        background: #cbd5e1 !important;
+        width: 7px; height: 7px;
+        opacity: 1;
+    }
+
+    .custom-pagination .swiper-pagination-bullet-active {
+        background: var(--ledger-primary) !important;
+        width: 20px;
+        border-radius: 4px;
+    }
+
+    .media-empty {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 3rem 2rem;
+        text-align: center;
+        color: var(--ledger-muted);
+    }
+
+    .media-empty-icon {
+        width: 64px; height: 64px;
+        border-radius: 50%;
+        background: var(--ledger-bg);
+        border: 2px dashed var(--ledger-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        margin: 0 auto 1rem;
+        color: var(--ledger-muted);
+    }
+
+    /* ════════════════════════════════════════
+       BOTTOM GRID
+    ════════════════════════════════════════ */
+    .bottom-grid {
+        display: grid;
+        grid-template-columns: 1fr 380px;
+        gap: 1.5rem;
+        align-items: start;
+    }
+
+    @media (max-width: 1200px) {
+        .bottom-grid { grid-template-columns: 1fr; }
+    }
+</style>
+
+<div class="container-fluid px-4 py-3">
+
+    <!-- ════════════════════════════════════════
+         METRIC CARDS
+    ════════════════════════════════════════ -->
+    <div class="metric-grid mb-4">
+
+        <!-- Total Budget -->
+        <div class="metric-card mc-primary">
+            <div class="metric-icon-box soft-primary">
+                <i class="bi bi-wallet2"></i>
+            </div>
+            <div>
+                <div class="metric-label">Total Budget</div>
+                <div class="metric-value">{{ total_expense|indian_currency }}</div>
+            </div>
+        </div>
+
+        <!-- Total Paid -->
+        <div class="metric-card mc-success">
+            <div class="metric-icon-box soft-success">
+                <i class="bi bi-cash-stack"></i>
+            </div>
+            <div>
+                <div class="metric-label">Total Paid</div>
+                <div class="metric-value val-success">{{ total_paid|indian_currency }}</div>
+            </div>
+        </div>
+
+        <!-- Remaining -->
+        <div class="metric-card {% if remaining < 0 %}mc-danger{% else %}mc-warning{% endif %}">
+            <div class="metric-icon-box {% if remaining < 0 %}soft-danger{% else %}soft-warning{% endif %}">
+                <i class="bi bi-clock-history"></i>
+            </div>
+            <div>
+                <div class="metric-label">Remaining</div>
+                <div class="metric-value {% if remaining < 0 %}val-danger{% endif %}">
+                    {{ project.remaining|indian_currency }}
                 </div>
             </div>
         </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="icon-box bg-success-soft text-success rounded-3 p-3">
-                        <i class="bi bi-cash-stack fs-4"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted fw-bold d-block mb-1 text-uppercase letter-spacing-1">Total Paid</small>
-                        <h4 class="fw-bold mb-0 text-success">{{ total_paid|indian_currency }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-md-4">
-            <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
-                <div class="d-flex align-items-center gap-3">
-                    <div class="icon-box {% if remaining < 0 %}bg-danger-soft text-danger{% else %}bg-info-soft text-info{% endif %} rounded-3 p-3">
-                        <i class="bi bi-clock-history fs-4"></i>
-                    </div>
-                    <div>
-                        <small class="text-muted fw-bold d-block mb-1 text-uppercase letter-spacing-1">Remaining</small>
-                        <h4 class="fw-bold mb-0 {% if remaining < 0 %}text-danger{% endif %}">{{ project.remaining|indian_currency }}</h4>
-                    </div>
-                </div>
-            </div>
-        </div>
+
     </div>
 
-    <div class="card border-0 shadow-sm rounded-4 mb-5 overflow-hidden">
-        <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
-            <h5 class="fw-bold mb-0">Budget Breakdown</h5>
-            <div class="d-flex gap-2">
-                <button class="btn btn-danger btn-sm rounded-3" type="button" data-bs-toggle="collapse" data-bs-target="#expenseFilters">
-                    <i class="bi bi-funnel"></i>
+    <!-- ════════════════════════════════════════
+         BUDGET BREAKDOWN TABLE
+    ════════════════════════════════════════ -->
+    <div class="section-card mb-4">
+
+        <!-- Header -->
+        <div class="section-head">
+            <div class="section-head-title">
+                <div class="section-head-icon soft-primary">
+                    <i class="bi bi-receipt-cutoff"></i>
+                </div>
+                Budget Breakdown
+            </div>
+            <div class="section-head-actions">
+                <button class="btn-s btn-s-filter"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target="#expenseFilters"
+                        aria-expanded="false">
+                    <i class="bi bi-funnel"></i> Filter
                 </button>
-                {% comment %} <a href="{% url 'invoice' project.id %}" target="_blank" class="btn btn-primary btn-sm rounded-3">
-                    <i class="bi bi-printer me-2"></i>Invoice
-                </a> {% endcomment %}
             </div>
         </div>
 
+        <!-- Filters -->
         <div class="collapse" id="expenseFilters">
-            <div class="card-body bg-light border-bottom p-4">
-                <form method="get" class="row g-3">
+            <div class="filter-panel">
+                <form method="get" class="row g-2 align-items-end">
                     <div class="col-md-4">
-                        <input type="text" name="desc" class="form-control" placeholder="Search description..." value="{{ request.GET.desc }}">
+                        <label class="form-label" style="font-size:0.7rem; font-weight:700; color:var(--ledger-muted); text-transform:uppercase; letter-spacing:0.8px;">Search</label>
+                        <input type="text" name="desc" class="form-control"
+                               placeholder="Description..." value="{{ request.GET.desc }}">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label" style="font-size:0.7rem; font-weight:700; color:var(--ledger-muted); text-transform:uppercase; letter-spacing:0.8px;">From</label>
                         <input type="date" name="from_date" class="form-control" value="{{ request.GET.from_date }}">
                     </div>
                     <div class="col-md-3">
+                        <label class="form-label" style="font-size:0.7rem; font-weight:700; color:var(--ledger-muted); text-transform:uppercase; letter-spacing:0.8px;">To</label>
                         <input type="date" name="to_date" class="form-control" value="{{ request.GET.to_date }}">
                     </div>
-                    <div class="col-md-2 d-flex gap-1">
-                        <button type="submit" class="btn btn-primary w-100">Apply</button>
-                        <a href="{% url 'client_details' project.id %}" class="btn btn-secondary"><i class="bi bi-x-circle"></i></a>
+                    <div class="col-md-2 d-flex gap-2">
+                        <button type="submit" class="btn-s btn-s-primary w-100">Apply</button>
+                        <a href="{% url 'client_details' project.id %}" class="btn-s btn-s-outline">
+                            <i class="bi bi-x"></i>
+                        </a>
                     </div>
                 </form>
             </div>
         </div>
 
+        <!-- Table -->
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="bg-light">
-                    <tr class="small text-muted text-uppercase fw-bold">
-                        <th class="ps-4">S.No</th>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>#</th>
                         <th>Date</th>
                         <th>Description</th>
-                        <th class="text-center">Area/Units</th>
+                        <th class="text-center">Area / Units</th>
                         <th class="text-end">Rate</th>
                         <th class="text-end">Amount</th>
-                        <th class="text-center pe-4">Actions</th>
+                        <th class="text-center">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for expense in expenses %}
                     <tr>
-                        <td class="ps-4 text-muted">{{ forloop.counter }}</td>
-                        <td class="fw-medium">{{ expense.date|date:"d M y" }}</td>
+                        <td style="color:var(--ledger-muted); font-size:0.78rem;">
+                            {{ forloop.counter }}
+                        </td>
                         <td>
-                            <span class="d-block fw-bold text-dark">{{ expense.description }}</span>
-                            <small class="text-muted">{{ expense.note|default:"-" }}</small>
+                            <span style="font-size:0.82rem; font-weight:600; color:var(--ledger-text-2);">
+                                {{ expense.date|date:"d M y" }}
+                            </span>
+                        </td>
+                        <td>
+                            <span class="d-block" style="font-weight:700; font-size:0.85rem;">{{ expense.description }}</span>
+                            {% if expense.note %}
+                            <span style="font-size:0.72rem; color:var(--ledger-muted);">{{ expense.note }}</span>
+                            {% endif %}
                         </td>
                         <td class="text-center">
-                            <span class="badge bg-primary-soft text-primary rounded-pill">{{ expense.area }} {{ expense.unit }}</span>
+                            <span class="data-badge soft-primary">
+                                {{ expense.area }} {{ expense.unit }}
+                            </span>
                         </td>
-                        <td class="text-end">{{ expense.rate }}</td>
-                        <td class="text-end fw-bold text-dark">{{ expense.amount|indian_currency }}</td>
-                        <td class="text-center pe-4">
-                            <div class="btn-group btn-group-sm rounded-3">
-                                <a href="{% url 'edit_expense' expense.id %}" class="btn btn-light border"><i class="bi bi-pencil-square"></i></a>
-                                <a href="{% url 'delete_expense' expense.id %}" class="btn btn-light-danger border text-danger" onclick="return confirm('Delete?');"><i class="bi bi-trash"></i></a>
+                        <td class="text-end">
+                            <span style="font-size:0.82rem; color:var(--ledger-text-2);">{{ expense.rate }}</span>
+                        </td>
+                        <td class="text-end">
+                            <span style="font-weight:700; font-size:0.9rem;">{{ expense.amount|indian_currency }}</span>
+                        </td>
+                        <td>
+                            <div class="action-group">
+                                <a href="{% url 'edit_expense' expense.id %}"
+                                   class="action-btn btn-edit" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <a href="{% url 'delete_expense' expense.id %}"
+                                   class="action-btn btn-del" title="Delete"
+                                   onclick="return confirm('Delete this expense?');">
+                                    <i class="bi bi-trash3"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>
                     {% empty %}
-                    <tr><td colspan="7" class="text-center py-5 text-muted">No expenses found matching the criteria.</td></tr>
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-icon"><i class="bi bi-inbox"></i></div>
+                                <p class="fw-600 mb-1" style="font-size:0.9rem;">No expenses found</p>
+                                <p style="font-size:0.78rem;">Try adjusting your filters.</p>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
     </div>
 
-    <div class="row g-4">
-        <div class="col-xl-8">
-            <div class="card border-0 shadow-sm rounded-4 h-100 overflow-hidden">
-                <div class="card-header bg-white py-3 px-4 d-flex justify-content-between align-items-center border-bottom">
-                    <h5 class="fw-bold mb-0 text-success"><i class="bi bi-credit-card-2-front me-2"></i>Payments</h5>
-                    <div class="dropdown">
-                        <button class="btn btn-danger btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#payFilter">
-                            <i class="bi bi-funnel"></i>
-                        </button>
+    <!-- ════════════════════════════════════════
+         PAYMENTS + MEDIA (side by side)
+    ════════════════════════════════════════ -->
+    <div class="bottom-grid">
+
+        <!-- ─── Payments ─── -->
+        <div class="section-card mb-0">
+            <div class="section-head">
+                <div class="section-head-title">
+                    <div class="section-head-icon soft-success">
+                        <i class="bi bi-credit-card-2-front"></i>
                     </div>
+                    Payment History
                 </div>
-
-                <div class="collapse" id="payFilter">
-                    <div class="card-body bg-light-success p-3 border-bottom">
-                        <form method="get" class="row g-2">
-                            <div class="col-sm-4">
-                                <select name="payment_mode" class="form-select form-select-sm">
-                                    <option value="">All Modes</option>
-                                    <option value="Cash" {% if request.GET.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
-                                    <option value="Online" {% if request.GET.payment_mode == 'Online' %}selected{% endif %}>Online</option>
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <input type="date" name="pay_from" class="form-control form-control-sm" value="{{ request.GET.pay_from }}">
-                            </div>
-                            <div class="col-sm-3">
-                                <input type="date" name="pay_to" class="form-control form-control-sm" value="{{ request.GET.pay_to }}">
-                            </div>
-                            <div class="col-sm-2">
-                                <button type="submit" class="btn btn-success btn-sm w-100">Go</button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-
-                <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="bg-light-success-subtle">
-                            <tr class="small text-muted text-uppercase fw-bold">
-                                <th class="ps-4">Date</th>
-                                <th>Mode</th>
-                                <th class="text-end">Paid</th>
-                                <th class="text-end">Balance After</th>
-                                <th class="text-center pe-4">Share</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for payment in payment_rows %}
-                            <tr>
-                                <td class="ps-4">{{ payment.date|date:"d-m-Y" }}</td>
-                                <td><span class="badge bg-white border text-dark fw-medium px-2">{{ payment.payment_mode }}</span></td>
-                                <td class="text-end fw-bold text-success">{{ payment.amount|indian_currency }}</td>
-                                <td class="text-end text-muted small">{{ payment.remaining_after_payment|indian_currency }}</td>
-                                <td class="text-center pe-4">
-                                    <div class="btn-group btn-group-sm shadow-sm rounded-3">
-
-                                        <!-- Invoice -->
-                                        <a href="{% url 'payment_invoice' payment.payment_obj.id %}" 
-                                        target="_blank" 
-                                        class="btn btn-white border"
-                                        title="View Invoice">
-                                            <i class="bi bi-receipt"></i>
-                                        </a>
-
-                                        <!-- WhatsApp -->
-                                        <a href="{{ payment.whatsapp_link }}" 
-                                        target="_blank" 
-                                        class="btn btn-success">
-                                            <i class="bi bi-whatsapp"></i>
-                                        </a>
-
-                                        <!-- 🔥 Edit Payment -->
-                                        <a href="{% url 'edit_payment' payment.payment_obj.id %}" 
-                                        class="btn btn-primary"
-                                        title="Edit Payment">
-                                            <i class="bi bi-pencil-square"></i>
-                                        </a>
-
-                                    </div>
-                                </td>
-                            </tr>
-                            {% endfor %}
-                            <tr class="bg-dark text-white fw-bold">
-                                <td colspan="2" class="ps-4">TOTAL COLLECTED</td>
-                                <td class="text-end text-primary">{{ total_paid|indian_currency }}</td>
-                                <td colspan="2"></td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="section-head-actions">
+                    <button class="btn-s btn-s-filter"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target="#payFilter">
+                        <i class="bi bi-funnel"></i> Filter
+                    </button>
                 </div>
             </div>
-        </div>
 
-        <div class="col-xl-4">
-            <div class="card border-0 shadow-lg rounded-4 h-100 bg-sidebar-dark text-white p-0 overflow-hidden">
-                
-                <div class="p-4 pb-0">
-                    <div class="d-flex justify-content-between align-items-center mb-3">
-                        <h6 class="fw-800 text-uppercase ls-1 mb-0">
-                            <i class="bi bi-images me-2 text-primary"></i>Site Media
-                        </h6>
-                        <a href="{% url 'upload_site_image' project.id %}" class="btn btn-primary btn-sm px-3 rounded-3">
-                            <i class="bi bi-plus-lg me-1"></i> Upload Image
-                        </a>
-                    </div>
-
-                    <form method="get" class="row g-2 mb-4">
-                        <div class="col-7">
-                            <div class="input-group input-group-sm">
-                                <span class="input-group-text bg-dark-soft border-0 text-muted"><i class="bi bi-calendar3"></i></span>
-                                <input type="date" name="image_from" class="form-control form-control-sm bg-dark-soft border-0 text-white" value="{{ image_from }}">
-                            </div>
+            <!-- Payment filter -->
+            <div class="collapse" id="payFilter">
+                <div class="filter-panel">
+                    <form method="get" class="row g-2 align-items-end">
+                        <div class="col-sm-4">
+                            <label class="form-label" style="font-size:0.7rem; font-weight:700; color:var(--ledger-muted); text-transform:uppercase; letter-spacing:0.8px;">Mode</label>
+                            <select name="payment_mode" class="form-select" style="font-size:0.82rem; border:1.5px solid var(--ledger-border); border-radius:var(--ledger-radius-sm);">
+                                <option value="">All Modes</option>
+                                <option value="Cash" {% if request.GET.payment_mode == 'Cash' %}selected{% endif %}>Cash</option>
+                                <option value="Online" {% if request.GET.payment_mode == 'Online' %}selected{% endif %}>Online</option>
+                            </select>
                         </div>
-                        <div class="col-5">
-                            <button type="submit" class="btn btn-sm btn-outline-primary w-100 border-opacity-25 rounded-3 fw-bold">
-                                Filter
-                            </button>
+                        <div class="col-sm-3">
+                            <label class="form-label" style="font-size:0.7rem; font-weight:700; color:var(--ledger-muted); text-transform:uppercase; letter-spacing:0.8px;">From</label>
+                            <input type="date" name="pay_from" class="form-control" value="{{ request.GET.pay_from }}"
+                                   style="font-size:0.82rem; border:1.5px solid var(--ledger-border); border-radius:var(--ledger-radius-sm);">
+                        </div>
+                        <div class="col-sm-3">
+                            <label class="form-label" style="font-size:0.7rem; font-weight:700; color:var(--ledger-muted); text-transform:uppercase; letter-spacing:0.8px;">To</label>
+                            <input type="date" name="pay_to" class="form-control" value="{{ request.GET.pay_to }}"
+                                   style="font-size:0.82rem; border:1.5px solid var(--ledger-border); border-radius:var(--ledger-radius-sm);">
+                        </div>
+                        <div class="col-sm-2">
+                            <label class="form-label" style="font-size:0.7rem; visibility:hidden;">-</label>
+                            <button type="submit" class="btn-s btn-s-primary w-100">Apply</button>
                         </div>
                     </form>
                 </div>
+            </div>
 
+            <!-- Payments table -->
+            <div class="table-responsive">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Mode</th>
+                            <th class="text-end">Paid</th>
+                            <th class="text-end">Balance After</th>
+                            <th class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payment_rows %}
+                        <tr>
+                            <td>
+                                <span style="font-size:0.82rem; font-weight:600;">
+                                    {{ payment.date|date:"d M Y" }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="data-badge {% if payment.payment_mode == 'Cash' %}soft-warning{% else %}soft-primary{% endif %}">
+                                    {{ payment.payment_mode }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <span style="font-weight:700; color:var(--ledger-success);">
+                                    {{ payment.amount|indian_currency }}
+                                </span>
+                            </td>
+                            <td class="text-end">
+                                <span style="font-size:0.8rem; color:var(--ledger-muted);">
+                                    {{ payment.remaining_after_payment|indian_currency }}
+                                </span>
+                            </td>
+                            <td>
+                                <div class="action-group">
+                                    <a href="{% url 'payment_invoice' payment.payment_obj.id %}"
+                                       target="_blank"
+                                       class="action-btn btn-inv" title="Invoice">
+                                        <i class="bi bi-receipt"></i>
+                                    </a>
+                                    <a href="{{ payment.whatsapp_link }}"
+                                       target="_blank"
+                                       class="action-btn btn-wa" title="WhatsApp">
+                                        <i class="bi bi-whatsapp"></i>
+                                    </a>
+                                    <a href="{% url 'edit_payment' payment.payment_obj.id %}"
+                                       class="action-btn btn-edit" title="Edit">
+                                        <i class="bi bi-pencil-square"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                        <!-- Total row -->
+                        <tr class="total-row">
+                            <td colspan="2">Total Collected</td>
+                            <td class="text-end" style="color:#93c5fd;">{{ total_paid|indian_currency }}</td>
+                            <td colspan="2"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- ─── Site Media ─── -->
+        <div class="media-section-card">
+
+            <div class="media-head">
+                <div class="section-head-title">
+                    <div class="section-head-icon soft-primary">
+                        <i class="bi bi-images"></i>
+                    </div>
+                    Site Media
+                </div>
+                <a href="{% url 'upload_site_image' project.id %}" class="btn-s btn-s-primary">
+                    <i class="bi bi-plus-lg"></i> Upload
+                </a>
+            </div>
+
+            <!-- Date filter -->
+            <div class="media-filter">
+                <form method="get" class="d-flex gap-2 align-items-center">
+                    <input type="date" name="image_from" class="form-control"
+                           value="{{ image_from }}" style="flex:1;">
+                    <button type="submit" class="btn-s btn-s-outline">
+                        <i class="bi bi-funnel"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Swiper -->
+            {% if site_images %}
+            <div class="media-swiper-wrap">
                 <div class="swiper mySwiper pb-5">
                     <div class="swiper-wrapper">
                         {% for img in site_images %}
-                            {% if img.image %}
-                            <div class="swiper-slide">
-                                <div class="media-card-wrapper p-3">
-                                    <div class="media-image-box shadow-lg">
-
-                                        <img src="{{ img.image.url }}" 
-                                            class="main-slide-img" 
-                                            alt="Site Progress">
-
-                                        <div class="date-badge-floating">
-                                            <i class="bi bi-clock-history me-1"></i>
-                                            {{ img.uploaded_at|date:"d M Y" }}
-                                        </div>
-
-                                        <div class="media-caption-glass">
-                                            <p class="mb-0 text-white small fw-bold text-truncate">
-                                                {{ img.description|default:"Site Progress Image" }}
-                                            </p>
-                                        </div>
-
-                                    </div>
+                        {% if img.image %}
+                        <div class="swiper-slide">
+                            <div class="slide-img-box">
+                                <img src="{{ img.image.url }}" alt="Site">
+                                <div class="slide-date-tag">
+                                    <i class="bi bi-calendar3 me-1"></i>
+                                    {{ img.uploaded_at|date:"d M Y" }}
+                                </div>
+                                <div class="slide-caption">
+                                    <p>{{ img.description|default:"Site Progress" }}</p>
                                 </div>
                             </div>
-                            {% endif %}
+                        </div>
+                        {% endif %}
                         {% endfor %}
                     </div>
-
                     <div class="swiper-button-next slide-nav"></div>
                     <div class="swiper-button-prev slide-nav"></div>
                     <div class="swiper-pagination custom-pagination"></div>
                 </div>
             </div>
+            {% else %}
+            <div class="media-empty">
+                <div class="media-empty-icon"><i class="bi bi-camera"></i></div>
+                <p class="fw-600 mb-1" style="font-size:0.88rem; color:var(--ledger-text);">No photos yet</p>
+                <p style="font-size:0.75rem;">Upload site images to track visual progress.</p>
+                <a href="{% url 'upload_site_image' project.id %}" class="btn-s btn-s-primary mt-2">
+                    <i class="bi bi-plus-lg"></i> Upload First Photo
+                </a>
+            </div>
+            {% endif %}
         </div>
+
     </div>
 </div>
 
+<!-- Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
 <script>
 document.addEventListener('DOMContentLoaded', function () {
-    const swiper = new Swiper(".mySwiper", {
+    new Swiper('.mySwiper', {
         loop: true,
-        slidesPerView: 1, // Only show 1 image at a time in the narrow sidebar
-        spaceBetween: 10,
-        centeredSlides: true,
-        
-        autoplay: {
-            delay: 3000,
-            disableOnInteraction: false,
-        },
-
+        slidesPerView: 1,
+        spaceBetween: 0,
+        autoplay: { delay: 3500, disableOnInteraction: false },
         pagination: {
-            el: ".swiper-pagination",
+            el: '.swiper-pagination',
             clickable: true,
             dynamicBullets: true,
         },
-
         navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
         },
     });
 });
 </script>
 
-<style>
-    /* Global Styling */
-    .bg-primary-soft { background: rgba(37, 99, 235, 0.1) !important; }
-    .bg-success-soft { background: rgba(22, 163, 74, 0.1) !important; }
-    .bg-danger-soft { background: rgba(220, 38, 38, 0.1) !important; }
-    .bg-info-soft { background: rgba(8, 145, 178, 0.1) !important; }
-    .bg-light-success-subtle { background: #f0fdf4; }
-    .bg-glass-dark { background: #0f172a; border: 1px solid rgba(255,255,255,0.05); }
-    
-    .letter-spacing-1 { letter-spacing: 0.5px; font-size: 0.65rem; }
-    .x-small { font-size: 0.75rem; }
-    
-    .btn-light-glass { background: rgba(0,0,0,0.03); border: 1px solid rgba(0,0,0,0.08); color: #64748b; font-weight: 600; }
-    .btn-light-glass:hover { background: #fff; color: #3b82f6; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
-    .btn-white { background: #fff; color: #64748b; }
-    .btn-light-danger { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.1); }
-
-    /* Media Overlay */
-    .media-info-overlay {
-        position: absolute;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        background: linear-gradient(transparent, rgba(0,0,0,0.9));
-    }
-
-   /* Deep Navy Theme from */
-.bg-sidebar-dark { 
-    background-color: #0f172a !important; 
-}
-
-.bg-dark-soft { 
-    background-color: rgba(255, 255, 255, 0.05); 
-}
-
-.fw-800 { font-weight: 800; }
-.ls-1 { letter-spacing: 1px; }
-
-/* Improved Slider Interaction */
-.media-image-box {
-    height: 320px;
-    border-radius: 20px;
-    overflow: hidden;
-    position: relative;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.4s ease;
-}
-
-.main-slide-img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    filter: brightness(0.9);
-}
-
-/* Date Badge Style from */
-.date-badge-floating {
-    position: absolute;
-    top: 15px;
-    left: 15px;
-    background: rgba(15, 23, 42, 0.6);
-    backdrop-filter: blur(8px);
-    color: #fff;
-    padding: 5px 12px;
-    border-radius: 8px;
-    font-size: 0.65rem;
-    font-weight: 800;
-    z-index: 10;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-/* Caption blur effect */
-.media-caption-glass {
-    position: absolute;
-    bottom: 0;
-    width: 100%;
-    padding: 20px 15px;
-    background: linear-gradient(to top, rgba(15, 23, 42, 0.95), transparent);
-    backdrop-filter: blur(2px);
-}
-
-/* Navigation Overhaul */
-.slide-nav {
-    width: 40px !important;
-    height: 40px !important;
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 50%;
-    color: #fff !important;
-    backdrop-filter: blur(10px);
-}
-
-.slide-nav:after { font-size: 16px !important; font-weight: 900; }
-
-.custom-pagination .swiper-pagination-bullet {
-    background: #475569 !important;
-    width: 8px;
-    height: 8px;
-    opacity: 1;
-}
-
-.custom-pagination .swiper-pagination-bullet-active {
-    background: #3b82f6 !important; /* Blue from */
-    width: 24px;
-    border-radius: 4px;
-}
-/* Ensure the swiper doesn't break the card padding */
-.mySwiper {
-    width: 100%;
-    height: auto;
-    overflow: hidden; /* Critical */
-    position: relative;
-}
-
-.swiper-wrapper {
-    display: flex; /* Ensures horizontal alignment */
-}
-
-.swiper-slide {
-    height: auto;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    /* Remove any 'float' or 'display: block' you might have added */
-}
-
-.media-image-box {
-    width: 100%;
-    height: 280px; /* Force height so slides are uniform */
-    border-radius: 16px;
-    overflow: hidden;
-    position: relative;
-}
-</style>
 {% endblock %}

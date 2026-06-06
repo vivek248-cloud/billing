@@ -8,351 +8,1204 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Project Progress | EDB Billing</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+    <title>Dashboard — EDB Billing</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
+        /* ════════════════════════════════════════
+           DESIGN TOKENS
+        ════════════════════════════════════════ */
         :root {
             --primary: #2563eb;
-            --primary-soft: #eff6ff;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --sidebar-bg: #0f172a;
-            --bg-main: #f8fafc;
-            --border-color: #e2e8f0;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --primary-50: rgba(37, 99, 235, 0.06);
+            --primary-ring: rgba(37, 99, 235, 0.15);
+
+            --success: #059669;
+            --success-hover: #047857;
+            --success-light: #ecfdf5;
+            --success-ring: rgba(5, 150, 105, 0.12);
+            --success-shadow: 0 8px 24px rgba(5, 150, 105, 0.2);
+
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+            --warning-ring: rgba(217, 119, 6, 0.12);
+
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+
+            --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+            --shadow-xl: 0 20px 50px rgba(0,0,0,0.1);
+
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: #1e293b;
-            margin: 0;
-            overflow-x: hidden;
-        }
-
-        /* --- SHARED SAAS NAVBAR --- */
-        .saas-nav {
-            background: var(--sidebar-bg);
-            color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .brand-box { display: flex; align-items: center; gap: 12px; }
-        .brand-logo { height: 35px; }
-
-        .nav-links {
-            display: flex;
-            gap: 24px;
-            list-style: none;
+        /* ════════════════════════════════════════
+           RESET & BASE
+        ════════════════════════════════════════ */
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        .nav-links a {
-            color: #94a3b8;
-            text-decoration: none;
-            font-size: 0.9rem;
-            font-weight: 500;
-            transition: 0.3s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .nav-links a:hover, .nav-links a.active { color: white; }
-
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
-        }
-
-        /* --- PAGE CONTENT --- */
-        .content-container {
-            padding: 2rem 5%;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-
-        .welcome-header {
-            margin-bottom: 3rem;
-            text-align: center;
-        }
-
-        .welcome-title {
-            font-weight: 800;
-            font-size: 2rem;
-            letter-spacing: -0.025em;
-            margin-bottom: 10px;
-        }
-
-        .welcome-subtitle {
-            color: #64748b;
-            font-size: 1.1rem;
-        }
-
-        /* --- CONGRATS CARD --- */
-        .congrats-card {
-            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-            color: white;
-            padding: 40px;
-            border-radius: 24px;
-            text-align: center;
-            margin-bottom: 3rem;
-            box-shadow: 0 20px 25px -5px rgba(16, 185, 129, 0.2);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .congrats-card h3 { font-size: 2rem; font-weight: 800; margin: 15px 0; }
-        .congrats-icon { font-size: 4rem; margin-bottom: 10px; }
-
-        /* --- PROGRESS STEPPER (Vertical for Mobile, Horizontal for Desktop) --- */
-        .stepper-card {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-        }
-
-        .stepper-container {
-            display: flex;
-            justify-content: space-between;
-            position: relative;
-            margin-top: 20px;
-        }
-
-        /* Horizontal Line */
-        .stepper-container::before {
-            content: '';
-            position: absolute;
-            top: 25px;
-            left: 0;
-            width: 100%;
-            height: 4px;
-            background: #e2e8f0;
-            z-index: 1;
-        }
-
-        .step {
-            position: relative;
-            z-index: 2;
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            min-height: 100vh;
             display: flex;
             flex-direction: column;
-            align-items: center;
-            flex: 1;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            overflow-x: hidden;
         }
 
-        .step-circle {
-            width: 50px;
-            height: 50px;
-            background: white;
-            border: 4px solid #e2e8f0;
+        ::selection { background: var(--primary-light); color: var(--primary); }
+        a { text-decoration: none; color: inherit; }
+
+        /* ════════════════════════════════════════
+           NAVBAR
+        ════════════════════════════════════════ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 clamp(1.25rem, 4vw, 3rem);
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+
+        .navbar.scrolled {
+            box-shadow: var(--shadow-sm);
+            background: rgba(255,255,255,0.95);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            width: 34px; height: 34px;
+            border-radius: 10px;
+            object-fit: contain;
+            border: 1px solid var(--gray-200);
+        }
+
+        .nav-brand-text {
+            font-weight: 800;
+            font-size: 1rem;
+            color: var(--gray-900);
+            letter-spacing: -0.3px;
+        }
+
+        .nav-brand-text span { color: var(--primary); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--radius-md);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--gray-900);
+            background: var(--gray-100);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .nav-link i { font-size: 1rem; }
+
+        .nav-link.logout {
+            color: var(--danger);
+        }
+
+        .nav-link.logout:hover {
+            background: var(--danger-light);
+        }
+
+        /* Mobile toggle */
+        .nav-toggle {
+            display: none;
+            width: 42px; height: 42px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            background: var(--white);
+            color: var(--gray-600);
+            font-size: 1.15rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .nav-toggle:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        /* Mobile menu */
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 68px;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            padding: 0.75rem;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .mobile-menu.open { display: flex; }
+
+        .mobile-menu .nav-link {
+            padding: 0.75rem 1rem;
+            border-radius: var(--radius-md);
+            font-size: 0.88rem;
+        }
+
+        /* Mobile overlay */
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.3);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+        }
+
+        .mobile-overlay.open { display: block; }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-toggle { display: flex; }
+        }
+
+        /* ════════════════════════════════════════
+           CONTENT AREA
+        ════════════════════════════════════════ */
+        .content {
+            flex: 1;
+            padding: 2rem clamp(1.25rem, 4vw, 3rem);
+            max-width: 860px;
+            margin: 0 auto;
+            width: 100%;
+        }
+
+        /* ─── Page Header ─── */
+        .page-header {
+            text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.5s ease forwards;
+        }
+
+        .page-header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .badge-status {
+            width: 6px; height: 6px;
             border-radius: 50%;
+            animation: dotPulse 2s ease infinite;
+        }
+
+        .badge-active {
+            background: var(--primary-light);
+            border: 1px solid var(--primary-ring);
+            color: var(--primary);
+        }
+
+        .badge-active .badge-status { background: var(--primary); }
+
+        .badge-completed {
+            background: var(--success-light);
+            border: 1px solid var(--success-ring);
+            color: var(--success);
+        }
+
+        .badge-completed .badge-status { background: var(--success); }
+
+        .badge-onhold {
+            background: var(--warning-light);
+            border: 1px solid var(--warning-ring);
+            color: var(--warning);
+        }
+
+        .badge-onhold .badge-status { background: var(--warning); }
+
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+            color: var(--gray-900);
+            margin-bottom: 0.4rem;
+        }
+
+        .page-subtitle {
+            font-size: 0.9rem;
+            color: var(--gray-500);
+            line-height: 1.5;
+        }
+
+        .page-subtitle strong {
+            color: var(--gray-800);
+        }
+
+        /* ─── Completion Banner ─── */
+        .completion-banner {
+            background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+            border-radius: var(--radius-2xl);
+            padding: 2.5rem 2rem;
+            text-align: center;
+            color: white;
+            margin-bottom: 2rem;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--success-shadow);
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .completion-banner::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(ellipse at 20% 20%, rgba(255,255,255,0.08) 0%, transparent 50%),
+                radial-gradient(ellipse at 80% 80%, rgba(255,255,255,0.05) 0%, transparent 50%);
+        }
+
+        .banner-content { position: relative; z-index: 1; }
+
+        .banner-icon {
+            width: 64px; height: 64px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.2);
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: 0.4s all ease;
-            margin-bottom: 15px;
+            font-size: 1.5rem;
+            margin: 0 auto 1.25rem;
         }
 
-        .step-icon { font-size: 1.2rem; color: #94a3b8; }
-        .check-icon { display: none; color: white; font-size: 1.2rem; }
+        .banner-title {
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+        }
 
-        .step-label {
+        .banner-desc {
+            font-size: 0.88rem;
+            color: rgba(255,255,255,0.75);
+            line-height: 1.6;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        /* ─── Stepper Card ─── */
+        .stepper-section {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-2xl);
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1rem;
             font-weight: 700;
-            font-size: 0.85rem;
-            color: #64748b;
+            color: var(--gray-900);
+        }
+
+        .section-title-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+        }
+
+        .section-title-icon.icon-primary {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        .progress-percentage {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .progress-bar-mini {
+            width: 100px;
+            height: 6px;
+            background: var(--gray-100);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-fill-mini {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .progress-fill-mini.fill-success { background: var(--success); }
+        .progress-fill-mini.fill-primary { background: var(--primary); }
+        .progress-fill-mini.fill-warning { background: var(--warning); }
+
+        .progress-text {
+            font-size: 0.78rem;
+            font-weight: 700;
+            color: var(--gray-600);
+        }
+
+        /* ─── DESKTOP STEPPER (Horizontal) ─── */
+        .stepper-horizontal {
+            display: flex;
+            position: relative;
+            padding: 0 1rem;
+        }
+
+        /* Connector line */
+        {% comment %} .stepper-horizontal::before {
+            content: '';
+            position: absolute;
+            top: 28px;
+            left: calc(1rem + 28px);
+            right: calc(1rem + 28px);
+            height: 3px;
+            background: var(--gray-200);
+            z-index: 0;
+        } {% endcomment %}
+
+        .step-h {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 1;
+        }
+
+        .step-circle-h {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            color: var(--gray-400);
+            margin-bottom: 1rem;
+            transition: all var(--transition-smooth);
+            position: relative;
+        }
+
+        .step-circle-h .check-icon {
+            display: none;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .step-info-h {
+            text-align: center;
+        }
+
+        .step-label-h {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--gray-500);
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-bottom: 3px;
         }
 
-        /* Step States */
-        .step.completed .step-circle {
+        .step-desc-h {
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            max-width: 120px;
+            margin: 0 auto;
+            line-height: 1.4;
+        }
+
+        /* ── Step states ── */
+        .step-h.completed .step-circle-h {
             background: var(--success);
             border-color: var(--success);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
         }
-        .step.completed .step-icon { display: none; }
-        .step.completed .check-icon { display: block; }
-        .step.completed .step-label { color: var(--success); }
 
-        .step.current .step-circle {
+        .step-h.completed .step-circle-h .step-icon-h { display: none; }
+        .step-h.completed .step-circle-h .check-icon { display: block; }
+
+        .step-h.completed .step-label-h { color: var(--success); }
+
+        .step-h.current .step-circle-h {
             border-color: var(--primary);
-            box-shadow: 0 0 0 5px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 6px var(--primary-50);
+            color: var(--primary);
         }
-        .step.current .step-icon { color: var(--primary); }
-        .step.current .step-label { color: var(--primary); }
 
-        /* Mobile Adjustments */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none;
-                flex-direction: column;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                width: 100%;
-                background: var(--sidebar-bg);
-                padding: 20px;
-                gap: 15px;
-            }
-            .nav-links.active { display: flex; }
-            .nav-toggle { display: block; }
+        .step-h.current .step-label-h { color: var(--primary); }
+        .step-h.current .step-icon-h { color: var(--primary); }
 
-            .stepper-container { flex-direction: column; gap: 40px; align-items: flex-start; }
-            .stepper-container::before { width: 4px; height: 100%; left: 23px; top: 0; }
-            .step { flex-direction: row; gap: 20px; }
-            .step-circle { margin-bottom: 0; }
+        .step-h.hold .step-circle-h {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.06);
+            color: var(--warning);
+        }
+
+        .step-h.hold .step-label-h { color: var(--warning); }
+
+        /* Connector fill for completed steps */
+        .step-connector {
+            position: absolute;
+            top: 28px;
+            left: 0;
+            height: 3px;
+            background: var(--success);
+            z-index: 0;
+            transition: width 1s ease;
+        }
+
+        /* ─── MOBILE STEPPER (Vertical) ─── */
+        .stepper-vertical {
+            display: none;
+            flex-direction: column;
+            position: relative;
+            padding-left: 28px;
+        }
+
+        {% comment %} .stepper-vertical::before {
+            content: '';
+            position: absolute;
+            left: 27px;
+            top: 28px;
+            bottom: 28px;
+            width: 3px;
+            background: var(--gray-200);
+            z-index: 0;
+        } {% endcomment %}
+
+        .step-v {
+            display: flex;
+            align-items: flex-start;
+            gap: 1.25rem;
+            position: relative;
+            z-index: 1;
+            padding-bottom: 2rem;
+        }
+
+        .step-v:last-child { padding-bottom: 0; }
+
+        .step-circle-v {
+            width: 56px; height: 56px;
+            border-radius: 16px;
+            background: var(--white);
+            border: 2px solid var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.15rem;
+            color: var(--gray-400);
+            flex-shrink: 0;
+            transition: all var(--transition-smooth);
+        }
+
+        .step-circle-v .check-icon {
+            display: none;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .step-content-v {
+            padding-top: 12px;
+        }
+
+        .step-label-v {
+            font-size: 0.88rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            margin-bottom: 3px;
+        }
+
+        .step-desc-v {
+            font-size: 0.78rem;
+            color: var(--gray-400);
+            line-height: 1.5;
+        }
+
+        /* Vertical step states */
+        .step-v.completed .step-circle-v {
+            background: var(--success);
+            border-color: var(--success);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.25);
+        }
+
+        .step-v.completed .step-circle-v .step-icon-v { display: none; }
+        .step-v.completed .step-circle-v .check-icon { display: block; }
+        .step-v.completed .step-label-v { color: var(--success); }
+
+        .step-v.current .step-circle-v {
+            border-color: var(--primary);
+            box-shadow: 0 0 0 6px var(--primary-50);
+            color: var(--primary);
+        }
+
+        .step-v.current .step-label-v { color: var(--primary); }
+        .step-v.current .step-icon-v { color: var(--primary); }
+
+        .step-v.hold .step-circle-v {
+            border-color: var(--warning);
+            box-shadow: 0 0 0 6px rgba(217, 119, 6, 0.06);
+            color: var(--warning);
+        }
+
+        .step-v.hold .step-label-v { color: var(--warning); }
+
+        @media (max-width: 640px) {
+            .stepper-horizontal { display: none; }
+            .stepper-vertical { display: flex; }
+        }
+
+        /* ─── Info Cards Grid ─── */
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 2rem;
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 0.3s;
+            opacity: 0;
+        }
+
+        @media (max-width: 480px) {
+            .info-grid { grid-template-columns: 1fr; }
+        }
+
+        .info-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-lg);
+            padding: 1.25rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            transition: all var(--transition-base);
+        }
+
+        .info-card:hover {
+            border-color: var(--gray-300);
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+
+        .info-icon {
+            width: 42px; height: 42px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            flex-shrink: 0;
+        }
+
+        .info-icon.ic-primary { background: var(--primary-light); color: var(--primary); }
+        .info-icon.ic-success { background: var(--success-light); color: var(--success); }
+        .info-icon.ic-warning { background: var(--warning-light); color: var(--warning); }
+
+        .info-label {
+            font-size: 0.68rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--gray-400);
+            margin-bottom: 3px;
+        }
+
+        .info-value {
+            font-size: 0.92rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        /* ─── CTA Section ─── */
+        .cta-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 0.4s;
+            opacity: 0;
+        }
+
+        .cta-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.7rem 1.4rem;
+            border-radius: var(--radius-md);
+            font-size: 0.85rem;
+            font-weight: 600;
+            transition: all var(--transition-base);
+            border: 1px solid;
+        }
+
+        .cta-primary {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+            box-shadow: 0 4px 14px rgba(37, 99, 235, 0.2);
+        }
+
+        .cta-primary:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(37, 99, 235, 0.25);
+            color: white;
+        }
+
+        .cta-outline {
+            background: var(--white);
+            color: var(--gray-600);
+            border-color: var(--gray-200);
+        }
+
+        .cta-outline:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+            color: var(--gray-900);
+        }
+
+        .cta-btn .btn-arrow {
+            transition: transform var(--transition-fast);
+        }
+
+        .cta-btn:hover .btn-arrow {
+            transform: translateX(3px);
+        }
+
+        /* ─── Footer ─── */
+        .page-footer {
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            border-top: 1px solid var(--gray-100);
+            margin-top: auto;
+        }
+
+        .page-footer a {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* ════════════════════════════════════════
+           ANIMATIONS
+        ════════════════════════════════════════ */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to   { opacity: 1; transform: scale(1); }
         }
     </style>
 </head>
 <body>
 
-<nav class="saas-nav">
-    <div class="brand-box">
-        <img src="{% static 'images/logo.PNG' %}" alt="Logo" class="brand-logo">
-        <span style="font-weight: 800; font-size: 1.2rem; letter-spacing: -1px;">EDB BILLING</span>
+<!-- ════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+    <div class="nav-brand">
+        <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="nav-logo">
+        <span class="nav-brand-text">EDB <span>Billing</span></span>
     </div>
 
-    <button class="nav-toggle" id="mobileToggle">
-        <i class="fa fa-bars"></i>
-    </button>
-
-    <ul class="nav-links" id="navMenu">
-        <li><a href="{% url 'client_dashboard' phone %}"><i class="fa fa-home"></i> Dashboard</a></li>
-        <li><a href="{% url 'siteprocess' phone %}" class="active"><i class="fa fa-tasks"></i> Progress</a></li>
-        <li><a href="{% url 'siteimage' phone %}"><i class="fa fa-image"></i> Photos</a></li>
-        <li><a href="{% url 'logout' %}" style="color: #fda4af;"><i class="fa fa-sign-out"></i> Logout</a></li>
+    <!-- Desktop links -->
+    <ul class="nav-links">
+        <li>
+            <a href="{% url 'client_dashboard' phone %}" class="nav-link active">
+                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'siteprocess' phone %}" class="nav-link ">
+                <i class="bi bi-bar-chart-steps"></i> Progress
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'siteimage' phone %}" class="nav-link">
+                <i class="bi bi-images"></i> Photos
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'logout' %}" class="nav-link logout">
+                <i class="bi bi-power"></i> Logout
+            </a>
+        </li>
     </ul>
+
+    <!-- Mobile toggle -->
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+        <i class="bi bi-list" id="toggleIcon"></i>
+    </button>
 </nav>
 
-<main class="content-container">
-    
-    <header class="welcome-header" data-aos="fade-down">
-        <h1 class="welcome-title">Track Your Project</h1>
-        <p class="welcome-subtitle">Real-time milestones for <strong>{{ project.client_name|title }}</strong></p>
+<!-- Mobile menu -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-menu" id="mobileMenu">
+    <a href="{% url 'client_dashboard' phone %}" class="nav-link">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+    </a>
+    <a href="{% url 'siteprocess' phone %}" class="nav-link active">
+        <i class="bi bi-bar-chart-steps"></i> Progress
+    </a>
+    <a href="{% url 'siteimage' phone %}" class="nav-link">
+        <i class="bi bi-images"></i> Photos
+    </a>
+    <a href="{% url 'logout' %}" class="nav-link logout">
+        <i class="bi bi-power"></i> Logout
+    </a>
+</div>
+
+<!-- ════════════════════════════════════════
+     CONTENT
+════════════════════════════════════════ -->
+<main class="content">
+
+    <!-- Page Header -->
+    <header class="page-header">
+        <div class="page-header-badge 
+            {% if project.status == 'Completed' %}badge-completed
+            {% elif project.status == 'On Hold' %}badge-onhold
+            {% else %}badge-active{% endif %}">
+            <span class="badge-status"></span>
+            {% if project.status == 'Completed' %}Project Completed
+            {% elif project.status == 'On Hold' %}On Hold
+            {% elif project.status == 'In Progress' %}In Progress
+            {% else %}Not Started{% endif %}
+        </div>
+
+        <h1 class="page-title">Project Milestones</h1>
+        <p class="page-subtitle">
+            Real-time progress for <strong>{{ project.client_name|title }}</strong>'s project
+        </p>
     </header>
 
+    <!-- ─── Completion Banner ─── -->
     {% if project.status == "Completed" %}
-    <div class="congrats-section" data-aos="zoom-in">
-        <div class="congrats-card">
-            <div class="congrats-icon">🏆</div>
-            <h3>Project Completed!</h3>
-            <p>Your vision has been brought to life. We've finished all construction stages successfully. Thank you for choosing EDB Billing.</p>
+    <div class="completion-banner" id="completionBanner">
+        <div class="banner-content">
+            <div class="banner-icon">
+                <i class="bi bi-trophy-fill"></i>
+            </div>
+            <h2 class="banner-title">Congratulations! 🎉</h2>
+            <p class="banner-desc">
+                Your project has been completed successfully. All construction
+                stages are finished. Thank you for trusting Elite Dream Builders.
+            </p>
         </div>
     </div>
     {% endif %}
 
-    <section class="stepper-card" data-aos="fade-up">
-        <h4 style="margin: 0 0 30px 0; font-weight: 800; color: var(--sidebar-bg);">Milestone Journey</h4>
-        
-        <div class="stepper-container">
-            <div class="step 
-                {% if project.status == 'In Progress' or project.status == 'Completed' %}completed{% endif %}
-                {% if project.status == 'Not Started' %}current{% endif %}">
-                <div class="step-circle">
-                    <i class="step-icon fas fa-hourglass-start"></i>
-                    <i class="check-icon fas fa-check"></i>
+    <!-- ─── Stepper ─── -->
+    <div class="stepper-section">
+        <div class="section-header">
+            <div class="section-title">
+                <div class="section-title-icon icon-primary">
+                    <i class="bi bi-signpost-split-fill"></i>
                 </div>
-                <div class="step-label">Planning</div>
+                Milestone Journey
+            </div>
+            <div class="progress-percentage">
+                <div class="progress-bar-mini">
+                    <div class="progress-fill-mini 
+                        {% if project.status == 'Completed' %}fill-success
+                        {% elif project.status == 'On Hold' %}fill-warning
+                        {% else %}fill-primary{% endif %}"
+                        style="width: 
+                            {% if project.status == 'Completed' %}100%
+                            {% elif project.status == 'In Progress' %}50%
+                            {% elif project.status == 'On Hold' %}50%
+                            {% else %}10%{% endif %};">
+                    </div>
+                </div>
+                <span class="progress-text">
+                    {% if project.status == 'Completed' %}100%
+                    {% elif project.status == 'In Progress' %}50%
+                    {% elif project.status == 'On Hold' %}50%
+                    {% else %}10%{% endif %}
+                </span>
+            </div>
+        </div>
+
+        <!-- ── Horizontal (Desktop) ── -->
+        <div class="stepper-horizontal" style="position: relative;">
+            <!-- Filled connector -->
+
+
+            <!-- Step 1: Planning -->
+            <div class="step-h 
+                {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}completed
+                {% elif project.status == 'Not Started' %}current{% endif %}">
+                <div class="step-circle-h">
+                    <i class="bi bi-clipboard2-check step-icon-h"></i>
+                    <i class="bi bi-check-lg check-icon"></i>
+                </div>
+                <div class="step-info-h">
+                    <div class="step-label-h">Planning</div>
+                    <div class="step-desc-h">Blueprint & approvals</div>
+                </div>
             </div>
 
-            <div class="step 
-                {% if project.status == 'Completed' %}completed{% endif %}
-                {% if project.status == 'In Progress' %}current{% endif %}">
-                <div class="step-circle">
-                    <i class="step-icon fas fa-tools"></i>
-                    <i class="check-icon fas fa-check"></i>
+            <!-- Step 2: Construction -->
+            <div class="step-h 
+                {% if project.status == 'Completed' %}completed
+                {% elif project.status == 'In Progress' %}current{% endif %}">
+                <div class="step-circle-h">
+                    <i class="bi bi-tools step-icon-h"></i>
+                    <i class="bi bi-check-lg check-icon"></i>
                 </div>
-                <div class="step-label">In Progress</div>
+                <div class="step-info-h">
+                    <div class="step-label-h">Construction</div>
+                    <div class="step-desc-h">Active building phase</div>
+                </div>
             </div>
 
+            <!-- On Hold (conditional) -->
             {% if project.status == 'On Hold' %}
-            <div class="step current">
-                <div class="step-circle" style="border-color: var(--warning);">
-                    <i class="step-icon fas fa-pause-circle" style="color: var(--warning);"></i>
+            <div class="step-h hold">
+                <div class="step-circle-h" style="border-color: var(--warning); color: var(--warning);">
+                    <i class="bi bi-pause-circle step-icon-h"></i>
                 </div>
-                <div class="step-label" style="color: var(--warning);">On Hold</div>
+                <div class="step-info-h">
+                    <div class="step-label-h" style="color: var(--warning);">On Hold</div>
+                    <div class="step-desc-h">Temporarily paused</div>
+                </div>
             </div>
             {% endif %}
 
-            <div class="step 
-                {% if project.status == 'Completed' %}completed current{% endif %}">
-                <div class="step-circle">
-                    <i class="step-icon fas fa-flag-checkered"></i>
-                    <i class="check-icon fas fa-check"></i>
+            <!-- Step 3: Handover -->
+            <div class="step-h 
+                {% if project.status == 'Completed' %}completed{% endif %}">
+                <div class="step-circle-h">
+                    <i class="bi bi-house-check step-icon-h"></i>
+                    <i class="bi bi-check-lg check-icon"></i>
                 </div>
-                <div class="step-label">Handover</div>
+                <div class="step-info-h">
+                    <div class="step-label-h">Handover</div>
+                    <div class="step-desc-h">Keys delivered</div>
+                </div>
             </div>
         </div>
-    </section>
 
-    <div style="margin-top: 2rem; text-align: center;" data-aos="fade-up">
-        <a href="{% url 'siteimage' phone %}" style="text-decoration: none; color: var(--primary); font-weight: 700; font-size: 0.9rem;">
-            View Latest Site Images <i class="fa fa-arrow-right ms-1"></i>
+        <!-- ── Vertical (Mobile) ── -->
+        <div class="stepper-vertical">
+
+            <div class="step-v 
+                {% if project.status == 'In Progress' or project.status == 'Completed' or project.status == 'On Hold' %}completed
+                {% elif project.status == 'Not Started' %}current{% endif %}">
+                <div class="step-circle-v">
+                    <i class="bi bi-clipboard2-check step-icon-v"></i>
+                    <i class="bi bi-check-lg check-icon"></i>
+                </div>
+                <div class="step-content-v">
+                    <div class="step-label-v">Planning</div>
+                    <div class="step-desc-v">Blueprint finalized & approvals obtained</div>
+                </div>
+            </div>
+
+            <div class="step-v 
+                {% if project.status == 'Completed' %}completed
+                {% elif project.status == 'In Progress' %}current{% endif %}">
+                <div class="step-circle-v">
+                    <i class="bi bi-tools step-icon-v"></i>
+                    <i class="bi bi-check-lg check-icon"></i>
+                </div>
+                <div class="step-content-v">
+                    <div class="step-label-v">Construction</div>
+                    <div class="step-desc-v">Active construction & building phase</div>
+                </div>
+            </div>
+
+            {% if project.status == 'On Hold' %}
+            <div class="step-v hold">
+                <div class="step-circle-v" style="border-color: var(--warning); color: var(--warning);">
+                    <i class="bi bi-pause-circle step-icon-v"></i>
+                </div>
+                <div class="step-content-v">
+                    <div class="step-label-v" style="color: var(--warning);">On Hold</div>
+                    <div class="step-desc-v">Project temporarily paused</div>
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="step-v 
+                {% if project.status == 'Completed' %}completed{% endif %}">
+                <div class="step-circle-v">
+                    <i class="bi bi-house-check step-icon-v"></i>
+                    <i class="bi bi-check-lg check-icon"></i>
+                </div>
+                <div class="step-content-v">
+                    <div class="step-label-v">Handover</div>
+                    <div class="step-desc-v">Keys delivered to client</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── Info cards ─── -->
+    <div class="info-grid">
+        <div class="info-card">
+            <div class="info-icon ic-primary">
+                <i class="bi bi-person-fill"></i>
+            </div>
+            <div>
+                <div class="info-label">Client</div>
+                <div class="info-value">{{ project.client_name|title }}</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon ic-success">
+                <i class="bi bi-building"></i>
+            </div>
+            <div>
+                <div class="info-label">Project</div>
+                <div class="info-value">{{ project.project_name|default:"Construction" }}</div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon 
+                {% if project.status == 'Completed' %}ic-success
+                {% elif project.status == 'On Hold' %}ic-warning
+                {% else %}ic-primary{% endif %}">
+                <i class="bi bi-flag-fill"></i>
+            </div>
+            <div>
+                <div class="info-label">Current Status</div>
+                <div class="info-value" style="color: 
+                    {% if project.status == 'Completed' %}var(--success)
+                    {% elif project.status == 'On Hold' %}var(--warning)
+                    {% else %}var(--primary){% endif %};">
+                    {{ project.status }}
+                </div>
+            </div>
+        </div>
+
+        <div class="info-card">
+            <div class="info-icon ic-primary">
+                <i class="bi bi-calendar-event"></i>
+            </div>
+            <div>
+                <div class="info-label">Remaining</div>
+                <div class="info-value">{{ project.remaining|indian_currency }}</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ─── CTA ─── -->
+    <div class="cta-row">
+        <a href="{% url 'siteprocess' phone %}" class="cta-btn cta-primary">
+            <i class="bi bi-eye"></i>
+            View Details
+            <i class="bi bi-arrow-right btn-arrow"></i>
+        </a>
+        <a href="{% url 'client_dashboard' phone %}" class="cta-btn cta-outline">
+            <i class="bi bi-arrow-left"></i>
+            Back to Dashboard
         </a>
     </div>
+
 </main>
 
+<!-- Footer -->
+<footer class="page-footer">
+    © 2025 <a href="https://www.edbbilling.com">Elite Dream Builders</a> · All rights reserved
+</footer>
+
+<!-- ════════════════════════════════════════
+     SCRIPTS
+════════════════════════════════════════ -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <script>
-    AOS.init({ duration: 800, once: true });
-
-    // Mobile Menu Toggle
-    const mobileToggle = document.getElementById('mobileToggle');
-    const navMenu = document.getElementById('navMenu');
-
-    mobileToggle.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        const icon = mobileToggle.querySelector('i');
-        icon.classList.toggle('fa-bars');
-        icon.classList.toggle('fa-times');
+    // ─── Navbar scroll ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
     });
 
-    // Confetti for Completion
+    // ─── Mobile menu ───
+    const navToggle     = document.getElementById('navToggle');
+    const toggleIcon    = document.getElementById('toggleIcon');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function toggleMobileMenu() {
+        const isOpen = mobileMenu.classList.toggle('open');
+        mobileOverlay.classList.toggle('open', isOpen);
+        toggleIcon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-list';
+    }
+
+    navToggle.addEventListener('click', toggleMobileMenu);
+    mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+    // Close on link click
+    mobileMenu.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (mobileMenu.classList.contains('open')) toggleMobileMenu();
+        });
+    });
+
+    // ─── Confetti on completion ───
     {% if project.status == "Completed" %}
     window.addEventListener('load', () => {
-        const duration = 3 * 1000;
+        const duration = 2500;
         const end = Date.now() + duration;
 
         (function frame() {
             confetti({
-                particleCount: 3,
+                particleCount: 2,
                 angle: 60,
                 spread: 55,
                 origin: { x: 0 },
-                colors: ['#2563eb', '#10b981']
+                colors: ['#2563eb', '#059669', '#818cf8']
             });
             confetti({
-                particleCount: 3,
+                particleCount: 2,
                 angle: 120,
                 spread: 55,
                 origin: { x: 1 },
-                colors: ['#2563eb', '#10b981']
+                colors: ['#2563eb', '#059669', '#818cf8']
             });
 
-            if (Date.now() < end) {
-                requestAnimationFrame(frame);
-            }
-        }());
+            if (Date.now() < end) requestAnimationFrame(frame);
+        })();
     });
     {% endif %}
+
+    // ─── Animate progress bar on scroll ───
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const fills = entry.target.querySelectorAll('.progress-fill-mini');
+                fills.forEach(f => {
+                    const w = f.style.width;
+                    f.style.width = '0%';
+                    setTimeout(() => { f.style.width = w; }, 100);
+                });
+                observer.unobserve(entry.target);
+            }
+        });
+    }, { threshold: 0.5 });
+
+    document.querySelectorAll('.stepper-section').forEach(el => observer.observe(el));
 </script>
 
 </body>

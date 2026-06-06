@@ -8,311 +8,985 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Site Images | EDB Billing</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
-    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
-    
+    <title>Site Gallery — EDB Billing</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <!-- Swiper -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css">
+
     <style>
+        /* ════════════════════════════════════════
+           DESIGN TOKENS
+        ════════════════════════════════════════ */
         :root {
             --primary: #2563eb;
-            --sidebar-bg: #0f172a;
-            --bg-main: #f8fafc;
-            --border-color: #e2e8f0;
-            --card-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --primary-50: rgba(37, 99, 235, 0.06);
+            --primary-ring: rgba(37, 99, 235, 0.15);
+
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --success-ring: rgba(5, 150, 105, 0.12);
+
+            --warning: #d97706;
+            --warning-light: #fffbeb;
+
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --radius-2xl: 24px;
+
+            --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.07);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.09);
+            --shadow-xl: 0 20px 50px rgba(0,0,0,0.11);
+
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.25s cubic-bezier(0.4,0,0.2,1);
+            --transition-smooth: 0.4s cubic-bezier(0.4,0,0.2,1);
         }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-main);
-            color: #1e293b;
-            margin: 0;
-        }
-
-        /* --- NAVBAR (Same as Dashboard) --- */
-        .saas-nav {
-            background: var(--sidebar-bg);
-            color: white;
-            padding: 1rem 5%;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-
-        .brand-box { display: flex; align-items: center; gap: 12px; }
-        .brand-logo { height: 35px; }
-
-        .nav-links {
-            display: flex;
-            gap: 24px;
-            list-style: none;
+        /* ─── Reset ─── */
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
 
-        .nav-links a {
-            color: #94a3b8;
-            text-decoration: none;
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a { text-decoration: none; color: inherit; }
+
+        ::selection {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        /* ════════════════════════════════════════
+           NAVBAR
+        ════════════════════════════════════════ */
+        .navbar {
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            height: 68px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 clamp(1.25rem, 4vw, 3rem);
+            background: rgba(255,255,255,0.86);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border-bottom: 1px solid var(--gray-200);
+            transition: all var(--transition-base);
+        }
+
+        .navbar.scrolled {
+            background: rgba(255,255,255,0.96);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .nav-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .nav-logo {
+            width: 34px;
+            height: 34px;
+            border-radius: 10px;
+            object-fit: contain;
+            border: 1px solid var(--gray-200);
+        }
+
+        .nav-brand-text {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -0.3px;
+        }
+
+        .nav-brand-text span { color: var(--primary); }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            list-style: none;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0.5rem 0.9rem;
+            border-radius: var(--radius-md);
+            font-size: 0.82rem;
+            font-weight: 600;
+            color: var(--gray-500);
+            transition: all var(--transition-fast);
+        }
+
+        .nav-link:hover {
+            color: var(--gray-900);
+            background: var(--gray-100);
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            background: var(--primary-light);
+        }
+
+        .nav-link.logout { color: var(--danger); }
+        .nav-link.logout:hover { background: var(--danger-light); }
+        .nav-link i { font-size: 1rem; }
+
+        .nav-toggle {
+            display: none;
+            width: 42px;
+            height: 42px;
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            background: var(--white);
+            color: var(--gray-600);
+            font-size: 1.15rem;
+            cursor: pointer;
+            align-items: center;
+            justify-content: center;
+            transition: all var(--transition-fast);
+        }
+
+        .nav-toggle:hover {
+            background: var(--gray-100);
+            color: var(--gray-900);
+        }
+
+        .mobile-menu {
+            display: none;
+            position: fixed;
+            top: 68px;
+            left: 0;
+            right: 0;
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            box-shadow: var(--shadow-lg);
+            z-index: 999;
+            padding: 0.75rem;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .mobile-menu.open { display: flex; }
+
+        .mobile-menu .nav-link {
+            padding: 0.75rem 1rem;
+            font-size: 0.88rem;
+        }
+
+        .mobile-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,0.3);
+            backdrop-filter: blur(4px);
+            z-index: 998;
+        }
+
+        .mobile-overlay.open { display: block; }
+
+        @media (max-width: 768px) {
+            .nav-links { display: none; }
+            .nav-toggle { display: flex; }
+        }
+
+        /* ════════════════════════════════════════
+           PAGE
+        ════════════════════════════════════════ */
+        .page {
+            flex: 1;
+            max-width: 1100px;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem clamp(1.25rem, 4vw, 3rem);
+        }
+
+        /* ─── Page Header ─── */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.75rem;
+            animation: fadeInDown 0.5s ease forwards;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0.3rem 0.8rem;
+            border-radius: 100px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary-ring);
+            color: var(--primary);
+            font-size: 0.7rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+        }
+
+        .header-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--primary);
+            animation: dotPulse 2s ease infinite;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: -0.5px;
+            color: var(--gray-900);
+            margin-bottom: 0.35rem;
+        }
+
+        .page-subtitle {
             font-size: 0.9rem;
+            color: var(--gray-500);
+        }
+
+        .photo-count-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.5rem 1rem;
+            border-radius: var(--radius-md);
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gray-700);
+            box-shadow: var(--shadow-xs);
+        }
+
+        /* ─── Filter card ─── */
+        .filter-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-xl);
+            padding: 1.25rem 1.5rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--shadow-sm);
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 0.1s;
+            opacity: 0;
+        }
+
+        .filter-inner {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 12px;
+            align-items: end;
+        }
+
+        @media (max-width: 700px) {
+            .filter-inner {
+                grid-template-columns: 1fr 1fr;
+            }
+
+            .filter-actions {
+                grid-column: span 2;
+                display: flex;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 420px) {
+            .filter-inner { grid-template-columns: 1fr; }
+            .filter-actions { grid-column: span 1; }
+        }
+
+        .field-label {
+            font-size: 0.68rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--gray-500);
+            margin-bottom: 0.45rem;
+            display: block;
+        }
+
+        .field-input {
+            width: 100%;
+            padding: 0.7rem 0.9rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.85rem;
             font-weight: 500;
-            transition: 0.3s;
+            color: var(--gray-900);
+            background: var(--gray-50);
+            transition: all var(--transition-base);
+            outline: none;
+        }
+
+        .field-input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--primary-50);
+        }
+
+        .filter-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-apply {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0.7rem 1.25rem;
+            border: none;
+            border-radius: var(--radius-md);
+            background: var(--primary);
+            color: white;
+            font-family: 'Inter', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            white-space: nowrap;
+            box-shadow: 0 4px 12px rgba(37,99,235,0.18);
+        }
+
+        .btn-apply:hover {
+            background: var(--primary-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(37,99,235,0.22);
+        }
+
+        .btn-reset {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.7rem 1rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            background: var(--white);
+            color: var(--gray-500);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.84rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .btn-reset:hover {
+            background: var(--gray-50);
+            border-color: var(--gray-300);
+            color: var(--gray-700);
+        }
+
+        /* ════════════════════════════════════════
+           SWIPER GALLERY
+        ════════════════════════════════════════ */
+        .gallery-wrap {
+            animation: fadeInUp 0.5s ease forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .mySwiper {
+            width: 100%;
+            padding-bottom: 60px !important;
+        }
+
+        .swiper-slide {
+            display: flex;
+            justify-content: center;
+        }
+
+        /* ─── Image Card ─── */
+        .image-card {
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-2xl);
+            overflow: hidden;
+            box-shadow: var(--shadow-md);
+            width: 100%;
+            transition: all var(--transition-smooth);
+        }
+
+        .swiper-slide-active .image-card {
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Image wrapper */
+        .img-wrapper {
+            position: relative;
+            overflow: hidden;
+            background: var(--gray-100);
+        }
+
+        .img-wrapper img {
+            width: 100%;
+            height: 520px;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.6s ease;
+        }
+
+        .image-card:hover .img-wrapper img {
+            transform: scale(1.02);
+        }
+
+        @media (max-width: 768px) {
+            .img-wrapper img {
+                height: 320px;
+            }
+        }
+
+        /* Top tag */
+        .img-date-tag {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0.4rem 0.85rem;
+            border-radius: 10px;
+            background: rgba(15,23,42,0.65);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            font-size: 0.72rem;
+            font-weight: 700;
+            border: 1px solid rgba(255,255,255,0.1);
+            letter-spacing: 0.3px;
+        }
+
+        /* Slide counter */
+        .slide-counter {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 0.35rem 0.75rem;
+            border-radius: 8px;
+            background: rgba(15,23,42,0.55);
+            backdrop-filter: blur(8px);
+            color: rgba(255,255,255,0.85);
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        /* Bottom gradient caption */
+        .img-caption-bar {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(to top, rgba(15,23,42,0.92), rgba(15,23,42,0.3), transparent);
+            padding: 3rem 1.5rem 1.25rem;
+        }
+
+        .img-caption-text {
+            font-size: 0.88rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.9);
+            line-height: 1.5;
+        }
+
+        /* ─── Card body ─── */
+        .card-body {
+            padding: 1.25rem 1.5rem;
+            border-top: 1px solid var(--gray-100);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .card-body-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .time-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            background: var(--primary-light);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.95rem;
+            flex-shrink: 0;
+        }
+
+        .card-date {
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: var(--gray-800);
+        }
+
+        .card-time {
+            font-size: 0.72rem;
+            color: var(--gray-400);
+            margin-top: 2px;
+        }
+
+        .card-note-wrap {
             display: flex;
             align-items: center;
             gap: 8px;
         }
 
-        .nav-links a:hover, .nav-links a.active { color: white; }
-
-        /* Mobile Toggle */
-        .nav-toggle {
-            display: none;
-            background: none;
-            border: none;
-            color: white;
-            font-size: 1.5rem;
-            cursor: pointer;
+        .card-note-icon {
+            font-size: 0.85rem;
+            color: var(--gray-400);
         }
 
-        /* --- CONTAINER --- */
-        .content-container {
-            padding: 2rem 5%;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        /* --- FILTER FORM --- */
-        .filter-card {
-            background: white;
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-            margin-bottom: 2rem;
-        }
-
-        .filter-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 15px;
-            align-items: end;
-        }
-
-        .form-group label {
-            display: block;
+        .card-note {
             font-size: 0.8rem;
+            color: var(--gray-600);
+            font-style: italic;
+        }
+
+        /* ─── Swiper Navigation ─── */
+        .swiper-button-prev,
+        .swiper-button-next {
+            width: 44px !important;
+            height: 44px !important;
+            background: var(--white) !important;
+            border: 1px solid var(--gray-200) !important;
+            border-radius: var(--radius-md) !important;
+            color: var(--gray-700) !important;
+            box-shadow: var(--shadow-md) !important;
+            transition: all var(--transition-base) !important;
+        }
+
+        .swiper-button-prev::after,
+        .swiper-button-next::after {
+            font-size: 14px !important;
+            font-weight: 900 !important;
+            color: var(--gray-700) !important;
+        }
+
+        .swiper-button-prev:hover,
+        .swiper-button-next:hover {
+            background: var(--primary) !important;
+            border-color: var(--primary) !important;
+            transform: scale(1.05) !important;
+        }
+
+        .swiper-button-prev:hover::after,
+        .swiper-button-next:hover::after {
+            color: white !important;
+        }
+
+        /* Pagination */
+        .swiper-pagination-bullet {
+            background: var(--gray-300) !important;
+            width: 8px !important;
+            height: 8px !important;
+            opacity: 1 !important;
+        }
+
+        .swiper-pagination-bullet-active {
+            background: var(--primary) !important;
+            width: 24px !important;
+            border-radius: 4px !important;
+        }
+
+        /* ─── Empty State ─── */
+        .empty-state {
+            text-align: center;
+            padding: 5rem 2rem;
+            background: var(--white);
+            border: 1px solid var(--gray-200);
+            border-radius: var(--radius-2xl);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .empty-icon-box {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--gray-50);
+            border: 2px dashed var(--gray-200);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 1.8rem;
+            color: var(--gray-300);
+        }
+
+        .empty-title {
+            font-size: 1rem;
             font-weight: 700;
-            color: #64748b;
-            margin-bottom: 6px;
-            text-transform: uppercase;
+            color: var(--gray-700);
+            margin-bottom: 0.4rem;
         }
 
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            font-family: inherit;
+        .empty-sub {
+            font-size: 0.84rem;
+            color: var(--gray-400);
+            margin-bottom: 0;
         }
 
-        .btn-filter {
-            background: var(--primary);
-            color: white;
-            border: none;
-            padding: 11px 25px;
-            border-radius: 8px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: 0.3s;
+        /* ─── Footer ─── */
+        .page-footer {
+            padding: 1.5rem;
+            text-align: center;
+            font-size: 0.7rem;
+            color: var(--gray-400);
+            border-top: 1px solid var(--gray-100);
+            margin-top: auto;
         }
 
-        .btn-filter:hover { background: #1d4ed8; }
-
-        /* --- SWIPER GALLERY --- */
-        .swiper {
-            width: 100%;
-            padding-bottom: 50px !important;
-        }
-
-        .image-card {
-            background: white;
-            border-radius: 16px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-            box-shadow: var(--card-shadow);
-            position: relative;
-        }
-
-        .image-card img {
-            width: 100%;
-            height: 500px;
-            object-fit: cover;
-            display: block;
-        }
-
-        .image-info {
-            padding: 20px;
-            background: white;
-        }
-
-        .upload-date {
-            font-size: 0.8rem;
+        .page-footer a {
             color: var(--primary);
             font-weight: 700;
-            margin: 0 0 8px 0;
         }
 
-        .description {
-            font-size: 0.95rem;
-            color: #1e293b;
-            line-height: 1.5;
-            margin: 0;
+        /* ─── Animations ─── */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(16px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
 
-        /* Swiper Navigation Customization */
-        .swiper-button-next, .swiper-button-prev {
-            background: white;
-            width: 45px;
-            height: 45px;
-            border-radius: 50%;
-            color: var(--primary) !important;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-12px); }
+            to   { opacity: 1; transform: translateY(0); }
         }
-        .swiper-button-next:after, .swiper-button-prev:after { font-size: 1.2rem; font-weight: 800; }
 
-        /* Mobile Responsive */
-        @media (max-width: 768px) {
-            .nav-links {
-                display: none; /* Hidden by default on mobile */
-                flex-direction: column;
-                position: absolute;
-                top: 60px;
-                left: 0;
-                width: 100%;
-                background: var(--sidebar-bg);
-                padding: 20px;
-                gap: 15px;
-            }
-            .nav-links.active { display: flex; }
-            .nav-toggle { display: block; }
-            .filter-grid { grid-template-columns: 1fr; }
-            .image-card img { height: 350px; }
+        @keyframes dotPulse {
+            0%, 100% { opacity: 1; }
+            50%      { opacity: 0.3; }
         }
     </style>
 </head>
 <body>
 
-<nav class="saas-nav">
-    <div class="brand-box">
-        <img src="{% static 'images/logo.PNG' %}" alt="Logo" class="brand-logo">
-        <span style="font-weight: 800; font-size: 1.2rem; letter-spacing: -1px;">EDB BILLING</span>
+<!-- ════════════════════════════════════════
+     NAVBAR
+════════════════════════════════════════ -->
+<nav class="navbar" id="navbar">
+    <div class="nav-brand">
+        <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="nav-logo">
+        <span class="nav-brand-text">EDB <span>Billing</span></span>
     </div>
 
-    <button class="nav-toggle" id="mobileToggle">
-        <i class="fa fa-bars"></i>
-    </button>
-
-    <ul class="nav-links" id="navMenu">
-        <li><a href="{% url 'client_dashboard' phone %}"><i class="fa fa-home"></i> Dashboard</a></li>
-        <li><a href="{% url 'siteprocess' phone %}"><i class="fa fa-tasks"></i> Progress</a></li>
-        <li><a href="{% url 'siteimage' phone %}" class="active"><i class="fa fa-image"></i> Photos</a></li>
-        <li><a href="{% url 'logout' %}" style="color: #fda4af;"><i class="fa fa-sign-out"></i> Logout</a></li>
+    <!-- Desktop -->
+    <ul class="nav-links">
+        <li>
+            <a href="{% url 'client_dashboard' phone %}" class="nav-link">
+                <i class="bi bi-grid-1x2-fill"></i> Dashboard
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'siteprocess' phone %}" class="nav-link">
+                <i class="bi bi-bar-chart-steps"></i> Progress
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'siteimage' phone %}" class="nav-link active">
+                <i class="bi bi-images"></i> Photos
+            </a>
+        </li>
+        <li>
+            <a href="{% url 'logout' %}" class="nav-link logout">
+                <i class="bi bi-power"></i> Logout
+            </a>
+        </li>
     </ul>
+
+    <!-- Mobile Toggle -->
+    <button class="nav-toggle" id="navToggle" aria-label="Menu">
+        <i class="bi bi-list" id="toggleIcon"></i>
+    </button>
 </nav>
 
-<main class="content-container">
-    
-    <header style="margin-bottom: 2rem;" data-aos="fade-down">
-        <h1 style="font-weight: 800; letter-spacing: -0.5px; margin: 0;">Site Gallery</h1>
-        <p style="color: #64748b;">Visual updates from your project site</p>
+<!-- Mobile Menu -->
+<div class="mobile-overlay" id="mobileOverlay"></div>
+<div class="mobile-menu" id="mobileMenu">
+    <a href="{% url 'client_dashboard' phone %}" class="nav-link">
+        <i class="bi bi-grid-1x2-fill"></i> Dashboard
+    </a>
+    <a href="{% url 'siteprocess' phone %}" class="nav-link">
+        <i class="bi bi-bar-chart-steps"></i> Progress
+    </a>
+    <a href="{% url 'siteimage' phone %}" class="nav-link active">
+        <i class="bi bi-images"></i> Photos
+    </a>
+    <a href="{% url 'logout' %}" class="nav-link logout">
+        <i class="bi bi-power"></i> Logout
+    </a>
+</div>
+
+<!-- ════════════════════════════════════════
+     PAGE
+════════════════════════════════════════ -->
+<main class="page">
+
+    <!-- Header -->
+    <header class="page-header">
+        <div>
+            <div class="header-badge">
+                <span class="header-dot"></span>
+                Site Documentation
+            </div>
+            <h1 class="page-title">Site Gallery</h1>
+            <p class="page-subtitle">
+                Visual progress documentation for {{ project.client_name|title|default:"your project" }}
+            </p>
+        </div>
+
+        <div class="photo-count-badge">
+            <i class="bi bi-images" style="color: var(--primary);"></i>
+            {{ site_images|length }} photo{{ site_images|length|pluralize }}
+        </div>
     </header>
 
-    <div class="filter-card" data-aos="fade-up">
-        <form method="get">
-            <div class="filter-grid">
-                <div class="form-group">
-                    <label for="img_from">From Date</label>
-                    <input type="date" name="img_from" id="img_from" value="{{ img_from }}" class="form-control">
+    <!-- Filter -->
+    <div class="filter-card">
+        <form method="get" id="filterForm">
+            <div class="filter-inner">
+                <div>
+                    <label class="field-label" for="img_from">From Date</label>
+                    <input type="date" name="img_from" id="img_from"
+                           value="{{ img_from }}" class="field-input">
                 </div>
-                <div class="form-group">
-                    <label for="img_to">To Date</label>
-                    <input type="date" name="img_to" id="img_to" value="{{ img_to }}" class="form-control">
+                <div>
+                    <label class="field-label" for="img_to">To Date</label>
+                    <input type="date" name="img_to" id="img_to"
+                           value="{{ img_to }}" class="field-input">
                 </div>
-                <button type="submit" class="btn-filter">
-                    <i class="fa fa-filter me-2"></i> Apply Filter
-                </button>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-apply">
+                        <i class="bi bi-funnel-fill"></i>
+                        Apply
+                    </button>
+                    <a href="{% url 'siteimage' phone %}" class="btn-reset">
+                        <i class="bi bi-x"></i>
+                        Reset
+                    </a>
+                </div>
             </div>
         </form>
     </div>
 
-    <div class="swiper mySwiper" data-aos="zoom-in">
-        <div class="swiper-wrapper">
-            {% for img in site_images %}
+    <!-- Gallery -->
+    <div class="gallery-wrap">
+
+        {% if site_images %}
+        <div class="swiper mySwiper">
+            <div class="swiper-wrapper">
+                {% for img in site_images %}
                 {% if img.image %}
                 <div class="swiper-slide">
                     <div class="image-card">
-                        <img src="{{ img.image.url }}" alt="Site Image">
-                        <div class="image-info">
-                            <p class="upload-date"><i class="fa fa-calendar-alt me-1"></i> {{ img.uploaded_at|date:"d M Y, h:i A" }}</p>
-                            <p class="description"><strong>Notes:</strong> {{ img.description|default:"No description provided." }}</p>
+
+                        <!-- Image -->
+                        <div class="img-wrapper">
+                            <img src="{{ img.image.url }}" alt="Site Progress">
+
+                            <!-- Date tag -->
+                            <div class="img-date-tag">
+                                <i class="bi bi-calendar3"></i>
+                                {{ img.uploaded_at|date:"d M Y" }}
+                            </div>
+
+                            <!-- Counter -->
+                            <div class="slide-counter">
+                                {{ forloop.counter }} / {{ site_images|length }}
+                            </div>
+
+                            <!-- Caption -->
+                            {% if img.description %}
+                            <div class="img-caption-bar">
+                                <p class="img-caption-text">
+                                    <i class="bi bi-chat-quote me-1"></i>
+                                    {{ img.description }}
+                                </p>
+                            </div>
+                            {% endif %}
                         </div>
+
+                        <!-- Card body -->
+                        <div class="card-body">
+                            <div class="card-body-left">
+                                <div class="time-icon">
+                                    <i class="bi bi-clock-history"></i>
+                                </div>
+                                <div>
+                                    <div class="card-date">{{ img.uploaded_at|date:"l, d F Y" }}</div>
+                                    <div class="card-time">{{ img.uploaded_at|date:"h:i A" }}</div>
+                                </div>
+                            </div>
+
+                            {% if img.description %}
+                            <div class="card-note-wrap">
+                                <i class="bi bi-sticky card-note-icon"></i>
+                                <span class="card-note">{{ img.description|truncatechars:55 }}</span>
+                            </div>
+                            {% endif %}
+                        </div>
+
                     </div>
                 </div>
                 {% endif %}
-            {% empty %}
-                <div class="text-center" style="padding: 100px 0; color: #94a3b8;">
-                    <i class="fa fa-camera-retro" style="font-size: 3rem; opacity: 0.3; display: block; margin-bottom: 15px;"></i>
-                    <p>No images found for the selected dates.</p>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
+
+            <!-- Nav & Pagination -->
+            <div class="swiper-button-prev"></div>
+            <div class="swiper-button-next"></div>
+            <div class="swiper-pagination"></div>
         </div>
 
-        <div class="swiper-button-next"></div>
-        <div class="swiper-button-prev"></div>
-        <div class="swiper-pagination"></div>
+        {% else %}
+        <!-- Empty state -->
+        <div class="empty-state">
+            <div class="empty-icon-box">
+                <i class="bi bi-camera"></i>
+            </div>
+            <p class="empty-title">No photos found</p>
+            <p class="empty-sub">
+                {% if img_from or img_to %}
+                    No images match the selected date range. Try resetting the filter.
+                {% else %}
+                    Site photos will appear here once uploaded by your project manager.
+                {% endif %}
+            </p>
+
+            {% if img_from or img_to %}
+            <a href="{% url 'siteimage' phone %}" class="btn-reset" style="margin-top: 1.25rem; display: inline-flex;">
+                <i class="bi bi-arrow-left"></i> Clear Filter
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+
     </div>
+
 </main>
 
+<footer class="page-footer">
+    © 2025 <a href="https://www.edbbilling.com">Elite Dream Builders</a> · All rights reserved
+</footer>
+
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
 
 <script>
-    // Initialize Animations
-    AOS.init({ duration: 800, once: true });
-
-    // Mobile Menu Toggle Logic
-    const mobileToggle = document.getElementById('mobileToggle');
-    const navMenu = document.getElementById('navMenu');
-
-    mobileToggle.addEventListener('click', () => {
-        navMenu.classList.toggle('active');
-        const icon = mobileToggle.querySelector('i');
-        icon.classList.toggle('fa-bars');
-        icon.classList.toggle('fa-times');
+    // ─── Navbar scroll ───
+    const navbar = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+        navbar.classList.toggle('scrolled', window.scrollY > 20);
     });
 
-    // Initialize Swiper
-    const swiper = new Swiper(".mySwiper", {
-        loop: false, // Set to false if you have few images
-        spaceBetween: 30,
+    // ─── Mobile menu ───
+    const navToggle     = document.getElementById('navToggle');
+    const toggleIcon    = document.getElementById('toggleIcon');
+    const mobileMenu    = document.getElementById('mobileMenu');
+    const mobileOverlay = document.getElementById('mobileOverlay');
+
+    function toggleMobileMenu() {
+        const isOpen = mobileMenu.classList.toggle('open');
+        mobileOverlay.classList.toggle('open', isOpen);
+        toggleIcon.className = isOpen ? 'bi bi-x-lg' : 'bi bi-list';
+    }
+
+    navToggle.addEventListener('click', toggleMobileMenu);
+    mobileOverlay.addEventListener('click', toggleMobileMenu);
+
+    mobileMenu.querySelectorAll('.nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+            if (mobileMenu.classList.contains('open')) toggleMobileMenu();
+        });
+    });
+
+    // ─── Swiper ───
+    new Swiper('.mySwiper', {
+        loop: {{ site_images|length }} > 1 ? true : false,
+        spaceBetween: 20,
         centeredSlides: true,
+        grabCursor: true,
+
         autoplay: {
-            delay: 4000,
+            delay: 5000,
             disableOnInteraction: false,
+            pauseOnMouseEnter: true,
         },
+
+        effect: 'slide',
+
+        keyboard: {
+            enabled: true,
+        },
+
         pagination: {
-            el: ".swiper-pagination",
+            el: '.swiper-pagination',
             clickable: true,
             dynamicBullets: true,
         },
+
         navigation: {
-            nextEl: ".swiper-button-next",
-            prevEl: ".swiper-button-prev",
+            nextEl: '.swiper-button-next',
+            prevEl: '.swiper-button-prev',
         },
+
+        breakpoints: {
+            0: { slidesPerView: 1 },
+            900: { slidesPerView: 1, spaceBetween: 30 },
+        }
     });
 </script>
 
