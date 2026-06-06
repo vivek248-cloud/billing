@@ -5,213 +5,926 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
-    <link rel="icon" href="{% static 'images/favicon-512x512.png' %}" type="image/png">
-    <title>Admin Login</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-..." crossorigin="anonymous" />
+    <link rel="apple-touch-icon" href="{% static 'images/favicon-512x512.png' %}">
+    <title>Admin Login — EDB Billing</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
     <style>
-        body {
+        /* ════════════════════════════════════════
+           DESIGN TOKENS
+        ════════════════════════════════════════ */
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --primary-50: rgba(37, 99, 235, 0.06);
+            --primary-ring: rgba(37, 99, 235, 0.15);
+            --primary-shadow: 0 8px 24px rgba(37, 99, 235, 0.22);
+
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --danger-border: rgba(220, 38, 38, 0.12);
+
+            --success: #059669;
+            --success-light: #ecfdf5;
+
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+            --shadow-xl: 0 20px 50px rgba(0,0,0,0.1);
+
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ════════════════════════════════════════
+           RESET & BASE
+        ════════════════════════════════════════ */
+        *, *::before, *::after {
+            box-sizing: border-box;
             margin: 0;
-            font-family: 'Inter', sans-serif;
-            background: linear-gradient(135deg, #e0c3fc, #c3aed6, #a78bfa);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background-attachment: fixed;
-        }
-
-        .form-container {
-            background: rgba(255, 255, 255, 0.25);
-            backdrop-filter: blur(12px);
-            -webkit-backdrop-filter: blur(12px);
-            padding: 2.5rem;
-            border-radius: 24px;
-            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.15);
-            max-width: 420px;
-            width: 90%;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 1rem;
-            background: #a100ff;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 2.5rem; /* Larger icon for better visibility */
-        }
-
-        .logo i {
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
-        }
-
-        .form-container h2 {
-            font-size: 2.2rem;
-            margin-bottom: 2rem;
-            color: #333;
-            font-weight: 600;
-        }
-
-        .input-group {
-            position: relative;
-            margin-bottom: 1.5rem;
-        }
-
-        .input-group input {
-            width: 85%;
-            padding: 1rem 1rem 1rem 3rem;
-            border: none;
-            background: rgba(255, 255, 255, 0.6);
-            border-radius: 16px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-            box-shadow: inset 0 2px 8px rgba(0,0,0,0.05);
-        }
-
-        .input-group input:focus {
-            outline: none;
-            background: rgba(255, 255, 255, 0.9);
-            box-shadow: 0 0 0 3px rgba(161, 0, 255, 0.2);
-        }
-
-        .input-group i {
-            position: absolute;
-            top: 50%;
-            left: 1.1rem;
-            transform: translateY(-50%);
-            color: #777;
-            font-size: 1.2rem;
-        }
-
-        .password-container {
-            position: relative;
-        }
-
-        .toggle-password {
-            position: absolute;
-            top: 50%;
-            right: 4.1rem;
-            transform: translateY(-50%);
-            color: #777;
-            cursor: pointer;
-            font-size: 1.2rem;
-        }
-
-        .remember-me {
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            font-size: 0.95rem;
-            margin-bottom: 1.5rem;
-            color: #444;
-        }
-
-        .remember-me input {
-            margin-right: 0.5rem;
-        }
-
-        button {
-            width: 100%;
-            padding: 1rem;
-            background: linear-gradient(to right, #a100ff, #ff0080);
-            color: #fff;
-            border: none;
-            border-radius: 16px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(161, 0, 255, 0.3);
-        }
-
-        button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(161, 0, 255, 0.4);
-        }
-
-        .messages {
-            margin-top: 1.5rem;
-        }
-
-        .messages ul {
-            list-style: none;
             padding: 0;
         }
 
-        .messages li {
-            padding: 0.8rem;
-            background: rgba(255, 0, 0, 0.1);
-            border-radius: 8px;
-            color: #d00;
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            background: var(--gray-50);
+            color: var(--gray-900);
+        }
+
+        ::selection {
+            background: var(--primary-light);
+            color: var(--primary);
+        }
+
+        a {
+            text-decoration: none;
+            color: inherit;
+        }
+
+        /* ════════════════════════════════════════
+           SPLIT LAYOUT
+        ════════════════════════════════════════ */
+        .page-wrapper {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+        }
+
+        /* ─── LEFT PANEL ─── */
+        .left-panel {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem;
+            background: var(--gray-900);
+            overflow: hidden;
+        }
+
+        /* Background image */
+        .left-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(160deg,
+            rgba(12, 12, 12, 0.33) 0%,
+            rgba(0, 0, 0, 0.56) 50%,
+            rgba(0, 0, 0, 0.7) 100%),
+                url("https://ik.imagekit.io/zygvxqqhx/Front2.jpg?updatedAt=1750071617078")
+                center / cover no-repeat;
+            z-index: 0;
+        }
+
+        /* Geometric accent */
+        .left-accent {
+            position: absolute;
+            width: 280px;
+            height: 280px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(37, 99, 235, 0.15) 0%, transparent 70%);
+            top: -60px;
+            right: -60px;
+            z-index: 0;
+        }
+
+        .left-accent-2 {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(99, 102, 241, 0.1) 0%, transparent 70%);
+            bottom: 100px;
+            left: -40px;
+            z-index: 0;
+        }
+
+        /* Top bar inside left panel */
+        .left-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .left-logo {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            object-fit: contain;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .left-brand-name {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .left-brand-name span {
+            color: #ffffff;
+        }
+
+        /* Center content */
+        .left-center {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .left-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.35rem 0.85rem;
+            border-radius: 100px;
+            background: rgba(0, 81, 255, 0.9);
+            border: 1px solid rgba(37, 99, 235, 0.2);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #ffffff;
+            margin-bottom: 1.5rem;
+            width: fit-content;
+        }
+
+        .left-tag i {
+            font-size: 0.75rem;
+        }
+
+        .left-heading {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .left-sub {
             font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.7;
+            max-width: 320px;
+            margin-bottom: 2.5rem;
+        }
+
+        /* Access level info */
+        .access-cards {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .access-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .access-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            flex-shrink: 0;
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.6);
+        }
+
+        .access-text h5 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 2px;
+        }
+
+        .access-text p {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.38);
+        }
+
+        /* Bottom of left panel */
+        .left-bottom {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .left-bottom-text {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .left-bottom-link {
+            font-size: 0.7rem;
+            color: #93c5fd;
+            font-weight: 600;
+            transition: color var(--transition-fast);
+        }
+
+        .left-bottom-link:hover {
+            color: white;
+        }
+
+        /* ─── RIGHT PANEL — Login Form ─── */
+        .right-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 2.5rem;
+            background: var(--white);
+            position: relative;
+        }
+
+        .form-wrapper {
+            max-width: 380px;
+            width: 100%;
+        }
+
+        /* Form header */
+        .form-header {
+            margin-bottom: 2.5rem;
+        }
+
+        .form-icon {
+            width: 52px;
+            height: 52px;
+            border-radius: 15px;
+            background: var(--primary-light);
+            border: 1px solid var(--primary-ring);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--primary);
+            margin-bottom: 1.25rem;
+        }
+
+        .form-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            line-height: 1.6;
+        }
+
+        /* ─── Field Label ─── */
+        .field-label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            margin-bottom: 0.5rem;
+        }
+
+        /* ─── Input Field ─── */
+        .field-wrapper {
+            margin-bottom: 1.25rem;
+        }
+
+        .input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            font-size: 1rem;
+            color: var(--gray-400);
+            pointer-events: none;
+            transition: color var(--transition-fast);
+            z-index: 1;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.8rem 1rem 0.8rem 2.75rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            color: var(--gray-900);
+            background: var(--gray-50);
+            transition: all var(--transition-base);
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--primary-50);
+        }
+
+        .form-input:focus ~ .input-icon,
+        .input-box:focus-within .input-icon {
+            color: var(--primary);
+        }
+
+        /* Error state */
+        .form-input.input-error {
+            border-color: var(--danger);
+            background: var(--danger-light);
+        }
+
+        .form-input.input-error:focus {
+            box-shadow: 0 0 0 4px rgba(220, 38, 38, 0.06);
+        }
+
+        /* Password toggle */
+        .pwd-toggle {
+            position: absolute;
+            right: 14px;
+            font-size: 1rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            transition: color var(--transition-fast);
+            padding: 4px;
+            z-index: 1;
+        }
+
+        .pwd-toggle:hover {
+            color: var(--gray-600);
+        }
+
+        /* ─── Options Row ─── */
+        .options-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 1.75rem;
+        }
+
+        /* Custom checkbox */
+        .checkbox-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+        }
+
+        .checkbox-wrapper input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            border-radius: 5px;
+            accent-color: var(--primary);
+            cursor: pointer;
+        }
+
+        .checkbox-label {
+            font-size: 0.82rem;
+            font-weight: 500;
+            color: var(--gray-600);
+            cursor: pointer;
+        }
+
+        /* ─── Submit Button ─── */
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--primary-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            letter-spacing: 0.2px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37, 99, 235, 0.28);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn .btn-icon {
+            font-size: 1rem;
+            transition: transform var(--transition-base);
+        }
+
+        .submit-btn:hover .btn-icon {
+            transform: translateX(3px);
+        }
+
+        /* Loading state */
+        .submit-btn.loading {
+            pointer-events: none;
+            opacity: 0.8;
+        }
+
+        /* ─── Alert Messages ─── */
+        .alert-box {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            margin-top: 1.25rem;
+            border: 1px solid;
+        }
+
+        .alert-error {
+            background: var(--danger-light);
+            border-color: var(--danger-border);
+            color: var(--danger);
+        }
+
+        .alert-box .alert-icon {
+            font-size: 0.95rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .alert-box .alert-text {
+            font-size: 0.82rem;
+            font-weight: 500;
+            line-height: 1.5;
+        }
+
+        /* ─── Divider ─── */
+        .form-divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .form-divider .line {
+            flex: 1;
+            height: 1px;
+            background: var(--gray-200);
+        }
+
+        .form-divider .divider-text {
+            font-size: 0.68rem;
+            color: var(--gray-400);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ─── Back Link ─── */
+        .back-link {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 1.5rem;
+            padding: 0.5rem 1rem;
+            font-size: 0.82rem;
+            color: white;
+            background: black;
+            font-weight: 500;
+            transition: color var(--transition-fast);
+            border-radius: var(--radius-sm);
+        }
+
+        .back-link:hover {
+            color: var(--gray-300);
+        }
+
+        .back-link i {
+            font-size: 0.85rem;
+        }
+
+        /* ─── Security strip ─── */
+        .security-strip {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-100);
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--gray-500);
+        }
+
+        .security-badge i {
+            font-size: 0.68rem;
+        }
+
+        .security-badge .bi-shield-fill-check { color: var(--success); }
+        .security-badge .bi-lock-fill { color: var(--primary); }
+
+        /* ─── Bottom footer ─── */
+        .right-footer {
+            position: absolute;
+            bottom: 1.5rem;
+            font-size: 0.68rem;
+            color: var(--gray-400);
+        }
+
+        /* ════════════════════════════════════════
+           RESPONSIVE
+        ════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .page-wrapper {
+                grid-template-columns: 1fr;
+            }
+
+            .left-panel {
+                display: none;
+            }
+
+            .right-panel {
+                min-height: 100vh;
+                background: linear-gradient(160deg, var(--white) 0%, var(--gray-50) 100%);
+            }
+
+            .form-wrapper {
+                max-width: 420px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .right-panel {
+                padding: 2rem 1.25rem;
+            }
+
+            .form-title {
+                font-size: 1.4rem;
+            }
+
+            .options-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+
+            .security-strip {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="form-container">
-        <div class="logo">
-            <i class="fa-solid fa-shield-halved"></i> <!-- Updated to a more modern/secure-looking shield icon in FA6 -->
+
+<div class="page-wrapper">
+
+    <!-- ════════════════════════════════════════
+         LEFT PANEL — Brand & Info
+    ════════════════════════════════════════ -->
+    <div class="left-panel">
+        <div class="left-bg"></div>
+        <div class="left-accent"></div>
+        <div class="left-accent-2"></div>
+
+        <!-- Top brand bar -->
+        <div class="left-top">
+            <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="left-logo">
+            <span class="left-brand-name">EDB <span>Billing</span></span>
         </div>
-        <h2>Admin Login</h2>
-        
-        <form method="POST" action="{% url 'admin_login' %}">
-            {% csrf_token %}
-            <div class="input-group">
-                <i class="fa-solid fa-user"></i> <!-- Updated to solid style for consistency with FA6 -->
-                <input type="text" name="username" placeholder="Username"
-                       value="{{ request.COOKIES.admin_username|default:'' }}" required>
+
+        <!-- Center content -->
+        <div class="left-center">
+            <div class="left-tag">
+                <i class="bi bi-shield-lock-fill"></i>
+                Admin Access
             </div>
-            
-            <div class="input-group password-container">
-                <i class="fa-solid fa-lock"></i> <!-- Updated to solid style -->
-                <input type="password" name="password" id="passwordField" placeholder="Password"
-                       value="{{ request.COOKIES.admin_password|default:'' }}" required>
-                <span class="toggle-password" onclick="togglePassword()">
-                    <i id="eyeIcon" class="fa-solid fa-eye-slash"></i>
+
+            <h2 class="left-heading">
+                Secure Admin<br>Control Center
+            </h2>
+
+            <p class="left-sub">
+                Manage projects, track payments, generate invoices
+                and oversee all operations from one place.
+            </p>
+
+            <!-- Access features -->
+            <div class="access-cards">
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="bi bi-bar-chart-fill"></i>
+                    </div>
+                    <div class="access-text">
+                        <h5>Full Analytics Dashboard</h5>
+                        <p>Revenue, expenses & project insights</p>
+                    </div>
+                </div>
+
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="bi bi-people-fill"></i>
+                    </div>
+                    <div class="access-text">
+                        <h5>Client & Project Management</h5>
+                        <p>Create, update and track all projects</p>
+                    </div>
+                </div>
+
+                <div class="access-card">
+                    <div class="access-icon">
+                        <i class="bi bi-gear-fill"></i>
+                    </div>
+                    <div class="access-text">
+                        <h5>System Settings & Backups</h5>
+                        <p>Configure and protect your data</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Bottom -->
+        <div class="left-bottom">
+            <span class="left-bottom-text">© 2025 Elite Dream Builders</span>
+            <a href="{% url 'home' %}" class="left-bottom-link">
+                <i class="bi bi-arrow-left" style="margin-right: 4px;"></i>Back to Home
+            </a>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         RIGHT PANEL — Login Form
+    ════════════════════════════════════════ -->
+    <div class="right-panel">
+        <div class="form-wrapper">
+
+            <!-- Header -->
+            <div class="form-header">
+                <div class="form-icon">
+                    <i class="bi bi-shield-lock-fill"></i>
+                </div>
+                <h1 class="form-title">Admin Login</h1>
+                <p class="form-subtitle">
+                    Enter your credentials to access the admin dashboard.
+                </p>
+            </div>
+
+            <!-- Form -->
+            <form method="POST" action="{% url 'admin_login' %}" id="loginForm">
+                {% csrf_token %}
+
+                <!-- Username -->
+                <div class="field-wrapper">
+                    <label class="field-label" for="username">Username</label>
+                    <div class="input-box">
+                        <i class="bi bi-person-fill input-icon"></i>
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            class="form-input"
+                            placeholder="Enter your username"
+                            value="{{ request.COOKIES.admin_username|default:'' }}"
+                            autocomplete="username"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="field-wrapper">
+                    <label class="field-label" for="password">Password</label>
+                    <div class="input-box">
+                        <i class="bi bi-lock-fill input-icon"></i>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            value="{{ request.COOKIES.admin_password|default:'' }}"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <span class="pwd-toggle" id="pwdToggle" title="Show/hide password">
+                            <i class="bi bi-eye-slash" id="pwdIcon"></i>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Options row -->
+                <div class="options-row">
+                    <label class="checkbox-wrapper">
+                        <input
+                            type="checkbox"
+                            name="remember_me"
+                            {% if request.COOKIES.admin_username %}checked{% endif %}
+                        >
+                        <span class="checkbox-label">Remember me for 7 days</span>
+                    </label>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span class="btn-text">Sign in to Dashboard</span>
+                    <i class="bi bi-arrow-right btn-icon"></i>
+                </button>
+
+                <!-- Error Messages -->
+                {% if messages %}
+                {% for message in messages %}
+                <div class="alert-box alert-error">
+                    <i class="bi bi-exclamation-circle-fill alert-icon"></i>
+                    <span class="alert-text">{{ message }}</span>
+                </div>
+                {% endfor %}
+                {% endif %}
+
+            </form>
+
+            <!-- Divider -->
+            <div class="form-divider">
+                <div class="line"></div>
+                <span class="divider-text">or</span>
+                <div class="line"></div>
+            </div>
+
+            <!-- Back to home -->
+            <a href="{% url 'home' %}" class="back-link">
+                <i class="bi bi-arrow-left"></i>
+                Back to Home
+            </a>
+
+            <!-- Security -->
+            <div class="security-strip">
+                <span class="security-badge">
+                    <i class="bi bi-shield-fill-check"></i>
+                    SSL Secured
+                </span>
+                <span class="security-badge">
+                    <i class="bi bi-lock-fill"></i>
+                    Encrypted
+                </span>
+                <span class="security-badge">
+                    <i class="bi bi-patch-check-fill" style="color: #d97706;"></i>
+                    Verified
                 </span>
             </div>
 
-            <label class="remember-me">
-                <input type="checkbox" name="remember_me"
-                       {% if request.COOKIES.admin_username %}checked{% endif %}>
-                Remember me for 7 days
-            </label>
+        </div>
 
-            <button type="submit">Login</button>
-        </form>
-
-        {% if messages %}
-            <div class="messages">
-                <ul>
-                    {% for message in messages %}
-                        <li>{{ message }}</li>
-                    {% endfor %}
-                </ul>
-            </div>
-        {% endif %}
+        <!-- Footer -->
+        <div class="right-footer">
+            © 2025 Elite Dream Builders · All rights reserved
+        </div>
     </div>
 
-    <script>
-        function togglePassword() {
-            const passwordField = document.getElementById('passwordField');
-            const eyeIcon = document.getElementById('eyeIcon');
-            if (passwordField.type === 'password') {
-                passwordField.type = 'text';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
-            } else {
-                passwordField.type = 'password';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
-            }
+</div>
+
+<script>
+    // ─── Password toggle ───
+    const pwdToggle = document.getElementById('pwdToggle');
+    const pwdField  = document.getElementById('password');
+    const pwdIcon   = document.getElementById('pwdIcon');
+
+    pwdToggle.addEventListener('click', () => {
+        const isHidden = pwdField.type === 'password';
+        pwdField.type = isHidden ? 'text' : 'password';
+        pwdIcon.className = isHidden ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+
+    // ─── Submit loading state ───
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+
+    loginForm.addEventListener('submit', function () {
+        submitBtn.classList.add('loading');
+        submitBtn.innerHTML = `
+            <span style="
+                display: inline-block;
+                width: 16px; height: 16px;
+                border: 2px solid rgba(255,255,255,0.3);
+                border-top-color: white;
+                border-radius: 50%;
+                animation: spin 0.7s linear infinite;
+            "></span>
+            <span>Signing in...</span>
+        `;
+    });
+
+    // ─── Inject spin keyframe ───
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
-    </script>
-    <script src="{% static 'js/ledger.js' %}"></script>
+    `;
+    document.head.appendChild(style);
+
+    // ─── Focus glow on icon ───
+    document.querySelectorAll('.form-input').forEach(input => {
+        input.addEventListener('focus', () => {
+            const icon = input.parentElement.querySelector('.input-icon');
+            if (icon) icon.style.color = 'var(--primary)';
+        });
+        input.addEventListener('blur', () => {
+            const icon = input.parentElement.querySelector('.input-icon');
+            if (icon) icon.style.color = '';
+        });
+    });
+</script>
+
+<script src="{% static 'js/ledger.js' %}"></script>
 </body>
 </html>
