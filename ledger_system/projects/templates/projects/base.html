@@ -141,6 +141,171 @@
             color: var(--primary);
         }
 
+
+
+/* ════════════════════════════════════════
+   PAGE LOADER
+════════════════════════════════════════ */
+.page-loader {
+    position: fixed;
+    inset: 0;
+    z-index: 99999;
+    background: rgba(255, 255, 255, 0.92);
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.4s ease, visibility 0.4s ease;
+}
+
+.page-loader.hide {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+/* ─── Top Progress Bar ─── */
+.loader-top-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: #e2e8f0;
+    overflow: hidden;
+}
+
+.loader-top-fill {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb, #818cf8, #2563eb);
+    background-size: 200% 100%;
+    border-radius: 0 2px 2px 0;
+    animation:
+        topBarGrow 2.5s cubic-bezier(0.4, 0, 0.2, 1) infinite,
+        topBarShimmer 1.5s ease infinite;
+}
+
+@keyframes topBarGrow {
+    0%   { width: 0%; }
+    50%  { width: 75%; }
+    100% { width: 95%; }
+}
+
+@keyframes topBarShimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+}
+
+.page-loader.hide .loader-top-fill {
+    width: 100% !important;
+    transition: width 0.25s ease;
+    animation: none;
+}
+
+/* ─── Center Content ─── */
+.loader-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+    animation: loaderContentIn 0.4s ease;
+}
+
+@keyframes loaderContentIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.96);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/* ─── Ring Spinner + Logo ─── */
+.loader-ring-wrap {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1.1rem;
+}
+
+.loader-ring {
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    border: 3.5px solid #eef2ff;
+    border-top-color: #2563eb;
+    animation: ringRotate 0.9s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+@keyframes ringRotate {
+    to { transform: rotate(360deg); }
+}
+
+.loader-logo-box {
+    width: 80px;
+    height: 80px;
+    border-radius: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.loader-logo-img {
+    width: 88px;
+    height: 88px;
+    object-fit: contain;
+}
+
+/* ─── Brand Name ─── */
+.loader-brand {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #1e293b;
+    letter-spacing: -0.3px;
+    margin-bottom: 0.2rem;
+}
+
+/* ─── Loading Text with Animated Dots ─── */
+.loader-text {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #94a3b8;
+    display: flex;
+    align-items: center;
+    gap: 1px;
+}
+
+.loader-dot-1,
+.loader-dot-2,
+.loader-dot-3 {
+    animation: dotFade 1.4s ease-in-out infinite;
+    color: #2563eb;
+    font-weight: 700;
+}
+
+.loader-dot-1 { animation-delay: 0s; }
+.loader-dot-2 { animation-delay: 0.2s; }
+.loader-dot-3 { animation-delay: 0.4s; }
+
+@keyframes dotFade {
+    0%, 100% { opacity: 0.15; }
+    50%      { opacity: 1; }
+}
+
+
+
+
         a { text-decoration: none; }
 
         /* ════════════════════════════════════════
@@ -1412,6 +1577,41 @@
 </head>
 <body>
 
+<!-- ════════════════════════════════════════
+     PAGE LOADER — Professional SaaS
+════════════════════════════════════════ -->
+<div id="pageLoader" class="page-loader">
+
+    <!-- Top Progress Bar -->
+    <div class="loader-top-bar">
+        <div class="loader-top-fill"></div>
+    </div>
+
+    <!-- Center Content -->
+    <div class="loader-content">
+
+        <!-- Logo Spinner -->
+        <div class="loader-ring-wrap">
+            <div class="loader-ring"></div>
+            <div class="loader-logo-box">
+                <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="loader-logo-img">
+            </div>
+        </div>
+
+        <!-- Brand + Loading Text -->
+        <div class="loader-brand">EDB Billing</div>
+        <div class="loader-text">
+            <span>Loading</span>
+            <span class="loader-dot-1">.</span>
+            <span class="loader-dot-2">.</span>
+            <span class="loader-dot-3">.</span>
+        </div>
+
+    </div>
+
+</div>
+
+
     <!-- ════════════════════════════════════════
          MOBILE FAB TOGGLE
     ════════════════════════════════════════ -->
@@ -1635,6 +1835,62 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+
+
+    <script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const loader = document.getElementById("pageLoader");
+
+    // Hide loader after page load
+    window.addEventListener("load", function () {
+        loader.classList.add("hide");
+    });
+
+    // Show loader on internal link clicks
+    document.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function (e) {
+            var href = this.getAttribute("href");
+
+            if (
+                href &&
+                href !== "#" &&
+                !href.startsWith("#") &&
+                !href.startsWith("javascript") &&
+                !href.startsWith("mailto:") &&
+                !href.startsWith("tel:") &&
+                !this.hasAttribute("target") &&
+                !this.hasAttribute("download") &&
+                !this.hasAttribute("data-no-loader") &&
+                !this.getAttribute("data-bs-toggle") &&
+                !e.ctrlKey &&
+                !e.metaKey
+            ) {
+                loader.classList.remove("hide");
+            }
+        });
+    });
+
+    // Show loader on form submit
+    document.querySelectorAll("form").forEach(function (form) {
+        form.addEventListener("submit", function () {
+            if (!this.hasAttribute("data-no-loader")) {
+                loader.classList.remove("hide");
+            }
+        });
+    });
+
+    // Handle browser back/forward (bfcache)
+    window.addEventListener("pageshow", function (e) {
+        if (e.persisted) {
+            loader.classList.add("hide");
+        }
+    });
+
+});
+</script>
+
+
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
