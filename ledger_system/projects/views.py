@@ -838,13 +838,6 @@ def add_project(request):
         estimated_cost = request.POST.get('estimated_cost', '0.00')
 
 
-        Activity.objects.create(
-                title="Project Created",
-                description=f"Project '{name}' created with budget ₹{budget}",
-                action="create",
-                project=project
-        )
-        
         # Check duplicate project name
         if Project.objects.filter(name=name).exists():
             messages.error(request, f"A project with name '{name}' already exists.")
@@ -858,12 +851,24 @@ def add_project(request):
                 budget = Decimal(budget)
                 estimated_cost = Decimal(estimated_cost)
 
-                Project.objects.create(
+                project = Project.objects.create(
                     name=name,
                     client_name=client_name,
                     phone=phone,
                     budget=budget,
                     estimated_cost=estimated_cost
+                )
+
+
+                Activity.objects.create(
+                    title=f"Project Created • {project.name}",
+                    description=(
+                        f"New project created for {project.client_name}. "
+                        f"Budget ₹{project.budget:,.0f}. "
+                        f"Contact: {project.phone}"
+                    ),
+                    action="create",
+                    project=project
                 )
 
                 messages.success(request, "Project created successfully!")
