@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.db.models import Sum
 from decimal import Decimal
 from django.shortcuts import render, get_object_or_404, redirect
+from openai import project
 from .models import*
 from datetime import datetime
 from django.http import HttpResponse
