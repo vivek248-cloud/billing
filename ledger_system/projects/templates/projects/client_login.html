@@ -2,1044 +2,1001 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Client Portal — EDB Billing</title>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-
-  <!-- Bootstrap Icons -->
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
-
-  <!-- SweetAlert2 -->
-  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-  <style>
-    /* ════════════════════════════════════════
-       DESIGN TOKENS
-    ════════════════════════════════════════ */
-    :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #eff6ff;
-      --primary-50: rgba(37, 99, 235, 0.06);
-      --primary-ring: rgba(37, 99, 235, 0.15);
-      --primary-shadow: 0 8px 24px rgba(37, 99, 235, 0.22);
-
-      --success: #059669;
-      --success-light: #ecfdf5;
-      --success-ring: rgba(5, 150, 105, 0.12);
-
-      --danger: #dc2626;
-      --danger-light: #fef2f2;
-      --danger-ring: rgba(220, 38, 38, 0.12);
-
-      --white: #ffffff;
-      --gray-50: #f8fafc;
-      --gray-100: #f1f5f9;
-      --gray-200: #e2e8f0;
-      --gray-300: #cbd5e1;
-      --gray-400: #94a3b8;
-      --gray-500: #64748b;
-      --gray-600: #475569;
-      --gray-700: #334155;
-      --gray-800: #1e293b;
-      --gray-900: #0f172a;
-
-      --radius-sm: 8px;
-      --radius-md: 12px;
-      --radius-lg: 16px;
-      --radius-xl: 20px;
-
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
-      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
-      --shadow-xl: 0 20px 50px rgba(0,0,0,0.1);
-
-      --transition-fast: 0.15s ease;
-      --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-
-    /* ════════════════════════════════════════
-       RESET & BASE
-    ════════════════════════════════════════ */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
-
-    body {
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      background: var(--gray-50);
-      color: var(--gray-900);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-    }
-
-    ::selection { background: var(--primary-light); color: var(--primary); }
-    a { text-decoration: none; color: inherit; }
-
-    /* ════════════════════════════════════════
-       SPLIT LAYOUT
-    ════════════════════════════════════════ */
-    .page-wrapper {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
-    }
-
-    /* ─── LEFT PANEL ─── */
-    .left-panel {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      padding: 2.5rem;
-      background: var(--gray-900);
-      overflow: hidden;
-    }
-
-    .left-bg {
-      position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(160deg,
-          rgba(12, 12, 12, 0.33) 0%,
-          rgba(0, 0, 0, 0.56) 50%,
-          rgba(0, 0, 0, 0.7) 100%),
-        url("https://ik.imagekit.io/zygvxqqhx/Front2.jpg?updatedAt=1750071617078")
-        center / cover no-repeat;
-      z-index: 0;
-    }
-
-    /* Accent glow */
-    .left-glow-1 {
-      position: absolute;
-      width: 300px; height: 300px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(5, 150, 105, 0.12) 0%, transparent 70%);
-      top: -80px; right: -60px;
-      z-index: 0;
-    }
-
-    .left-glow-2 {
-      position: absolute;
-      width: 200px; height: 200px;
-      border-radius: 50%;
-      background: radial-gradient(circle, rgba(37, 99, 235, 0.08) 0%, transparent 70%);
-      bottom: 80px; left: -40px;
-      z-index: 0;
-    }
-
-    /* Top nav bar */
-    .left-top {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .left-logo {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      object-fit: contain;
-      border: 1px solid rgba(255,255,255,0.12);
-      background: rgba(255,255,255,0.08);
-    }
-
-    .left-brand {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: white;
-    }
-
-    .left-brand span { color: #ffffff; }
-
-    /* Center content */
-    .left-center {
-      position: relative;
-      z-index: 1;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      padding: 2rem 0;
-    }
-
-    .left-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0.35rem 0.85rem;
-      border-radius: 100px;
-      background: rgba(5, 150, 105, 0.15);
-      border: 1px solid rgba(255, 255, 255, 0.2);
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: #ffffff;
-      margin-bottom: 1.5rem;
-      width: fit-content;
-    }
-
-    .left-heading {
-      font-size: 2rem;
-      font-weight: 800;
-      color: white;
-      line-height: 1.25;
-      letter-spacing: -0.5px;
-      margin-bottom: 1rem;
-    }
-
-    .left-sub {
-      font-size: 0.9rem;
-      color: rgba(255,255,255,0.5);
-      line-height: 1.7;
-      max-width: 320px;
-      margin-bottom: 2.5rem;
-    }
-
-    /* Client benefits */
-    .benefit-list {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .benefit-item {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 0.85rem 1rem;
-      border-radius: var(--radius-md);
-      background: rgba(255,255,255,0.04);
-      border: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .benefit-icon {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 0.9rem;
-      flex-shrink: 0;
-      background: rgba(255,255,255,0.06);
-      color: rgba(255,255,255,0.55);
-    }
-
-    .benefit-text h5 {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.85);
-      margin-bottom: 2px;
-    }
-
-    .benefit-text p {
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.35);
-    }
-
-    /* Bottom */
-    .left-bottom {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding-top: 1.5rem;
-      border-top: 1px solid rgba(255,255,255,0.06);
-    }
-
-    .left-bottom-text {
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.3);
-    }
-
-    .left-bottom-link {
-      font-size: 0.7rem;
-      color: #34d399;
-      font-weight: 600;
-      transition: color var(--transition-fast);
-    }
-
-    .left-bottom-link:hover { color: white; }
-
-    /* ─── RIGHT PANEL ─── */
-    .right-panel {
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 3rem 2.5rem;
-      background: var(--white);
-      position: relative;
-    }
-
-    .form-wrapper {
-      max-width: 380px;
-      width: 100%;
-    }
-
-    /* Form header */
-    .form-header {
-      margin-bottom: 2.5rem;
-    }
-
-    .form-icon {
-      width: 52px; height: 52px;
-      border-radius: 15px;
-      background: var(--success-light);
-      border: 1px solid var(--success-ring);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      color: var(--success);
-      margin-bottom: 1.25rem;
-    }
-
-    .form-title {
-      font-size: 1.6rem;
-      font-weight: 800;
-      color: var(--gray-900);
-      letter-spacing: -0.5px;
-      margin-bottom: 0.4rem;
-    }
-
-    .form-subtitle {
-      font-size: 0.85rem;
-      color: var(--gray-500);
-      line-height: 1.6;
-    }
-
-    /* ─── Status pill ─── */
-    .status-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      padding: 0.35rem 0.85rem;
-      border-radius: 100px;
-      background: var(--success-light);
-      border: 1px solid var(--success-ring);
-      font-size: 0.72rem;
-      font-weight: 600;
-      color: var(--success);
-      margin-bottom: 2rem;
-    }
-
-    .status-pill .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--success);
-      animation: dotPulse 2s ease infinite;
-    }
-
-    @keyframes dotPulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
-    }
-
-    /* ─── Info card (above input) ─── */
-    .info-card {
-      display: flex;
-      align-items: flex-start;
-      gap: 12px;
-      padding: 1rem;
-      border-radius: var(--radius-md);
-      background: var(--primary-50);
-      border: 1px solid var(--primary-ring);
-      margin-bottom: 1.75rem;
-    }
-
-    .info-card .info-icon {
-      font-size: 1rem;
-      color: var(--primary);
-      margin-top: 1px;
-      flex-shrink: 0;
-    }
-
-    .info-card .info-text {
-      font-size: 0.8rem;
-      color: var(--gray-600);
-      line-height: 1.5;
-    }
-
-    .info-card .info-text strong {
-      color: var(--primary);
-      font-weight: 600;
-    }
-
-    /* ─── Field ─── */
-    .field-wrapper { margin-bottom: 1.25rem; }
-
-    .field-label {
-      display: block;
-      font-size: 0.75rem;
-      font-weight: 700;
-      color: var(--gray-600);
-      text-transform: uppercase;
-      letter-spacing: 0.8px;
-      margin-bottom: 0.5rem;
-    }
-
-    .input-box {
-      position: relative;
-      display: flex;
-      align-items: center;
-    }
-
-    .input-icon {
-      position: absolute;
-      left: 14px;
-      font-size: 1rem;
-      color: var(--gray-400);
-      pointer-events: none;
-      transition: color var(--transition-fast);
-      z-index: 1;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.85rem 1rem 0.85rem 2.85rem;
-      border: 1.5px solid var(--gray-200);
-      border-radius: var(--radius-md);
-      font-size: 0.92rem;
-      font-weight: 500;
-      font-family: 'Inter', sans-serif;
-      color: var(--gray-900);
-      background: var(--gray-50);
-      transition: all var(--transition-base);
-      outline: none;
-      letter-spacing: 0.3px;
-    }
-
-    .form-input::placeholder {
-      color: var(--gray-400);
-      font-weight: 400;
-    }
-
-    .form-input:focus {
-      border-color: var(--primary);
-      background: var(--white);
-      box-shadow: 0 0 0 4px var(--primary-50);
-    }
-
-    .input-box:focus-within .input-icon {
-      color: var(--primary);
-    }
-
-    /* Phone prefix */
-    .phone-prefix {
-      position: absolute;
-      left: 42px;
-      font-size: 0.88rem;
-      font-weight: 600;
-      color: var(--gray-600);
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .form-input.has-prefix {
-      padding-left: 4.5rem;
-    }
-
-    /* ─── Helper text ─── */
-    .field-helper {
-      font-size: 0.72rem;
-      color: var(--gray-400);
-      margin-top: 0.4rem;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-    }
-
-    /* ─── Submit button ─── */
-    .submit-btn {
-      width: 100%;
-      padding: 0.88rem 1.5rem;
-      background: var(--primary);
-      color: white;
-      border: none;
-      border-radius: var(--radius-md);
-      font-family: 'Inter', sans-serif;
-      font-size: 0.92rem;
-      font-weight: 700;
-      cursor: pointer;
-      transition: all var(--transition-base);
-      box-shadow: var(--primary-shadow);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      letter-spacing: 0.2px;
-      margin-top: 0.25rem;
-    }
-
-    .submit-btn:hover {
-      background: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 12px 30px rgba(37, 99, 235, 0.28);
-    }
-
-    .submit-btn:active {
-      transform: translateY(0);
-    }
-
-    .submit-btn:disabled {
-      pointer-events: none;
-      opacity: 0.7;
-    }
-
-    .btn-arrow {
-      transition: transform var(--transition-base);
-    }
-
-    .submit-btn:hover .btn-arrow {
-      transform: translateX(3px);
-    }
-
-    /* ─── Divider ─── */
-    .form-divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 1.5rem 0;
-    }
-
-    .form-divider .line {
-      flex: 1;
-      height: 1px;
-      background: var(--gray-200);
-    }
-
-    .form-divider .divider-text {
-      font-size: 0.68rem;
-      color: var(--gray-400);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* ─── Back link ─── */
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Client Login — EDB Billing</title>
+
+    <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* ════════════════════════════════════════
+           DESIGN TOKENS
+        ════════════════════════════════════════ */
+        :root {
+            --primary: #2563eb;
+            --primary-hover: #1d4ed8;
+            --primary-light: #eff6ff;
+            --primary-50: rgba(37, 99, 235, 0.06);
+            --primary-ring: rgba(37, 99, 235, 0.15);
+            --primary-shadow: 0 8px 24px rgba(37, 99, 235, 0.22);
+
+            --success: #059669;
+            --success-light: #ecfdf5;
+            --success-ring: rgba(5, 150, 105, 0.12);
+
+            --danger: #dc2626;
+            --danger-light: #fef2f2;
+            --danger-ring: rgba(220, 38, 38, 0.12);
+
+            --white: #ffffff;
+            --gray-50: #f8fafc;
+            --gray-100: #f1f5f9;
+            --gray-200: #e2e8f0;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+            --gray-600: #475569;
+            --gray-700: #334155;
+            --gray-800: #1e293b;
+            --gray-900: #0f172a;
+
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+
+            --shadow-sm: 0 1px 3px rgba(0,0,0,0.06);
+            --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+            --shadow-lg: 0 10px 30px rgba(0,0,0,0.08);
+
+            --transition-fast: 0.15s ease;
+            --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ════════════════════════════════════════
+           RESET
+        ════════════════════════════════════════ */
+        *, *::before, *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+            background: var(--gray-50);
+            color: var(--gray-900);
+        }
+
+        ::selection { background: var(--primary-light); color: var(--primary); }
+        a { text-decoration: none; color: inherit; }
+
+        /* ════════════════════════════════════════
+           SPLIT LAYOUT
+        ════════════════════════════════════════ */
+        .page {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            min-height: 100vh;
+        }
+
+        /* ─── LEFT PANEL ─── */
+        .left {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 2.5rem;
+            background: var(--gray-900);
+            overflow: hidden;
+        }
+
+        .left-bg {
+            position: absolute;
+            inset: 0;
+            background:
+                linear-gradient(160deg,
+                    rgba(15,23,42,0.65) 0%,
+                    rgba(5,150,105,0.06) 50%,
+                    rgba(15,23,42,0.92) 100%),
+                url("https://ik.imagekit.io/zygvxqqhx/Front2.jpg?updatedAt=1750071617078")
+                center / cover no-repeat;
+            z-index: 0;
+        }
+
+        .left-glow {
+            position: absolute;
+            border-radius: 50%;
+            z-index: 0;
+        }
+
+        .glow-1 {
+            width: 300px; height: 300px;
+            background: radial-gradient(circle, rgba(5,150,105,0.12) 0%, transparent 70%);
+            top: -80px; right: -60px;
+        }
+
+        .glow-2 {
+            width: 200px; height: 200px;
+            background: radial-gradient(circle, rgba(37,99,235,0.08) 0%, transparent 70%);
+            bottom: 80px; left: -40px;
+        }
+
+        .left-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .left-logo {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            object-fit: contain;
+            border: 1px solid rgba(255,255,255,0.12);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .left-brand {
+            font-size: 0.95rem;
+            font-weight: 700;
+            color: white;
+        }
+
+        .left-brand span { color: #34d399; }
+
+        .left-center {
+            position: relative;
+            z-index: 1;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            padding: 2rem 0;
+        }
+
+        .left-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.35rem 0.85rem;
+            border-radius: 100px;
+            background: rgba(5,150,105,0.15);
+            border: 1px solid rgba(5,150,105,0.2);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: #34d399;
+            margin-bottom: 1.5rem;
+            width: fit-content;
+        }
+
+        .left-heading {
+            font-size: 2rem;
+            font-weight: 800;
+            color: white;
+            line-height: 1.25;
+            letter-spacing: -0.5px;
+            margin-bottom: 1rem;
+        }
+
+        .left-sub {
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.5);
+            line-height: 1.7;
+            max-width: 320px;
+            margin-bottom: 2.5rem;
+        }
+
+        .features {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .feature {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .feature-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            background: rgba(255,255,255,0.06);
+            color: rgba(255,255,255,0.55);
+            flex-shrink: 0;
+        }
+
+        .feature h5 {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.85);
+            margin-bottom: 2px;
+        }
+
+        .feature p {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.35);
+        }
+
+        .left-bottom {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding-top: 1.5rem;
+            border-top: 1px solid rgba(255,255,255,0.06);
+        }
+
+        .left-bottom span {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .left-bottom a {
+            font-size: 0.7rem;
+            color: #34d399;
+            font-weight: 600;
+            transition: color var(--transition-fast);
+        }
+
+        .left-bottom a:hover { color: white; }
+
+        /* ─── RIGHT PANEL ─── */
+        .right {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 3rem 2.5rem;
+            background: var(--white);
+            position: relative;
+        }
+
+        .form-wrap {
+            max-width: 380px;
+            width: 100%;
+        }
+
+        /* Status pill */
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.35rem 0.85rem;
+            border-radius: 100px;
+            background: var(--success-light);
+            border: 1px solid var(--success-ring);
+            font-size: 0.72rem;
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: 2rem;
+        }
+
+        .status-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s ease infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.3; }
+        }
+
+        /* Form header */
+        .form-header {
+            margin-bottom: 2rem;
+        }
+
+        .form-icon {
+            width: 52px; height: 52px;
+            border-radius: 15px;
+            background: var(--success-light);
+            border: 1px solid var(--success-ring);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            color: var(--success);
+            margin-bottom: 1.25rem;
+        }
+
+        .form-title {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--gray-900);
+            letter-spacing: -0.5px;
+            margin-bottom: 0.4rem;
+        }
+
+        .form-subtitle {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            line-height: 1.6;
+        }
+
+        /* ─── Password Info ─── */
+        .pwd-info {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            background: var(--primary-50);
+            border: 1px solid var(--primary-ring);
+            margin-bottom: 1.75rem;
+        }
+
+        .pwd-info-icon {
+            font-size: 1rem;
+            color: var(--primary);
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        .pwd-info-text {
+            font-size: 0.78rem;
+            color: var(--gray-600);
+            line-height: 1.55;
+        }
+
+        .pwd-info-text strong {
+            color: var(--primary);
+        }
+
+        .pwd-info-text code {
+            background: var(--primary-light);
+            padding: 2px 6px;
+            border-radius: 5px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: 'JetBrains Mono', 'Fira Code', monospace, 'Inter';
+        }
+
+        /* ─── Fields ─── */
+        .field {
+            margin-bottom: 1.25rem;
+        }
+
+        .field-label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            color: var(--gray-600);
+            margin-bottom: 0.45rem;
+        }
+
+        .input-box {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 14px;
+            font-size: 1rem;
+            color: var(--gray-400);
+            pointer-events: none;
+            transition: color var(--transition-fast);
+            z-index: 1;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.82rem 1rem 0.82rem 2.85rem;
+            border: 1.5px solid var(--gray-200);
+            border-radius: var(--radius-md);
+            font-size: 0.9rem;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            color: var(--gray-900);
+            background: var(--gray-50);
+            transition: all var(--transition-base);
+            outline: none;
+        }
+
+        .form-input::placeholder {
+            color: var(--gray-400);
+            font-weight: 400;
+        }
+
+        .form-input:focus {
+            border-color: var(--primary);
+            background: var(--white);
+            box-shadow: 0 0 0 4px var(--primary-50);
+        }
+
+        .input-box:focus-within .input-icon {
+            color: var(--primary);
+        }
+
+        /* Phone prefix */
+        .phone-prefix {
+            position: absolute;
+            left: 42px;
+            font-size: 0.86rem;
+            font-weight: 600;
+            color: var(--gray-600);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .form-input.has-prefix {
+            padding-left: 4.5rem;
+        }
+
+        /* Password toggle */
+        .pwd-toggle {
+            position: absolute;
+            right: 14px;
+            font-size: 1rem;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 4px;
+            z-index: 1;
+            transition: color var(--transition-fast);
+        }
+
+        .pwd-toggle:hover {
+            color: var(--gray-600);
+        }
+
+        /* Field helper */
+        .field-helper {
+            font-size: 0.72rem;
+            color: var(--gray-400);
+            margin-top: 0.4rem;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        /* ─── Submit Button ─── */
+        .submit-btn {
+            width: 100%;
+            padding: 0.85rem 1.5rem;
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-family: 'Inter', sans-serif;
+            font-size: 0.92rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all var(--transition-base);
+            box-shadow: var(--primary-shadow);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 0.5rem;
+        }
+
+        .submit-btn:hover {
+            background: var(--primary-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 30px rgba(37,99,235,0.28);
+        }
+
+        .submit-btn:active {
+            transform: translateY(0);
+        }
+
+        .submit-btn:disabled {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .btn-arrow {
+            transition: transform var(--transition-fast);
+        }
+
+        .submit-btn:hover .btn-arrow {
+            transform: translateX(3px);
+        }
+
+        /* ─── Alert ─── */
+        .alert {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            padding: 0.85rem 1rem;
+            border-radius: var(--radius-md);
+            margin-bottom: 1.25rem;
+            font-size: 0.82rem;
+            font-weight: 500;
+            line-height: 1.5;
+            animation: alertSlide 0.3s ease;
+        }
+
+        @keyframes alertSlide {
+            from { opacity: 0; transform: translateY(-6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-error {
+            background: var(--danger-light);
+            border: 1px solid var(--danger-ring);
+            color: var(--danger);
+        }
+
+        .alert-success {
+            background: var(--success-light);
+            border: 1px solid var(--success-ring);
+            color: var(--success);
+        }
+
+        .alert i {
+            font-size: 0.95rem;
+            flex-shrink: 0;
+            margin-top: 1px;
+        }
+
+        /* ─── Divider ─── */
+        .divider {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 1.5rem 0;
+        }
+
+        .divider .line {
+            flex: 1;
+            height: 1px;
+            background: var(--gray-200);
+        }
+
+        .divider span {
+            font-size: 0.68rem;
+            color: var(--gray-400);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* ─── Back link ─── */
         .back-link {
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
-            margin-top: 1.5rem;
-            padding: 0.5rem 1rem;
             font-size: 0.82rem;
-            color: white;
-            background: black;
+            color: var(--gray-500);
             font-weight: 500;
             transition: color var(--transition-fast);
-            border-radius: var(--radius-sm);
         }
 
-    .back-link:hover { color: var(--gray-300); }
+        .back-link:hover { color: var(--primary); }
 
-    /* ─── Security strip ─── */
-    .security-strip {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--gray-100);
-      flex-wrap: wrap;
-    }
+        /* ─── Security ─── */
+        .security {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            margin-top: 2rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid var(--gray-100);
+            flex-wrap: wrap;
+        }
 
-    .sec-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      padding: 0.25rem 0.6rem;
-      border-radius: 100px;
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      font-size: 0.65rem;
-      font-weight: 600;
-      color: var(--gray-500);
-    }
+        .sec-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 0.25rem 0.6rem;
+            border-radius: 100px;
+            background: var(--gray-50);
+            border: 1px solid var(--gray-200);
+            font-size: 0.65rem;
+            font-weight: 600;
+            color: var(--gray-500);
+        }
 
-    .sec-badge i { font-size: 0.68rem; }
-    .sec-badge .bi-shield-fill-check { color: var(--success); }
-    .sec-badge .bi-lock-fill { color: var(--primary); }
-    .sec-badge .bi-phone-fill { color: #d97706; }
+        .sec-badge i { font-size: 0.68rem; }
+        .sec-badge .bi-shield-fill-check { color: var(--success); }
+        .sec-badge .bi-lock-fill { color: var(--primary); }
 
-    /* ─── Footer ─── */
-    .right-footer {
-      position: absolute;
-      bottom: 1.5rem;
-      font-size: 0.68rem;
-      color: var(--gray-400);
-      text-align: center;
-    }
+        /* ─── Footer ─── */
+        .right-footer {
+            position: absolute;
+            bottom: 1.5rem;
+            font-size: 0.68rem;
+            color: var(--gray-400);
+        }
 
-    /* ─── SweetAlert Custom ─── */
-    .swal2-popup {
-      border-radius: 20px !important;
-      font-family: 'Inter', sans-serif !important;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.12) !important;
-    }
+        /* ─── Mobile brand ─── */
+        .mobile-brand {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 2rem;
+        }
 
-    .swal2-confirm {
-      border-radius: 12px !important;
-      font-weight: 600 !important;
-      padding: 0.65rem 1.5rem !important;
-    }
+        .mobile-brand img {
+            width: 44px; height: 44px;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+        }
 
-    .swal2-cancel {
-      border-radius: 12px !important;
-      font-weight: 600 !important;
-      padding: 0.65rem 1.5rem !important;
-    }
+        .mobile-brand .mb-text {
+            font-size: 1rem;
+            font-weight: 800;
+            color: var(--gray-900);
+        }
 
-    /* ─── Client confirm card inside Swal ─── */
-    .swal-client-card {
-      display: flex;
-      align-items: center;
-      gap: 14px;
-      padding: 1rem 1.25rem;
-      background: var(--gray-50);
-      border: 1px solid var(--gray-200);
-      border-radius: 14px;
-      margin: 0.5rem 0;
-      text-align: left;
-    }
+        .mobile-brand .mb-text span { color: var(--success); }
 
-    .swal-client-avatar {
-      width: 46px; height: 46px;
-      border-radius: 14px;
-      background: linear-gradient(135deg, var(--primary), #818cf8);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-weight: 800;
-      font-size: 1.1rem;
-      flex-shrink: 0;
-    }
+        /* ════════════════════════════════════════
+           RESPONSIVE
+        ════════════════════════════════════════ */
+        @media (max-width: 1024px) {
+            .page { grid-template-columns: 1fr; }
+            .left { display: none; }
 
-    .swal-client-name {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: var(--gray-900);
-    }
+            .right {
+                min-height: 100vh;
+                background: linear-gradient(160deg, var(--white) 0%, var(--gray-50) 100%);
+                padding: 3rem 1.5rem;
+            }
 
-    .swal-client-phone {
-      font-size: 0.78rem;
-      color: var(--gray-500);
-      font-weight: 500;
-      margin-top: 2px;
-    }
+            .form-wrap { max-width: 420px; }
+            .mobile-brand { display: flex !important; }
+        }
 
-    .swal-verify-text {
-      font-size: 0.82rem;
-      color: var(--gray-500);
-      margin-top: 0.75rem;
-      line-height: 1.5;
-    }
-
-    /* ════════════════════════════════════════
-       RESPONSIVE
-    ════════════════════════════════════════ */
-    @media (max-width: 1024px) {
-      .page-wrapper { grid-template-columns: 1fr; }
-      .left-panel { display: none; }
-
-      .right-panel {
-        min-height: 100vh;
-        background: linear-gradient(160deg, var(--white) 0%, var(--gray-50) 100%);
-        padding: 3rem 1.5rem;
-      }
-
-      /* Mobile brand header */
-      .mobile-brand {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        margin-bottom: 2rem;
-      }
-
-      .mobile-brand img {
-        width: 44px; height: 44px;
-        border-radius: 12px;
-        border: 1px solid var(--gray-200);
-      }
-
-      .mobile-brand .m-brand-text {
-        font-size: 1rem;
-        font-weight: 800;
-        color: var(--gray-900);
-      }
-
-      .mobile-brand .m-brand-text span { color: var(--success); }
-    }
-
-    @media (max-width: 480px) {
-      .form-title { font-size: 1.4rem; }
-      .info-card { flex-direction: column; gap: 8px; }
-    }
-
-    .mobile-brand { display: none; }
-  </style>
+        @media (max-width: 480px) {
+            .right { padding: 2rem 1.25rem; }
+            .form-title { font-size: 1.4rem; }
+        }
+    </style>
 </head>
 <body>
 
-<div class="page-wrapper">
+<div class="page">
 
-  <!-- ════════════════════════════════════════
-       LEFT PANEL
-  ════════════════════════════════════════ -->
-  <div class="left-panel">
-    <div class="left-bg"></div>
-    <div class="left-glow-1"></div>
-    <div class="left-glow-2"></div>
+    <!-- ════════════════════════════════════════
+         LEFT PANEL
+    ════════════════════════════════════════ -->
+    <div class="left">
+        <div class="left-bg"></div>
+        <div class="left-glow glow-1"></div>
+        <div class="left-glow glow-2"></div>
 
-    <!-- Top brand -->
-    <div class="left-top">
-      <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="left-logo">
-      <span class="left-brand">EDB <span>Billing</span></span>
-    </div>
-
-    <!-- Center -->
-    <div class="left-center">
-      <div class="left-tag">
-        <i class="bi bi-person-fill"></i>
-        Client Access
-      </div>
-
-      <h2 class="left-heading">
-        Your Projects,<br>At Your Fingertips
-      </h2>
-
-      <p class="left-sub">
-        Access your invoices, payment history, and project
-        progress in real-time — anytime, anywhere.
-      </p>
-
-      <div class="benefit-list">
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="bi bi-receipt-cutoff"></i>
-          </div>
-          <div class="benefit-text">
-            <h5>View All Invoices</h5>
-            <p>Download and track your billing history</p>
-          </div>
+        <div class="left-top">
+            <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="left-logo">
+            <span class="left-brand">EDB <span>Billing</span></span>
         </div>
 
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="bi bi-graph-up-arrow"></i>
-          </div>
-          <div class="benefit-text">
-            <h5>Project Progress</h5>
-            <p>Monitor real-time updates on your projects</p>
-          </div>
+        <div class="left-center">
+            <div class="left-tag">
+                <i class="bi bi-person-fill"></i>
+                Client Portal
+            </div>
+
+            <h2 class="left-heading">
+                Your Projects,<br>At Your Fingertips
+            </h2>
+
+            <p class="left-sub">
+                Track invoices, payments, and project progress in real-time — anytime, anywhere.
+            </p>
+
+            <div class="features">
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="bi bi-receipt-cutoff"></i>
+                    </div>
+                    <div>
+                        <h5>View All Invoices</h5>
+                        <p>Download and track your billing history</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="bi bi-graph-up-arrow"></i>
+                    </div>
+                    <div>
+                        <h5>Live Project Progress</h5>
+                        <p>Monitor real-time construction updates</p>
+                    </div>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">
+                        <i class="bi bi-currency-rupee"></i>
+                    </div>
+                    <div>
+                        <h5>Payment Summary</h5>
+                        <p>Track paid, pending & remaining amounts</p>
+                    </div>
+                </div>
+            </div>
         </div>
 
-        <div class="benefit-item">
-          <div class="benefit-icon">
-            <i class="bi bi-currency-rupee"></i>
-          </div>
-          <div class="benefit-text">
-            <h5>Payment Summary</h5>
-            <p>Track paid, pending & remaining amounts</p>
-          </div>
+        <div class="left-bottom">
+            <span>© 2025 Elite Dream Builders</span>
+            <a href="{% url 'home' %}">
+                <i class="bi bi-arrow-left" style="margin-right:4px;"></i>Back to Home
+            </a>
         </div>
-      </div>
     </div>
 
-    <!-- Bottom -->
-    <div class="left-bottom">
-      <span class="left-bottom-text">© 2025 Elite Dream Builders</span>
-      <a href="{% url 'home' %}" class="left-bottom-link">
-        <i class="bi bi-arrow-left" style="margin-right: 4px;"></i>Back to Home
-      </a>
-    </div>
-  </div>
+    <!-- ════════════════════════════════════════
+         RIGHT PANEL — Login Form
+    ════════════════════════════════════════ -->
+    <div class="right">
+        <div class="form-wrap">
 
-  <!-- ════════════════════════════════════════
-       RIGHT PANEL — Form
-  ════════════════════════════════════════ -->
-  <div class="right-panel">
-    <div class="form-wrapper">
+            <!-- Mobile brand -->
+            <div class="mobile-brand">
+                <img src="{% static 'images/logo.PNG' %}" alt="EDB Logo">
+                <div class="mb-text">EDB <span>Billing</span></div>
+            </div>
 
-      <!-- Mobile brand (hidden on desktop) -->
-      <div class="mobile-brand">
-        <img src="{% static 'images/logo.PNG' %}" alt="EDB Logo">
-        <div class="m-brand-text">EDB <span>Billing</span></div>
-      </div>
+            <!-- Status -->
+            <div class="status-pill">
+                <span class="status-dot"></span>
+                Secure Client Portal
+            </div>
 
-      <!-- Status pill -->
-      <div class="status-pill">
-        <span class="dot"></span>
-        Secure portal — No password required
-      </div>
+            <!-- Header -->
+            <div class="form-header">
+                <div class="form-icon">
+                    <i class="bi bi-person-fill"></i>
+                </div>
+                <h1 class="form-title">Client Login</h1>
+                <p class="form-subtitle">
+                    Enter your registered mobile number and password to access your dashboard.
+                </p>
+            </div>
 
-      <!-- Header -->
-      <div class="form-header">
-        <div class="form-icon">
-          <i class="bi bi-person-fill"></i>
+            <!-- Password hint -->
+            <div class="pwd-info">
+                <i class="bi bi-info-circle-fill pwd-info-icon"></i>
+                <p class="pwd-info-text">
+                    Your password is your <strong>name + last 4 digits</strong> of your phone number.<br>
+                    Example: <code>johnsmith1234</code> (no spaces, lowercase)
+                </p>
+            </div>
+
+            <!-- Error alert (server-side) -->
+            {% if error %}
+            <div class="alert alert-error">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
+
+            <!-- Error alert (AJAX) -->
+            <div class="alert alert-error" id="ajaxError" style="display: none;">
+                <i class="bi bi-exclamation-circle-fill"></i>
+                <span id="ajaxErrorText"></span>
+            </div>
+
+            <!-- Form -->
+            <form id="loginForm" method="POST" action="{% url 'client_login' %}">
+                {% csrf_token %}
+
+                <!-- Phone -->
+                <div class="field">
+                    <label class="field-label" for="phone">Mobile Number</label>
+                    <div class="input-box">
+                        <i class="bi bi-phone-fill input-icon"></i>
+                        <span class="phone-prefix">+91</span>
+                        <input
+                            type="tel"
+                            id="phone"
+                            name="phone"
+                            class="form-input has-prefix"
+                            placeholder="Enter 10-digit number"
+                            maxlength="10"
+                            pattern="[6-9][0-9]{9}"
+                            inputmode="numeric"
+                            autocomplete="tel"
+                            value="{{ phone|default:'' }}"
+                            required
+                        >
+                    </div>
+                </div>
+
+                <!-- Password -->
+                <div class="field">
+                    <label class="field-label" for="password">Password</label>
+                    <div class="input-box">
+                        <i class="bi bi-lock-fill input-icon"></i>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            class="form-input"
+                            placeholder="Enter your password"
+                            autocomplete="current-password"
+                            required
+                        >
+                        <span class="pwd-toggle" id="pwdToggle" title="Show/hide password">
+                            <i class="bi bi-eye-slash" id="pwdIcon"></i>
+                        </span>
+                    </div>
+                    <div class="field-helper">
+                        <i class="bi bi-shield-lock-fill" style="color: var(--success); font-size: 0.7rem;"></i>
+                        Your credentials are encrypted
+                    </div>
+                </div>
+
+                <!-- Submit -->
+                <button type="submit" class="submit-btn" id="submitBtn">
+                    <span id="btnText">Sign In</span>
+                    <i class="bi bi-arrow-right btn-arrow" id="btnArrow"></i>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                <div class="line"></div>
+                <span>or</span>
+                <div class="line"></div>
+            </div>
+
+            <!-- Back -->
+            <a href="{% url 'home' %}" class="back-link">
+                <i class="bi bi-arrow-left"></i>
+                Back to Home
+            </a>
+
+            <!-- Security -->
+            <div class="security">
+                <span class="sec-badge">
+                    <i class="bi bi-shield-fill-check"></i> SSL Secured
+                </span>
+                <span class="sec-badge">
+                    <i class="bi bi-lock-fill"></i> Encrypted
+                </span>
+                <span class="sec-badge">
+                    <i class="bi bi-patch-check-fill" style="color: #d97706;"></i> Verified
+                </span>
+            </div>
         </div>
-        <h1 class="form-title">Client Login</h1>
-        <p class="form-subtitle">
-          Enter your registered mobile number to access your dashboard.
-        </p>
-      </div>
 
-      <!-- Info hint -->
-      <div class="info-card">
-        <i class="bi bi-info-circle-fill info-icon"></i>
-        <p class="info-text">
-          We'll find your account instantly.
-          <strong>No password needed</strong> — just your registered number.
-        </p>
-      </div>
-
-      <!-- Form -->
-      <form id="clientLoginForm">
-        {% csrf_token %}
-
-        <div class="field-wrapper">
-          <label class="field-label" for="phoneInput">Mobile Number</label>
-          <div class="input-box">
-            <i class="bi bi-phone-fill input-icon"></i>
-            <span class="phone-prefix">+91</span>
-            <input
-              type="tel"
-              id="phoneInput"
-              name="phone"
-              class="form-input has-prefix"
-              placeholder="Enter 10-digit number"
-              maxlength="10"
-              pattern="[6-9][0-9]{9}"
-              autocomplete="tel"
-              inputmode="numeric"
-              required
-            >
-          </div>
-          <div class="field-helper">
-            <i class="bi bi-shield-lock-fill" style="color: var(--success); font-size: 0.7rem;"></i>
-            Your number is encrypted and never shared
-          </div>
+        <div class="right-footer">
+            © 2025 Elite Dream Builders · All rights reserved
         </div>
-
-        <!-- Submit -->
-        <button type="submit" class="submit-btn" id="submitBtn">
-          <span class="btn-text">Find My Account</span>
-          <i class="bi bi-arrow-right btn-arrow"></i>
-        </button>
-
-      </form>
-
-      <!-- Divider -->
-      <div class="form-divider">
-        <div class="line"></div>
-        <span class="divider-text">or</span>
-        <div class="line"></div>
-      </div>
-
-      <!-- Back -->
-      <a href="{% url 'home' %}" class="back-link">
-        <i class="bi bi-arrow-left"></i>
-        Back to Home
-      </a>
-
-      <!-- Security -->
-      <div class="security-strip">
-        <span class="sec-badge">
-          <i class="bi bi-shield-fill-check"></i>
-          SSL Secured
-        </span>
-        <span class="sec-badge">
-          <i class="bi bi-lock-fill"></i>
-          Encrypted
-        </span>
-        <span class="sec-badge">
-          <i class="bi bi-phone-fill"></i>
-          No Password
-        </span>
-      </div>
-
     </div>
-
-    <!-- Footer -->
-    <div class="right-footer">
-      © 2025 Elite Dream Builders · All rights reserved
-    </div>
-  </div>
 
 </div>
 
 <script>
-  // ─── Phone input — numbers only ───
-  document.getElementById('phoneInput').addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '').slice(0, 10);
-  });
+(function() {
 
-  // ─── Form submit ───
-  document.getElementById('clientLoginForm').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    const phone    = document.getElementById('phoneInput').value.trim();
-    const btn      = document.getElementById('submitBtn');
-    const origHTML = btn.innerHTML;
-
-    // Validate
-    if (phone.length !== 10 || !/^[6-9]\d{9}$/.test(phone)) {
-      Swal.fire({
-        icon: 'warning',
-        title: 'Invalid Number',
-        text: 'Please enter a valid 10-digit Indian mobile number.',
-        confirmButtonText: 'Try Again',
-        confirmButtonColor: '#2563eb',
-        customClass: { popup: 'swal2-popup' }
-      });
-      return;
-    }
-
-    // Loading state
-    btn.disabled = true;
-    btn.innerHTML = `
-      <span style="
-        display: inline-block;
-        width: 16px; height: 16px;
-        border: 2px solid rgba(255,255,255,0.3);
-        border-top-color: white;
-        border-radius: 50%;
-        animation: spin 0.7s linear infinite;
-      "></span>
-      <span>Looking up...</span>
-    `;
-
-    fetch("{% url 'client_login' %}", {
-      method: 'POST',
-      headers: {
-        'X-Requested-With': 'XMLHttpRequest',
-        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: `phone=${phone}`
-    })
-    .then(res => res.json())
-    .then(data => {
-
-      btn.disabled = false;
-      btn.innerHTML = origHTML;
-
-      if (data.status === 'success') {
-
-        // ─── Confirm identity ───
-        Swal.fire({
-          title: 'Confirm Your Identity',
-          html: `
-            <div class="swal-client-card">
-              <div class="swal-client-avatar">
-                ${data.client_name.charAt(0).toUpperCase()}
-              </div>
-              <div>
-                <div class="swal-client-name">${data.client_name}</div>
-                <div class="swal-client-phone">
-                  <i class="bi bi-phone-fill" style="margin-right: 4px; color: #64748b;"></i>
-                  +91 ****${data.phone.slice(-4)}
-                </div>
-              </div>
-            </div>
-            <p class="swal-verify-text">
-              Is this your account? Click <strong>Confirm</strong> to proceed to your dashboard.
-            </p>
-          `,
-          showCancelButton: true,
-          confirmButtonText: '<i class="bi bi-check-circle-fill" style="margin-right: 6px;"></i> Confirm',
-          cancelButtonText: 'Not Me',
-          confirmButtonColor: '#2563eb',
-          cancelButtonColor: '#64748b',
-          reverseButtons: true,
-          focusConfirm: false,
-          customClass: { popup: 'swal2-popup' }
-        }).then(result => {
-          if (result.isConfirmed) {
-
-            // Loading on confirm
-            Swal.fire({
-              title: 'Signing you in...',
-              html: `
-                <div style="display: flex; flex-direction: column; align-items: center; gap: 12px; padding: 1rem 0;">
-                  <div style="
-                    width: 40px; height: 40px;
-                    border: 3px solid #eff6ff;
-                    border-top-color: #2563eb;
-                    border-radius: 50%;
-                    animation: spin 0.7s linear infinite;
-                  "></div>
-                  <p style="color: #64748b; font-size: 0.85rem; margin: 0;">Preparing your dashboard...</p>
-                </div>
-              `,
-              showConfirmButton: false,
-              allowOutsideClick: false,
-              customClass: { popup: 'swal2-popup' }
-            });
-
-            setTimeout(() => {
-              window.location.href = `/client/confirm-login/?phone=${data.phone}`;
-            }, 800);
-          }
-        });
-
-      } else {
-
-        // ─── Not found ───
-        Swal.fire({
-          icon: 'error',
-          title: 'Account Not Found',
-          html: `
-            <p style="color: #64748b; font-size: 0.88rem; line-height: 1.6;">
-              No account found for <strong style="color: #0f172a;">+91 ${phone}</strong>.<br>
-              Please check the number or contact your project manager.
-            </p>
-          `,
-          confirmButtonText: 'Try Again',
-          confirmButtonColor: '#2563eb',
-          customClass: { popup: 'swal2-popup' }
-        });
-      }
-    })
-    .catch(() => {
-      btn.disabled = false;
-      btn.innerHTML = origHTML;
-
-      Swal.fire({
-        icon: 'error',
-        title: 'Connection Error',
-        text: 'Something went wrong. Please check your connection and try again.',
-        confirmButtonText: 'Retry',
-        confirmButtonColor: '#2563eb',
-        customClass: { popup: 'swal2-popup' }
-      });
+    // ─── Phone: numbers only ───
+    var phoneInput = document.getElementById('phone');
+    phoneInput.addEventListener('input', function() {
+        this.value = this.value.replace(/\D/g, '').slice(0, 10);
     });
-  });
 
-  // ─── Inject keyframes ───
-  const s = document.createElement('style');
-  s.textContent = `
-    @keyframes spin {
-      to { transform: rotate(360deg); }
+    // ─── Password toggle ───
+    var pwdToggle = document.getElementById('pwdToggle');
+    var pwdField  = document.getElementById('password');
+    var pwdIcon   = document.getElementById('pwdIcon');
+
+    pwdToggle.addEventListener('click', function() {
+        var isHidden = pwdField.type === 'password';
+        pwdField.type = isHidden ? 'text' : 'password';
+        pwdIcon.className = isHidden ? 'bi bi-eye' : 'bi bi-eye-slash';
+    });
+
+    // ─── Form submit (AJAX) ───
+    var form      = document.getElementById('loginForm');
+    var submitBtn = document.getElementById('submitBtn');
+    var btnText   = document.getElementById('btnText');
+    var btnArrow  = document.getElementById('btnArrow');
+    var ajaxError = document.getElementById('ajaxError');
+    var errorText = document.getElementById('ajaxErrorText');
+
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        var phone    = phoneInput.value.trim();
+        var password = pwdField.value.trim();
+
+        // Client-side validation
+        if (phone.length !== 10 || !/^[6-9]\d{9}$/.test(phone)) {
+            showError('Please enter a valid 10-digit mobile number.');
+            return;
+        }
+
+        if (!password) {
+            showError('Please enter your password.');
+            return;
+        }
+
+        // Loading state
+        submitBtn.disabled = true;
+        btnArrow.style.display = 'none';
+        btnText.innerHTML = '<span style="display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,0.3);border-top-color:white;border-radius:50%;animation:spin 0.7s linear infinite;vertical-align:middle;margin-right:8px;"></span>Signing in...';
+
+        // Hide previous errors
+        ajaxError.style.display = 'none';
+
+        // AJAX request
+        var formData = new FormData(form);
+
+        fetch(form.action, {
+            method: 'POST',
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+            },
+            body: formData
+        })
+        .then(function(res) { return res.json(); })
+        .then(function(data) {
+            if (data.status === 'success') {
+                // Success feedback
+                btnText.innerHTML = '<i class="bi bi-check-circle-fill" style="margin-right:6px;"></i>Welcome, ' + data.client_name;
+                submitBtn.style.background = '#059669';
+                submitBtn.style.boxShadow = '0 8px 24px rgba(5,150,105,0.25)';
+
+                setTimeout(function() {
+                    window.location.href = data.redirect_url;
+                }, 600);
+            } else {
+                showError(data.message);
+                resetBtn();
+            }
+        })
+        .catch(function() {
+            showError('Connection error. Please try again.');
+            resetBtn();
+        });
+    });
+
+    function showError(msg) {
+        errorText.textContent = msg;
+        ajaxError.style.display = 'flex';
+
+        // Shake animation
+        ajaxError.style.animation = 'none';
+        ajaxError.offsetHeight; // trigger reflow
+        ajaxError.style.animation = 'alertSlide 0.3s ease';
     }
-  `;
-  document.head.appendChild(s);
+
+    function resetBtn() {
+        submitBtn.disabled = false;
+        btnText.textContent = 'Sign In';
+        btnArrow.style.display = '';
+        submitBtn.style.background = '';
+        submitBtn.style.boxShadow = '';
+    }
+
+    // Inject spin keyframe
+    var style = document.createElement('style');
+    style.textContent = '@keyframes spin { to { transform: rotate(360deg); } }';
+    document.head.appendChild(style);
+
+})();
 </script>
 
 </body>

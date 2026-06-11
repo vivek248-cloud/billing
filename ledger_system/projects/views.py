@@ -124,36 +124,113 @@ def admin_login(request):
 
 from django.http import JsonResponse
 
+# from django.http import JsonResponse
+# from django.shortcuts import render
+# from .models import Project
+
+# def client_login(request):
+#     if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
+#         phone = request.POST.get('phone', '').strip()
+
+#         if not phone:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': 'Phone number is required'
+#             })
+
+#         try:
+#             project = Project.objects.get(phone=phone)
+
+#             return JsonResponse({
+#                 'status': 'success',
+#                 'client_name': project.client_name,
+#                 'phone': project.phone
+#             })
+
+#         except Project.DoesNotExist:
+#             return JsonResponse({
+#                 'status': 'error',
+#                 'message': 'Phone number not found'
+#             })
+
+#     return render(request, 'projects/client_login.html')
+
+
+
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project
 
-def client_login(request):
-    if request.method == 'POST' and request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        phone = request.POST.get('phone', '').strip()
 
-        if not phone:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Phone number is required'
+def client_login(request):
+
+    if request.method == "POST":
+
+        phone = request.POST.get("phone", "").strip()
+        password = request.POST.get("password", "").strip()
+
+        # Check if AJAX
+        is_ajax = request.headers.get('X-Requested-With') == 'XMLHttpRequest'
+
+        if not phone or not password:
+            if is_ajax:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "Phone number and password are required."
+                })
+            return render(request, "projects/client_login.html", {
+                "error": "Phone number and password are required."
             })
 
         try:
             project = Project.objects.get(phone=phone)
 
-            return JsonResponse({
-                'status': 'success',
-                'client_name': project.client_name,
-                'phone': project.phone
-            })
+            # Generate expected password
+            expected_password = (
+                project.client_name.lower().replace(" ", "")
+                + project.phone[-4:]
+            )
+
+            if password.lower() != expected_password:
+                if is_ajax:
+                    return JsonResponse({
+                        "status": "error",
+                        "message": "Invalid password. Please try again."
+                    })
+                return render(request, "projects/client_login.html", {
+                    "error": "Invalid password. Please try again.",
+                    "phone": phone
+                })
+
+            # Set session
+            request.session["client_project_id"] = project.id
+            request.session.modified = True
+
+            redirect_url = f"/client/dashboard/{project.phone}/"
+
+            if is_ajax:
+                return JsonResponse({
+                    "status": "success",
+                    "client_name": project.client_name,
+                    "redirect_url": redirect_url
+                })
+
+            return redirect(redirect_url)
 
         except Project.DoesNotExist:
-            return JsonResponse({
-                'status': 'error',
-                'message': 'Phone number not found'
+            if is_ajax:
+                return JsonResponse({
+                    "status": "error",
+                    "message": "No account found with this phone number."
+                })
+            return render(request, "projects/client_login.html", {
+                "error": "No account found with this phone number.",
+                "phone": phone
             })
 
-    return render(request, 'projects/client_login.html')
+    return render(request, "projects/client_login.html")
+
+
 
 from django.shortcuts import redirect, get_object_or_404
 
