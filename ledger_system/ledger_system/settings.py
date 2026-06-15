@@ -250,7 +250,9 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 # 4. (no output)
 
+# 5.remove it:
+# sed -i '/from openai import project/d' /root/edb/billing/ledger_system/projects/views.py
 
-#4. cd /root/edb/billing/ledger_system
+#6. cd /root/edb/billing/ledger_system
 # source ../venv/bin/activate
 # python manage.py check

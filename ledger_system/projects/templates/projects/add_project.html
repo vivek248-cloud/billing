@@ -1,7 +1,6 @@
 {% extends 'projects/base.html' %}
 {% load extra_filters %}
 {% load indian_format %}
-
 {% load static %}
 
 {% block page_title %}Project Management{% endblock %}
@@ -35,6 +34,52 @@
                     <span class="pm-stat-chip-lbl">Active Projects</span>
                 </div>
             </div>
+            <!-- Mobile Add Button -->
+            <button class="pm-mobile-add-btn" id="pmMobileAddBtn" type="button">
+                <i class="bi bi-plus-lg"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════
+         STATS ROW (visible on all screens)
+    ════════════════════════════════════════ -->
+    <div class="pm-stats-row">
+        <div class="pm-stat-card pm-stat-total">
+            <div class="pm-stat-card-icon">
+                <i class="bi bi-layers-fill"></i>
+            </div>
+            <div class="pm-stat-card-body">
+                <span class="pm-stat-card-val">{{ projects|length }}</span>
+                <span class="pm-stat-card-lbl">Total Projects</span>
+            </div>
+        </div>
+        <div class="pm-stat-card pm-stat-ongoing">
+            <div class="pm-stat-card-icon">
+                <i class="bi bi-clock-fill"></i>
+            </div>
+            <div class="pm-stat-card-body">
+                <span class="pm-stat-card-val" id="ongoingCount">0</span>
+                <span class="pm-stat-card-lbl">Ongoing</span>
+            </div>
+        </div>
+        <div class="pm-stat-card pm-stat-completed">
+            <div class="pm-stat-card-icon">
+                <i class="bi bi-check-circle-fill"></i>
+            </div>
+            <div class="pm-stat-card-body">
+                <span class="pm-stat-card-val" id="completedCount">0</span>
+                <span class="pm-stat-card-lbl">Completed</span>
+            </div>
+        </div>
+        <div class="pm-stat-card pm-stat-hold">
+            <div class="pm-stat-card-icon">
+                <i class="bi bi-pause-circle-fill"></i>
+            </div>
+            <div class="pm-stat-card-body">
+                <span class="pm-stat-card-val" id="holdCount">0</span>
+                <span class="pm-stat-card-lbl">On Hold</span>
+            </div>
         </div>
     </div>
 
@@ -44,8 +89,13 @@
     <div class="pm-layout">
 
         <!-- ── LEFT: New Project Form ── -->
-        <div class="pm-form-col">
-            <div class="pm-form-card">
+        <div class="pm-form-col" id="pmFormCol">
+            <div class="pm-form-card" id="pmFormCard">
+
+                <!-- Mobile close button -->
+                <button class="pm-form-close" id="pmFormClose" type="button">
+                    <i class="bi bi-x-lg"></i>
+                </button>
 
                 <div class="pm-form-header">
                     <div class="pm-form-header-icon">
@@ -139,6 +189,8 @@
                 </form>
 
             </div>
+            <!-- Mobile overlay backdrop -->
+            <div class="pm-form-backdrop" id="pmFormBackdrop"></div>
         </div>
 
         <!-- ── RIGHT: Project Table ── -->
@@ -171,8 +223,8 @@
                     </div>
                 </div>
 
-                <!-- Table -->
-                <div class="pm-table-scroll">
+                <!-- Desktop Table -->
+                <div class="pm-table-scroll pm-desktop-table">
                     <table class="pm-table">
                         <thead>
                             <tr>
@@ -207,6 +259,7 @@
                         <tbody id="projectTableBody">
                             {% for project in projects %}
                             <tr class="pm-tr project-item"
+                                data-status="{{ project.status|default:'Pending' }}"
                                 style="animation-delay: {{ forloop.counter0 }}0ms">
 
                                 <!-- Serial -->
@@ -238,13 +291,12 @@
                                     </span>
                                 </td>
 
-                                <!-- current Budget -->
+                                <!-- Current Budget -->
                                 <td>
-                                    <span class="pm-budget">
+                                    <span class="pm-budget pm-budget-current">
                                         {{ project|total_budget_with_expense|indian_currency }}
                                     </span>
                                 </td>
-
 
                                 <!-- Status -->
                                 <td>
@@ -276,7 +328,7 @@
                             </tr>
                             {% empty %}
                             <tr id="emptyRow">
-                                <td colspan="5">
+                                <td colspan="6">
                                     <div class="pm-empty">
                                         <div class="pm-empty-art">
                                             <div class="pm-ea-ring pm-ear-1"></div>
@@ -286,7 +338,7 @@
                                             </div>
                                         </div>
                                         <h5>No Projects Yet</h5>
-                                        <p>Create your first project using the form on the left</p>
+                                        <p>Create your first project using the form</p>
                                     </div>
                                 </td>
                             </tr>
@@ -295,7 +347,82 @@
                     </table>
                 </div>
 
-                <!-- No results row (hidden by default) -->
+                <!-- Mobile Card List -->
+                <div class="pm-mobile-list" id="pmMobileList">
+                    {% for project in projects %}
+                    <div class="pm-mobile-card project-item-mobile"
+                         data-status="{{ project.status|default:'Pending' }}"
+                         style="animation-delay: {{ forloop.counter0 }}0ms">
+                        <div class="pm-mobile-card-top">
+                            <div class="pm-proj-cell">
+                                <div class="pm-proj-av pm-av-{% cycle 'indigo' 'emerald' 'amber' 'violet' 'teal' %}">
+                                    {{ project.name|slice:":2"|upper }}
+                                </div>
+                                <div>
+                                    <span class="pm-proj-name">{{ project.name }}</span>
+                                    <span class="pm-proj-meta">
+                                        <i class="bi bi-person"></i> {{ project.client_name }}
+                                    </span>
+                                </div>
+                            </div>
+                            <span class="pm-status-badge
+                                {% if project.status == 'Ongoing' %}pm-st-amber
+                                {% elif project.status == 'Completed' %}pm-st-emerald
+                                {% elif project.status == 'On Hold' %}pm-st-slate
+                                {% else %}pm-st-slate{% endif %}">
+                                <span class="pm-st-dot"></span>
+                                {{ project.status|default:"Pending" }}
+                            </span>
+                        </div>
+                        <div class="pm-mobile-card-details">
+                            <div class="pm-mobile-detail">
+                                <span class="pm-mobile-detail-lbl">
+                                    <i class="bi bi-telephone"></i> Phone
+                                </span>
+                                <span class="pm-mobile-detail-val">{{ project.phone }}</span>
+                            </div>
+                            <div class="pm-mobile-detail">
+                                <span class="pm-mobile-detail-lbl">
+                                    <i class="bi bi-calculator"></i> Budget
+                                </span>
+                                <span class="pm-mobile-detail-val pm-budget-sm">₹{{ project.budget|default:"0.00" }}</span>
+                            </div>
+                            <div class="pm-mobile-detail">
+                                <span class="pm-mobile-detail-lbl">
+                                    <i class="bi bi-graph-up"></i> Current
+                                </span>
+                                <span class="pm-mobile-detail-val pm-budget-sm pm-budget-current">
+                                    {{ project|total_budget_with_expense|indian_currency }}
+                                </span>
+                            </div>
+                        </div>
+                        <div class="pm-mobile-card-actions">
+                            <a href="{% url 'edit_project' project.id %}"
+                               class="pm-mobile-action pm-mobile-edit">
+                                <i class="bi bi-pencil-square"></i> Edit
+                            </a>
+                            <a href="{% url 'delete_project' project.id %}"
+                               class="pm-mobile-action pm-mobile-delete delete-btn">
+                                <i class="bi bi-trash3"></i> Delete
+                            </a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="pm-empty">
+                        <div class="pm-empty-art">
+                            <div class="pm-ea-ring pm-ear-1"></div>
+                            <div class="pm-ea-ring pm-ear-2"></div>
+                            <div class="pm-ea-icon">
+                                <i class="bi bi-briefcase"></i>
+                            </div>
+                        </div>
+                        <h5>No Projects Yet</h5>
+                        <p>Tap the + button to create your first project</p>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- No results row -->
                 <div id="pmNoResults" class="pm-no-results" style="display:none;">
                     <i class="bi bi-search"></i>
                     <span>No projects match your search</span>
@@ -332,6 +459,7 @@
     --pm-violet-lt: #f5f3ff;
     --pm-teal:      #0d9488;
     --pm-teal-lt:   #f0fdfa;
+
     --pm-s50:  #f8fafc;
     --pm-s100: #f1f5f9;
     --pm-s200: #e2e8f0;
@@ -340,15 +468,26 @@
     --pm-s500: #64748b;
     --pm-s600: #475569;
     --pm-dark: #0f172a;
+
     --pm-r-sm: 8px;
     --pm-r-md: 12px;
     --pm-r-lg: 16px;
     --pm-r-xl: 20px;
+    --pm-r-2xl: 24px;
+
     --pm-ease: cubic-bezier(.4,0,.2,1);
+    --pm-spring: cubic-bezier(.34,1.56,.64,1);
+
     --pm-sh-sm: 0 1px 3px rgba(0,0,0,.05);
     --pm-sh-md: 0 4px 12px rgba(0,0,0,.07);
     --pm-sh-lg: 0 12px 32px rgba(0,0,0,.1);
+    --pm-sh-xl: 0 20px 48px rgba(0,0,0,.14);
 }
+
+/* ══════════════════════════════
+   GLOBAL RESET
+══════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; }
 
 /* ══════════════════════════════
    PAGE
@@ -356,10 +495,10 @@
 .pm-page {
     display: flex;
     flex-direction: column;
-    gap: 22px;
+    gap: 20px;
     max-width: 1440px;
     margin: 0 auto;
-    padding-bottom: 48px;
+    padding: 0 0 48px;
 }
 
 /* ══════════════════════════════
@@ -377,6 +516,13 @@
     display: flex;
     align-items: center;
     gap: 14px;
+    min-width: 0;
+}
+
+.pm-header-right {
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
 .pm-header-icon {
@@ -419,7 +565,7 @@
     color: var(--pm-s500); margin: 0;
 }
 
-/* Stat Chip */
+/* Stat Chip (header) */
 .pm-stat-chip {
     display: flex; align-items: center; gap: 12px;
     padding: 12px 18px;
@@ -447,6 +593,77 @@
     font-size: .62rem; font-weight: 500;
     color: var(--pm-s500); text-transform: uppercase;
     letter-spacing: .05em; margin-top: 1px;
+}
+
+/* Mobile Add FAB */
+.pm-mobile-add-btn {
+    display: none;
+    width: 42px; height: 42px;
+    background: linear-gradient(135deg, var(--pm-indigo), var(--pm-indigo-dk));
+    color: white; border: none;
+    border-radius: var(--pm-r-md);
+    font-size: 1.1rem;
+    align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(79,70,229,.3);
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: all .2s var(--pm-ease);
+}
+
+.pm-mobile-add-btn:active {
+    transform: scale(.94);
+}
+
+/* ══════════════════════════════
+   STATS ROW
+══════════════════════════════ */
+.pm-stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+
+.pm-stat-card {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: white;
+    border: 1px solid var(--pm-s200);
+    border-radius: var(--pm-r-lg);
+    box-shadow: var(--pm-sh-sm);
+    transition: all .2s var(--pm-ease);
+}
+
+.pm-stat-card:hover {
+    box-shadow: var(--pm-sh-md);
+    transform: translateY(-1px);
+}
+
+.pm-stat-card-icon {
+    width: 40px; height: 40px;
+    border-radius: var(--pm-r-md);
+    display: flex; align-items: center; justify-content: center;
+    font-size: .92rem;
+    flex-shrink: 0;
+}
+
+.pm-stat-total .pm-stat-card-icon   { background: var(--pm-indigo-lt); color: var(--pm-indigo); }
+.pm-stat-ongoing .pm-stat-card-icon { background: var(--pm-amber-lt);  color: var(--pm-amber); }
+.pm-stat-completed .pm-stat-card-icon { background: var(--pm-emerald-lt); color: var(--pm-emerald); }
+.pm-stat-hold .pm-stat-card-icon    { background: var(--pm-s100);      color: var(--pm-s500); }
+
+.pm-stat-card-val {
+    display: block;
+    font-size: 1.2rem; font-weight: 700;
+    color: var(--pm-dark); line-height: 1.1;
+}
+
+.pm-stat-card-lbl {
+    display: block;
+    font-size: .6rem; font-weight: 500;
+    color: var(--pm-s500); text-transform: uppercase;
+    letter-spacing: .06em; margin-top: 1px;
 }
 
 /* ══════════════════════════════
@@ -477,12 +694,25 @@
     position: relative;
 }
 
-/* Top accent */
 .pm-form-card::before {
     content: '';
     display: block;
     height: 3px;
     background: linear-gradient(90deg, var(--pm-indigo), #818cf8, #06b6d4);
+}
+
+.pm-form-close {
+    display: none;
+    position: absolute;
+    top: 14px; right: 14px;
+    width: 32px; height: 32px;
+    background: var(--pm-s100);
+    border: none; border-radius: var(--pm-r-sm);
+    color: var(--pm-s500);
+    font-size: .88rem;
+    align-items: center; justify-content: center;
+    cursor: pointer; z-index: 10;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .pm-form-header {
@@ -509,9 +739,8 @@
     color: var(--pm-s500); margin: 0;
 }
 
-/* Alert */
 .pm-alert {
-    display: flex; align-items: center; gap: 8px;
+    display: flex; align-items: flex-start; gap: 8px;
     padding: 10px 14px; border-radius: var(--pm-r-md);
     font-size: .74rem; font-weight: 500;
     margin: 14px 20px 0;
@@ -523,9 +752,8 @@
     border: 1px solid rgba(220,38,38,.15);
 }
 
-.pm-alert i { flex-shrink: 0; font-size: .82rem; }
+.pm-alert i { flex-shrink: 0; font-size: .82rem; margin-top: 1px; }
 
-/* Form */
 .pm-form { padding: 16px 20px 20px; display: flex; flex-direction: column; gap: 14px; }
 
 .pm-field { display: flex; flex-direction: column; gap: 5px; }
@@ -535,6 +763,7 @@
     font-size: .66rem; font-weight: 600;
     color: var(--pm-s500); text-transform: uppercase;
     letter-spacing: .06em;
+    transition: color .2s var(--pm-ease);
 }
 
 .pm-field-label i { color: var(--pm-indigo); font-size: .72rem; }
@@ -553,11 +782,14 @@
     width: 100%; padding: 10px 12px;
     border: 1.5px solid var(--pm-s200);
     border-radius: var(--pm-r-md);
-    font-size: .82rem; font-weight: 400;
+    font-size: 16px;
+    font-weight: 400;
     color: var(--pm-dark); background: var(--pm-s50);
     font-family: inherit;
     transition: all .2s var(--pm-ease);
     appearance: none;
+    -webkit-appearance: none;
+    box-sizing: border-box;
 }
 
 .pm-input-has-prefix { padding-left: 28px; }
@@ -577,10 +809,10 @@
     display: flex; align-items: center;
 }
 
-/* Submit */
 .pm-submit-btn {
     display: flex; align-items: center; justify-content: center;
     gap: 8px; width: 100%; padding: 12px;
+    min-height: 44px;
     background: linear-gradient(135deg, var(--pm-indigo), var(--pm-indigo-dk));
     color: white; border: none; border-radius: var(--pm-r-md);
     font-size: .82rem; font-weight: 600;
@@ -588,6 +820,7 @@
     transition: all .2s var(--pm-ease);
     box-shadow: 0 4px 12px rgba(79,70,229,.28);
     margin-top: 4px;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .pm-submit-btn:hover {
@@ -598,6 +831,11 @@
 .pm-submit-btn:active { transform: translateY(0); }
 
 .pm-submit-btn i { font-size: 1rem; }
+
+/* Form backdrop */
+.pm-form-backdrop {
+    display: none;
+}
 
 /* ══════════════════════════════
    TABLE CARD
@@ -611,7 +849,6 @@
     position: relative;
 }
 
-/* Top accent */
 .pm-table-card::before {
     content: '';
     display: block;
@@ -619,7 +856,6 @@
     background: linear-gradient(90deg, var(--pm-indigo), #818cf8, #06b6d4);
 }
 
-/* Table Header */
 .pm-table-header {
     display: flex; align-items: center;
     justify-content: space-between;
@@ -670,10 +906,12 @@
     width: 100%; padding: 8px 32px 8px 32px;
     border: 1.5px solid var(--pm-s200);
     border-radius: var(--pm-r-md);
-    font-size: .78rem; font-weight: 400;
+    font-size: 16px;
+    font-weight: 400;
     color: var(--pm-dark); background: white;
     font-family: inherit;
     transition: all .2s var(--pm-ease);
+    box-sizing: border-box;
 }
 
 .pm-search-input::placeholder { color: var(--pm-s400); }
@@ -694,7 +932,11 @@
 .pm-search-clear:hover { color: var(--pm-red); }
 
 /* Table Scroll */
-.pm-table-scroll { overflow-x: auto; max-height: 62vh; }
+.pm-table-scroll {
+    overflow-x: auto; max-height: 62vh;
+    -webkit-overflow-scrolling: touch;
+}
+
 .pm-table-scroll::-webkit-scrollbar { width: 4px; height: 4px; }
 .pm-table-scroll::-webkit-scrollbar-thumb { background: var(--pm-s200); border-radius: 10px; }
 
@@ -702,11 +944,10 @@
 .pm-table {
     width: 100%; border-collapse: collapse;
     font-size: .78rem;
+    min-width: 700px;
 }
 
-.pm-table thead {
-    position: sticky; top: 0; z-index: 10;
-}
+.pm-table thead { position: sticky; top: 0; z-index: 10; }
 
 .pm-table thead tr {
     background: var(--pm-s50);
@@ -727,7 +968,6 @@
 }
 
 .pm-th-end { justify-content: flex-end; width: 100%; }
-
 .pm-th-sno { width: 40px; text-align: center; }
 
 .pm-table tbody tr {
@@ -758,7 +998,7 @@
 }
 
 /* Project Cell */
-.pm-proj-cell { display: flex; align-items: center; gap: 10px; }
+.pm-proj-cell { display: flex; align-items: center; gap: 10px; min-width: 0; }
 
 .pm-proj-av {
     width: 36px; height: 36px; min-width: 36px;
@@ -778,6 +1018,7 @@
     display: block;
     font-size: .78rem; font-weight: 600;
     color: var(--pm-dark); line-height: 1.2;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 
 .pm-proj-meta {
@@ -790,10 +1031,15 @@
 
 /* Budget */
 .pm-budget {
-    font-size: 1.12rem; font-weight: 600;
+    font-size: .95rem; font-weight: 600;
     color: var(--pm-dark);
-    font-family: 'Monaco','Menlo',monospace;
+    font-family: 'Monaco','Menlo','Consolas', monospace;
     letter-spacing: -.01em;
+    white-space: nowrap;
+}
+
+.pm-budget-current {
+    color: var(--pm-indigo);
 }
 
 /* Status Badges */
@@ -802,16 +1048,15 @@
     padding: 4px 10px; border-radius: 20px;
     font-size: .62rem; font-weight: 500;
     border: 1px solid transparent;
+    white-space: nowrap; flex-shrink: 0;
 }
 
 .pm-st-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
 
 .pm-st-amber  { background: var(--pm-amber-lt);   color: var(--pm-amber);   border-color: rgba(217,119,6,.15); }
 .pm-st-amber  .pm-st-dot { background: var(--pm-amber); }
-
 .pm-st-emerald { background: var(--pm-emerald-lt); color: var(--pm-emerald); border-color: rgba(5,150,105,.15); }
 .pm-st-emerald .pm-st-dot { background: var(--pm-emerald); }
-
 .pm-st-slate  { background: var(--pm-s100);       color: var(--pm-s600);    border-color: var(--pm-s200); }
 .pm-st-slate  .pm-st-dot { background: var(--pm-s400); }
 
@@ -819,12 +1064,13 @@
 .pm-action-group { display: flex; align-items: center; justify-content: flex-end; gap: 5px; }
 
 .pm-action-btn {
-    width: 30px; height: 30px;
+    width: 32px; height: 32px;
     display: inline-flex; align-items: center; justify-content: center;
     border-radius: var(--pm-r-sm); border: 1px solid var(--pm-s200);
     background: white; color: var(--pm-s400);
     font-size: .78rem; text-decoration: none;
     transition: all .18s var(--pm-ease);
+    cursor: pointer;
 }
 
 .pm-action-edit:hover {
@@ -881,23 +1127,402 @@
 .pm-empty h5 { font-size: .9rem; font-weight: 600; color: var(--pm-dark); margin-bottom: 6px; }
 .pm-empty p  { font-size: .74rem; font-weight: 400; color: var(--pm-s500); margin: 0; }
 
+
 /* ══════════════════════════════
-   RESPONSIVE
+   MOBILE CARD LIST (hidden on desktop)
+══════════════════════════════ */
+.pm-mobile-list {
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+    padding: 14px;
+}
+
+.pm-mobile-card {
+    background: white;
+    border: 1px solid var(--pm-s200);
+    border-radius: var(--pm-r-lg);
+    padding: 14px;
+    animation: pmRowFade .3s var(--pm-ease) both;
+    transition: box-shadow .2s var(--pm-ease);
+}
+
+.pm-mobile-card:active {
+    box-shadow: var(--pm-sh-md);
+}
+
+.pm-mobile-card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pm-mobile-card-details {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 8px;
+    padding: 10px 0;
+    border-top: 1px solid var(--pm-s100);
+    border-bottom: 1px solid var(--pm-s100);
+}
+
+.pm-mobile-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pm-mobile-detail-lbl {
+    font-size: .56rem;
+    font-weight: 600;
+    color: var(--pm-s400);
+    text-transform: uppercase;
+    letter-spacing: .05em;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.pm-mobile-detail-lbl i {
+    font-size: .58rem;
+    color: var(--pm-indigo);
+}
+
+.pm-mobile-detail-val {
+    font-size: .76rem;
+    font-weight: 500;
+    color: var(--pm-dark);
+}
+
+.pm-budget-sm {
+    font-family: 'Monaco','Menlo','Consolas', monospace;
+    font-weight: 600;
+}
+
+.pm-mobile-card-actions {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px;
+}
+
+.pm-mobile-action {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 8px 12px;
+    border-radius: var(--pm-r-sm);
+    font-size: .7rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all .15s var(--pm-ease);
+    -webkit-tap-highlight-color: transparent;
+}
+
+.pm-mobile-edit {
+    background: var(--pm-indigo-lt);
+    color: var(--pm-indigo);
+    border: 1px solid var(--pm-indigo-md);
+}
+
+.pm-mobile-edit:hover { background: var(--pm-indigo-md); }
+
+.pm-mobile-delete {
+    background: var(--pm-red-lt);
+    color: var(--pm-red);
+    border: 1px solid rgba(220,38,38,.15);
+}
+
+.pm-mobile-delete:hover { background: #fecaca; }
+
+
+/* ══════════════════════════════
+   LABEL ACTIVE (JS-driven)
+══════════════════════════════ */
+.pm-label-active {
+    color: var(--pm-indigo) !important;
+}
+
+.pm-label-active i {
+    color: var(--pm-indigo-dk) !important;
+}
+
+
+/* ══════════════════════════════
+   RESPONSIVE — 1024px (Tablet)
 ══════════════════════════════ */
 @media (max-width: 1024px) {
-    .pm-layout { grid-template-columns: 1fr; }
-    .pm-form-col { position: static; }
+    .pm-layout {
+        grid-template-columns: 1fr;
+        gap: 16px;
+    }
+
+    .pm-form-col {
+        position: static;
+        top: unset;
+    }
+
+    .pm-stats-row {
+        grid-template-columns: repeat(4, 1fr);
+        gap: 10px;
+    }
+
+    .pm-stat-card {
+        padding: 12px 14px;
+    }
 }
 
+
+/* ══════════════════════════════
+   RESPONSIVE — 768px (Mobile)
+══════════════════════════════ */
 @media (max-width: 768px) {
-    .pm-header { flex-direction: column; align-items: flex-start; }
-    .pm-search-wrap { max-width: 100%; flex: 1; }
-    .pm-table-header { flex-direction: column; align-items: flex-start; }
+    .pm-page {
+        gap: 14px;
+        padding-bottom: 32px;
+    }
+
+    .pm-header {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .pm-header-icon {
+        width: 44px; height: 44px;
+        font-size: 1rem;
+    }
+
+    .pm-title { font-size: 1.1rem; }
+    .pm-subtitle { font-size: .66rem; }
+
+    /* Hide header stat chip, show mobile add */
+    .pm-stat-chip { display: none; }
+    .pm-mobile-add-btn { display: flex; }
+
+    /* Stats row 2x2 */
+    .pm-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 8px;
+    }
+
+    .pm-stat-card {
+        padding: 10px 12px;
+        gap: 10px;
+    }
+
+    .pm-stat-card-icon {
+        width: 34px; height: 34px;
+        font-size: .8rem;
+    }
+
+    .pm-stat-card-val { font-size: 1rem; }
+    .pm-stat-card-lbl { font-size: .55rem; }
+
+    /* Form — Mobile Slide-up */
+    .pm-form-col {
+        position: fixed;
+        top: 0; left: 0; right: 0; bottom: 0;
+        z-index: 1000;
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity .25s var(--pm-ease);
+    }
+
+    .pm-form-col.pm-form-open {
+        pointer-events: auto;
+        opacity: 1;
+    }
+
+    .pm-form-backdrop {
+        display: block;
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, .4);
+        backdrop-filter: blur(4px);
+        -webkit-backdrop-filter: blur(4px);
+        z-index: -1;
+        opacity: 0;
+        transition: opacity .25s var(--pm-ease);
+    }
+
+    .pm-form-col.pm-form-open .pm-form-backdrop {
+        opacity: 1;
+    }
+
+    .pm-form-card {
+        width: 100%;
+        max-width: 480px;
+        max-height: 90vh;
+        overflow-y: auto;
+        border-radius: var(--pm-r-2xl) var(--pm-r-2xl) 0 0;
+        box-shadow: var(--pm-sh-xl);
+        transform: translateY(100%);
+        transition: transform .35s var(--pm-spring);
+    }
+
+    .pm-form-col.pm-form-open .pm-form-card {
+        transform: translateY(0);
+    }
+
+    .pm-form-close {
+        display: flex;
+    }
+
+    /* Table */
+    .pm-table-card { border-radius: var(--pm-r-lg); }
+
+    .pm-table-header {
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 14px;
+        gap: 10px;
+    }
+
+    .pm-search-wrap {
+        max-width: 100%;
+        width: 100%;
+    }
+
+    /* Hide desktop table, show mobile cards */
+    .pm-desktop-table { display: none; }
+    .pm-mobile-list { display: flex; }
 }
 
+
+/* ══════════════════════════════
+   RESPONSIVE — 480px (Small)
+══════════════════════════════ */
 @media (max-width: 480px) {
-    .pm-stat-chip { display: none; }
-    .pm-proj-meta { display: none; }
+    .pm-page {
+        gap: 12px;
+        padding-bottom: 24px;
+    }
+
+    .pm-header-icon {
+        width: 40px; height: 40px;
+        font-size: .92rem;
+    }
+
+    .pm-icon-ring { inset: -4px; }
+
+    .pm-eyebrow { font-size: .55rem; }
+    .pm-title { font-size: 1rem; }
+    .pm-subtitle { display: none; }
+
+    .pm-stats-row { gap: 6px; }
+
+    .pm-stat-card {
+        padding: 9px 10px;
+        gap: 8px;
+        border-radius: var(--pm-r-md);
+    }
+
+    .pm-stat-card-icon {
+        width: 30px; height: 30px;
+        font-size: .72rem;
+        border-radius: var(--pm-r-sm);
+    }
+
+    .pm-stat-card-val { font-size: .88rem; }
+    .pm-stat-card-lbl { font-size: .5rem; }
+
+    /* Form tweaks inside sheet */
+    .pm-form-header { padding: 16px 16px 0; gap: 10px; }
+    .pm-form { padding: 14px 16px 16px; gap: 12px; }
+    .pm-alert { margin: 10px 16px 0; }
+
+    .pm-form-header-icon {
+        width: 32px; height: 32px;
+        font-size: .82rem;
+    }
+
+    .pm-form-title { font-size: .82rem; }
+
+    .pm-submit-btn {
+        min-height: 48px;
+        padding: 13px;
+        font-size: .84rem;
+    }
+
+    /* Mobile cards */
+    .pm-mobile-list { padding: 10px; gap: 8px; }
+
+    .pm-mobile-card { padding: 12px; }
+
+    .pm-proj-av {
+        width: 32px; height: 32px; min-width: 32px;
+        font-size: .55rem;
+    }
+
+    .pm-proj-name { font-size: .74rem; }
+    .pm-proj-meta { font-size: .58rem; }
+
+    .pm-mobile-card-details {
+        gap: 6px;
+        padding: 8px 0;
+    }
+
+    .pm-mobile-detail-lbl { font-size: .52rem; }
+    .pm-mobile-detail-val { font-size: .72rem; }
+
+    .pm-mobile-action {
+        padding: 9px 10px;
+        font-size: .68rem;
+    }
+
+    .pm-table-header { padding: 10px 12px; }
+    .pm-tbl-title { font-size: .76rem; }
+
+    .pm-empty { padding: 36px 16px; }
+    .pm-empty-art { width: 60px; height: 60px; }
+    .pm-ea-icon { font-size: 1.4rem; }
+    .pm-empty h5 { font-size: .82rem; }
+    .pm-empty p { font-size: .68rem; }
+}
+
+
+/* ══════════════════════════════
+   RESPONSIVE — 360px (XSmall)
+══════════════════════════════ */
+@media (max-width: 360px) {
+    .pm-title { font-size: .92rem; }
+
+    .pm-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 5px;
+    }
+
+    .pm-stat-card {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 6px;
+        padding: 8px 9px;
+    }
+
+    .pm-stat-card-icon {
+        width: 26px; height: 26px;
+        font-size: .65rem;
+    }
+
+    .pm-stat-card-val { font-size: .82rem; }
+
+    .pm-mobile-card-details {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pm-mobile-card-details .pm-mobile-detail:last-child {
+        grid-column: span 2;
+    }
+
+    .pm-form-header { padding: 14px 14px 0; }
+    .pm-form { padding: 12px 14px 14px; gap: 10px; }
+    .pm-alert { margin: 8px 14px 0; }
 }
 
 </style>
@@ -911,17 +1536,79 @@
 <script>
 document.addEventListener('DOMContentLoaded', function () {
 
-    /* ── Row animation delays ── */
-    document.querySelectorAll('.pm-tr').forEach((row, idx) => {
-        row.style.animationDelay = `${idx * 20}ms`;
+    /* ════════════════════════════
+       STATUS COUNTS
+    ════════════════════════════ */
+    const rows = document.querySelectorAll('#projectTableBody .project-item');
+    const mobileCards = document.querySelectorAll('.project-item-mobile');
+    let ongoing = 0, completed = 0, hold = 0;
+
+    rows.forEach(row => {
+        const s = (row.dataset.status || '').toLowerCase();
+        if (s === 'ongoing') ongoing++;
+        else if (s === 'completed') completed++;
+        else if (s === 'on hold') hold++;
     });
+
+    const oc = document.getElementById('ongoingCount');
+    const cc = document.getElementById('completedCount');
+    const hc = document.getElementById('holdCount');
+    if (oc) oc.textContent = ongoing;
+    if (cc) cc.textContent = completed;
+    if (hc) hc.textContent = hold;
+
+    /* ── Row animation delays ── */
+    rows.forEach((row, idx) => {
+        row.style.animationDelay = `${idx * 30}ms`;
+    });
+    mobileCards.forEach((card, idx) => {
+        card.style.animationDelay = `${idx * 30}ms`;
+    });
+
+
+    /* ════════════════════════════
+       MOBILE FORM SHEET
+    ════════════════════════════ */
+    const formCol = document.getElementById('pmFormCol');
+    const formClose = document.getElementById('pmFormClose');
+    const formBackdrop = document.getElementById('pmFormBackdrop');
+    const mobileAddBtn = document.getElementById('pmMobileAddBtn');
+
+    function openFormSheet() {
+        formCol.classList.add('pm-form-open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeFormSheet() {
+        formCol.classList.remove('pm-form-open');
+        document.body.style.overflow = '';
+    }
+
+    if (mobileAddBtn) {
+        mobileAddBtn.addEventListener('click', openFormSheet);
+    }
+
+    if (formClose) {
+        formClose.addEventListener('click', closeFormSheet);
+    }
+
+    if (formBackdrop) {
+        formBackdrop.addEventListener('click', closeFormSheet);
+    }
+
+    // Close on Escape
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && formCol.classList.contains('pm-form-open')) {
+            closeFormSheet();
+        }
+    });
+
 
     /* ════════════════════════════
        SEARCH FILTER
     ════════════════════════════ */
     const searchInput = document.getElementById('projectSearch');
     const searchClear = document.getElementById('pmSearchClear');
-    const rows        = document.querySelectorAll('#projectTableBody .project-item');
     const noResults   = document.getElementById('pmNoResults');
 
     function doSearch() {
@@ -931,11 +1618,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
         let visible = 0;
 
+        // Desktop table rows
         rows.forEach(row => {
             const text = row.innerText.toLowerCase();
             const show = text.includes(q);
             row.style.display = show ? '' : 'none';
             if (show) visible++;
+        });
+
+        // Mobile cards
+        mobileCards.forEach(card => {
+            const text = card.innerText.toLowerCase();
+            const show = text.includes(q);
+            card.style.display = show ? '' : 'none';
         });
 
         if (noResults) {
@@ -955,13 +1650,13 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+
     /* ════════════════════════════
        DELETE CONFIRMATION
     ════════════════════════════ */
     document.querySelectorAll('.delete-btn').forEach(btn => {
         btn.addEventListener('click', function (e) {
             e.preventDefault();
-
             const url = this.getAttribute('href');
 
             Swal.fire({
@@ -988,6 +1683,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+
     /* ════════════════════════════
        DJANGO MESSAGES
     ════════════════════════════ */
@@ -1006,6 +1702,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
         {% endfor %}
     {% endif %}
+
 
     /* ════════════════════════════
        FORM INPUT FOCUS EFFECTS
@@ -1026,12 +1723,5 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
-
-<!-- Label active state (JS-driven) -->
-<style>
-.pm-label-active {
-    color: var(--pm-indigo) !important;
-}
-</style>
 
 {% endblock %}
