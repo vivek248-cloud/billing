@@ -157,6 +157,25 @@ from django.http import JsonResponse
 
 
 
+def get_client_password(name, phone):
+    import re
+
+    name = name.lower().strip()
+
+    name = re.sub(
+        r'^(mr|mrs|ms|miss|dr)\.?\s*',
+        '',
+        name,
+        flags=re.IGNORECASE
+    )
+
+    name = re.sub(r'[^a-z]', '', name)
+
+    return f"{name}{str(phone)[-4:]}"
+
+
+
+
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from .models import Project
@@ -186,9 +205,9 @@ def client_login(request):
             project = Project.objects.get(phone=phone)
 
             # Generate expected password
-            expected_password = (
-                project.client_name.lower().replace(" ", "")
-                + project.phone[-4:]
+            expected_password = get_client_password(
+                project.client_name,
+                project.phone
             )
 
             if password.lower() != expected_password:

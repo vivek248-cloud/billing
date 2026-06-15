@@ -238,3 +238,19 @@ JAZZMIN_SETTINGS = {
 SESSION_COOKIE_AGE = 300  # 5 minutes in seconds
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
 SESSION_SAVE_EVERY_REQUEST = True
+
+
+
+# error solving command 
+
+# 1. sed -n '1,10p' /root/edb/billing/ledger_system/projects/views.py
+# 2. grep -n "openai" /root/edb/billing/ledger_system/projects/views.py
+
+# 3. Expected result:
+
+# 4. (no output)
+
+
+#4. cd /root/edb/billing/ledger_system
+# source ../venv/bin/activate
+# python manage.py check
