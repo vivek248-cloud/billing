@@ -157,18 +157,20 @@ from django.http import JsonResponse
 
 
 
-def get_client_password(name, phone):
-    import re
+import re
 
+def get_client_password(name, phone):
     name = name.lower().strip()
 
+    # Remove title at the beginning
     name = re.sub(
-        r'^(mr|mrs|ms|miss|dr)\.?\s*',
+        r'^(mr|mrs|ms|miss|dr)[.\s_-]*',
         '',
         name,
         flags=re.IGNORECASE
     )
 
+    # Keep only letters
     name = re.sub(r'[^a-z]', '', name)
 
     return f"{name}{str(phone)[-4:]}"
