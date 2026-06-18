@@ -318,9 +318,10 @@
                                            title="Edit">
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
-                                        <a href="{% url 'delete_project' project.id %}"
-                                           class="pm-action-btn pm-action-delete delete-btn"
-                                           title="Delete">
+                                        <a href="#"
+                                        class="pm-action-btn pm-action-delete"
+                                        title="Delete"
+                                        onclick="deleteProject('{% url 'delete_project' project.id %}')">
                                             <i class="bi bi-trash3"></i>
                                         </a>
                                     </div>
@@ -1722,6 +1723,24 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 });
+
+function deleteProject(url) {
+    Swal.fire({
+        title: 'Delete Project?',
+        text: "This action cannot be undone.",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.replace(url); // bypasses many loader handlers
+        }
+    });
+}
+
+
 </script>
 
 {% endblock %}

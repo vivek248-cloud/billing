@@ -161,7 +161,7 @@ window.addEventListener('orientationchange', checkOrientation);
     </div>
 
     <!-- ═══ On Hold ═══ -->
-    <div class="bl-sc bl-sc-amber">
+    {% comment %} <div class="bl-sc bl-sc-amber">
         <div class="bl-sc-head">
             <div class="bl-sc-icon bl-sci-amber">
                 <i class="bi bi-pause-circle-fill"></i>
@@ -204,7 +204,7 @@ window.addEventListener('orientationchange', checkOrientation);
             </span>
         </div>
         {% endif %}
-    </div>
+    </div> {% endcomment %}
 
     <!-- ═══ Not Started ═══ -->
     <div class="bl-sc bl-sc-slate">
@@ -810,7 +810,7 @@ document.addEventListener("DOMContentLoaded", function () {
 ══════════════════════════════════════ */
 .bl-summary-grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(3, 1fr);// 4 for billing page 
     gap: 16px;
 }
 
