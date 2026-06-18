@@ -338,8 +338,9 @@
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
                             <form method="post"
-                                  action="{% url 'delete_payment' payment.id %}"
-                                  class="delete-form pl-m-action-form">
+                                action="{% url 'delete_payment' payment.id %}"
+                                class="delete-form pl-m-action-form"
+                                data-no-loader>
                                 {% csrf_token %}
                                 <button type="submit" class="pl-m-action pl-m-delete">
                                     <i class="bi bi-trash3"></i> Delete
@@ -1277,6 +1278,44 @@ input[type="number"] { -moz-appearance:textfield; }
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
+
+function confirmPaymentDelete(event, form) {
+
+    event.preventDefault();
+
+    Swal.fire({
+        title: 'Delete Payment?',
+        text: 'This payment record will be permanently removed.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#dc3545',
+        confirmButtonText: 'Delete',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+
+        if (result.isConfirmed) {
+            form.submit(); // normal submit after confirmation
+        }
+
+    });
+
+    return false;
+}
+
+document.querySelectorAll("form").forEach(function (form) {
+    form.addEventListener("submit", function () {
+
+        if (
+            this.hasAttribute("data-no-loader") ||
+            this.classList.contains("delete-form")
+        ) {
+            return;
+        }
+
+        loader.classList.remove("hide");
+    });
+});
+
 document.addEventListener('DOMContentLoaded', function () {
 
     /* ════════════════════════════
