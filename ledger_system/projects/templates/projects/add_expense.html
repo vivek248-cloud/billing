@@ -316,7 +316,12 @@
                                 <td class="text-center">
                                     <div class="ex-action-group">
                                         <a href="{% url 'edit_expense' expense.id %}" class="ex-action-btn ex-act-edit" title="Edit"><i class="bi bi-pencil-square"></i></a>
-                                        <a href="{% url 'delete_expense' expense.id %}" class="ex-action-btn ex-act-delete delete-btn" title="Delete"><i class="bi bi-trash3"></i></a>
+                                        <a href="{% url 'delete_expense' expense.id %}"
+                                        class="ex-action-btn ex-act-delete delete-btn"
+                                        data-no-loader
+                                        title="Delete">
+                                            <i class="bi bi-trash3"></i>
+                                        </a>
                                     </div>
                                 </td>
                             </tr>
@@ -371,7 +376,9 @@
                             <a href="{% url 'edit_expense' expense.id %}" class="ex-m-action ex-m-edit">
                                 <i class="bi bi-pencil-square"></i> Edit
                             </a>
-                            <a href="{% url 'delete_expense' expense.id %}" class="ex-m-action ex-m-delete delete-btn">
+                            <a href="{% url 'delete_expense' expense.id %}"
+                            class="ex-m-action ex-m-delete delete-btn"
+                            data-no-loader>
                                 <i class="bi bi-trash3"></i> Delete
                             </a>
                         </div>
@@ -1352,6 +1359,33 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (areaInput) areaInput.addEventListener('input', updatePreview);
     if (rateInput) rateInput.addEventListener('input', updatePreview);
+
+
+
+        document.querySelectorAll("a").forEach(function (link) {
+        link.addEventListener("click", function (e) {
+
+            if (
+                this.classList.contains("delete-btn") ||
+                this.hasAttribute("data-no-loader")
+            ) {
+                return;
+            }
+
+            var href = this.getAttribute("href");
+
+            if (
+                href &&
+                href !== "#" &&
+                !href.startsWith("#") &&
+                !href.startsWith("javascript") &&
+                !href.startsWith("mailto:") &&
+                !href.startsWith("tel:")
+            ) {
+                loader.classList.remove("hide");
+            }
+        });
+    });
 
 
     /* ════════════════════════════

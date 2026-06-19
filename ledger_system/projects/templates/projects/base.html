@@ -1580,7 +1580,7 @@
 <!-- ════════════════════════════════════════
      PAGE LOADER — Professional SaaS
 ════════════════════════════════════════ -->
-{% comment %} <div id="pageLoader" class="page-loader">
+<div id="pageLoader" class="page-loader">
 
     <!-- Top Progress Bar -->
     <div class="loader-top-bar">
@@ -1609,7 +1609,7 @@
 
     </div>
 
-</div> {% endcomment %}
+</div>
 
 
     <!-- ════════════════════════════════════════
@@ -1704,15 +1704,15 @@
 
             <!-- Activity -->
             <a href="{% url 'activity' %}" class="sidebar-footer-btn">
-                <div class="footer-icon icon-activity">
+                <div class="footer-icon icon-activity bg-warning text-white">
                     <i class="bi bi-clock-history"></i>
                 </div>
-                <span>Activity Log</span>
+                <span>My History</span>
             </a>
 
             <!-- Logout -->
             <a href="{% url 'logout' %}" class="sidebar-footer-btn logout-btn">
-                <div class="footer-icon icon-logout">
+                <div class="footer-icon icon-logout bg-danger text-white">
                     <i class="bi bi-power"></i>
                 </div>
                 <span>Sign Out</span>
@@ -1800,7 +1800,7 @@
                                 <i class="bi bi-clock-history"></i>
                             </div>
                             <div class="dropdown-item-content">
-                                <span class="dropdown-item-label">Activity Log</span>
+                                <span class="dropdown-item-label">My History</span>
                                 <span class="dropdown-item-sub">View recent actions</span>
                             </div>
                             <i class="bi bi-chevron-right dropdown-item-arrow"></i>
@@ -1838,7 +1838,7 @@
 
 
     <script>
-{% comment %} document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
 
     const loader = document.getElementById("pageLoader");
 
@@ -1888,7 +1888,7 @@
     });
 
 });
-</script> {% endcomment %}
+</script>
 
 
 

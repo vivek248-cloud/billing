@@ -275,8 +275,9 @@
                                             <i class="bi bi-pencil-square"></i>
                                         </a>
                                         <form method="post"
-                                              action="{% url 'delete_payment' payment.id %}"
-                                              class="d-inline delete-form">
+                                            action="{% url 'delete_payment' payment.id %}"
+                                            class="delete-form "
+                                            data-no-loader>
                                             {% csrf_token %}
                                             <button type="submit"
                                                     class="pl-action-btn pl-act-delete"
