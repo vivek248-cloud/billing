@@ -1145,26 +1145,37 @@ def add_expense(request, project_id=None):
         selected_project_id = project_id
         project = get_object_or_404(Project, id=project_id)
 
-        form = ExpenseForm2(request.POST)
-
-        if form.is_valid():
-            expense = form.save(commit=False)
-            expense.project = project
-            expense.amount = form.cleaned_data['area'] * form.cleaned_data['rate']
-            expense.save()
-
-            Activity.objects.create(
-                title="Expense Added",
-                description=f"{expense.description} - ₹{expense.amount} added to {project.name}",
-                action="create",
-                project=project
-            )
-
-            messages.success(request, f"₹{expense.amount} expense added successfully!")
-            return redirect(f"{request.path}?project={project.id}")
+        # User only changed the project dropdown
+        if 'add_expense' not in request.POST:
+            form = ExpenseForm2()
 
         else:
-            messages.error(request, "Invalid expense data. Please check inputs.")
+            form = ExpenseForm2(request.POST)
+
+            if form.is_valid():
+                expense = form.save(commit=False)
+                expense.project = project
+                expense.amount = form.cleaned_data['area'] * form.cleaned_data['rate']
+                expense.save()
+
+                Activity.objects.create(
+                    title="Expense Added",
+                    description=f"{expense.description} - ₹{expense.amount} added to {project.name}",
+                    action="create",
+                    project=project
+                )
+
+                messages.success(
+                    request,
+                    f"₹{expense.amount} expense added successfully!"
+                )
+
+                return redirect(f"{request.path}?project={project.id}")
+
+            messages.error(
+                request,
+                "Invalid expense data. Please check inputs."
+            )
 
     else:
         form = ExpenseForm2()
@@ -1329,7 +1340,7 @@ def delete_expense(request, expense_id):
         f"Expense '{description}' deleted successfully!"
     )
 
-    return redirect('client_details', project_id=project_id)
+    return redirect('add', project_id=project_id)
 
 
 # remove_expense
