@@ -9,27 +9,27 @@
   <link rel="icon" href="{% static 'images/favicon.ico' %}" type="image/x-icon" />
   <link rel="apple-touch-icon" href="{% static 'images/favicon-512x512.png' %}" />
 
-  <title>Elite Dream Builders | EDB Billing & Construction Management</title>
+  <title>Elite Dream Builders | EDB Billing Portal</title>
   <link rel="canonical" href="https://www.edbbilling.com/home/" />
 
   <!-- SEO -->
-  <meta name="description" content="Elite Dream Builders (EDB Billing) is a trusted construction and billing management company in Trichy, offering transparent project billing, invoices, and construction services.">
-  <meta name="keywords" content="Elite Dream Builders, login, client login, project management, construction dashboard">
-  <meta name="author" content="The Elite Dream Builders">
+  <meta name="description" content="Elite Dream Builders (EDB Billing) — trusted construction company in Trichy. Access your admin dashboard or client portal to manage projects, invoices, and payments.">
+  <meta name="keywords" content="Elite Dream Builders, EDB Billing, construction Trichy, builders Trichy, client portal, admin login">
+  <meta name="author" content="Elite Dream Builders">
   <meta name="google-site-verification" content="68LnzYm0TJcA1eTKG1h7ySOYL0RviN56WFJNTtRZ9b4" />
   <meta name="robots" content="index, follow" />
 
   <!-- Open Graph -->
-  <meta property="og:title" content="The Elite Dream Builders" />
-  <meta property="og:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments." />
+  <meta property="og:title" content="Elite Dream Builders | EDB Billing Portal" />
+  <meta property="og:description" content="Build Stronger. Trusted Everywhere. Crafted to Last." />
   <meta property="og:image" content="https://edbbilling.com/static/images/logo.PNG" />
   <meta property="og:url" content="https://www.edbbilling.com/home/" />
   <meta property="og:type" content="website" />
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="The Elite Dream Builders" />
-  <meta name="twitter:description" content="Login to your Elite Dream Builders account to view your projects, invoices, and payments." />
+  <meta name="twitter:title" content="Elite Dream Builders" />
+  <meta name="twitter:description" content="Build Stronger. Trusted Everywhere. Crafted to Last." />
   <meta name="twitter:image" content="https://edbbilling.com/static/images/logo.PNG" />
 
   <!-- Fonts -->
@@ -44,33 +44,27 @@
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
-    "@type": "WebSite",
-    "name": "edbbilling",
-    "alternateName": ["EDB Billing", "Elite Billing", "The Elite Dream Builders"],
+    "@type": "Organization",
+    "name": "Elite Dream Builders",
+    "alternateName": ["EDB Billing", "Elite Builders Trichy"],
     "url": "https://www.edbbilling.com/home/",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": "https://www.edbbilling.com/home/?s={search_term_string}",
-      "query-input": "required name=search_term_string"
-    }
+    "logo": "https://edbbilling.com/static/images/logo.PNG"
   }
   </script>
 
-  <style>
+
+    <style>
     /* ════════════════════════════════════════
        DESIGN TOKENS
     ════════════════════════════════════════ */
     :root {
-      --primary: #2563eb;
-      --primary-hover: #1d4ed8;
-      --primary-light: #eff6ff;
-      --primary-50: rgba(37, 99, 235, 0.06);
-      --primary-border: rgba(37, 99, 235, 0.15);
-
+      --primary: #0f172a;
+      --primary-hover: #1e293b;
+      --accent: #2563eb;
+      --accent-hover: #1d4ed8;
+      --accent-soft: #eff6ff;
       --success: #059669;
-      --success-light: #ecfdf5;
-      --warning: #d97706;
-      --danger: #dc2626;
+      --success-soft: #ecfdf5;
 
       --white: #ffffff;
       --gray-50: #f8fafc;
@@ -87,399 +81,270 @@
       --radius-sm: 8px;
       --radius-md: 12px;
       --radius-lg: 16px;
-      --radius-xl: 20px;
-      --radius-2xl: 24px;
 
-      --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
       --shadow-sm: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-md: 0 4px 6px -1px rgba(0,0,0,0.08), 0 2px 4px -2px rgba(0,0,0,0.05);
-      --shadow-lg: 0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -4px rgba(0,0,0,0.04);
-      --shadow-xl: 0 20px 25px -5px rgba(0,0,0,0.08), 0 8px 10px -6px rgba(0,0,0,0.04);
-      --shadow-2xl: 0 25px 50px -12px rgba(0,0,0,0.15);
-      --shadow-primary: 0 8px 24px rgba(37, 99, 235, 0.2);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.06);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.10);
 
       --transition-fast: 0.15s ease;
       --transition-base: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-      --transition-smooth: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     /* ════════════════════════════════════════
        RESET
     ════════════════════════════════════════ */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
     html { scroll-behavior: smooth; }
-
     body {
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
-      background: var(--gray-50);
+      background: var(--white);
       color: var(--gray-900);
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
       overflow-x: hidden;
     }
-
-    ::selection { background: var(--primary-light); color: var(--primary); }
     a { text-decoration: none; color: inherit; }
+    button { font-family: inherit; cursor: pointer; border: none; background: none; }
+    ::selection { background: var(--accent-soft); color: var(--accent); }
 
     /* ════════════════════════════════════════
-       TOP NAVBAR — Clean & Minimal
+       PAGE LAYOUT
     ════════════════════════════════════════ */
-    .navbar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      z-index: 1000;
-      height: 72px;
+    .page-wrapper {
+      display: grid;
+      grid-template-columns: 1.1fr 0.9fr;
+      min-height: 100vh;
+      padding: 18px;
+      gap: 18px;
+      background: var(--white);
+    }
+
+    /* ════════════════════════════════════════
+       LEFT — IMAGE CAROUSEL
+    ════════════════════════════════════════ */
+    .left-panel {
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+      background: #1a1f2e;
+      min-height: calc(100vh - 36px);
+    }
+
+    .carousel { position: absolute; inset: 0; }
+
+    .carousel-slide {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      opacity: 0;
+      transition: opacity 0.9s ease;
+    }
+    .carousel-slide.active { opacity: 1; }
+
+    .carousel-overlay {
+      position: absolute; inset: 0;
+      background: linear-gradient(
+        180deg,
+        rgba(15, 23, 42, 0.45) 0%,
+        rgba(15, 23, 42, 0.55) 50%,
+        rgba(15, 23, 42, 0.78) 100%
+      );
+    }
+
+    /* Top bar */
+    .left-top {
+      position: absolute;
+      top: 24px;
+      left: 24px;
+      right: 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 clamp(1.25rem, 4vw, 3rem);
-      background: rgba(255, 255, 255, 0.85);
-      backdrop-filter: blur(20px) saturate(180%);
-      -webkit-backdrop-filter: blur(20px) saturate(180%);
-      border-bottom: 1px solid var(--gray-200);
-      transition: all var(--transition-base);
+      z-index: 5;
     }
 
-    .navbar.scrolled {
-      box-shadow: var(--shadow-sm);
-      background: rgba(255, 255, 255, 0.95);
-    }
-
-    .nav-brand {
+    .left-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
 
-    .nav-logo {
+    .left-brand-logo {
       width: 36px;
       height: 36px;
       border-radius: 10px;
-      object-fit: contain;
-      border: 1px solid #cbd5e1;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(10px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 6px;
+      border: 1px solid rgba(255, 255, 255, 0.15);
     }
 
-    .nav-brand-name {
+    .left-brand-logo img {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    .left-brand-name {
+      font-size: 1.1rem;
       font-weight: 800;
-      font-size: 1.05rem;
-      color: var(--gray-900);
+      color: #fff;
       letter-spacing: -0.3px;
     }
 
-    .nav-brand-name span {
-      color: var(--primary);
-    }
-
-    .nav-brand-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--gray-300);
-      margin: 0 4px;
-    }
-
-    .nav-brand-sub {
-      font-size: 0.72rem;
-      color: var(--gray-400);
-      font-weight: 500;
-    }
-
-    .nav-right {
-      display: flex;
+    .back-pill {
+      display: inline-flex;
       align-items: center;
-      gap: 6px;
-    }
-
-    .nav-btn {
-      padding: 0.5rem 1.1rem;
-      border-radius: var(--radius-md);
+      gap: 8px;
+      padding: 9px 16px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
       font-size: 0.82rem;
       font-weight: 600;
-      transition: all var(--transition-fast);
-      border: 1px solid transparent;
-      cursor: pointer;
+      transition: all var(--transition-base);
     }
 
-    .nav-btn-ghost {
-      color: #ffffff;
-      background: #64748b;
+    .back-pill:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
     }
 
-    .nav-btn-ghost:hover {
-      background: #64748b;
-      color: white;
-      transform: translateY(-2px);
-    }
-
-    .nav-btn-primary {
-      color: white;
-      background: var(--primary);
-      border-color: var(--primary);
-      box-shadow: var(--shadow-primary);
-    }
-
-    .nav-btn-primary:hover {
-      background: var(--primary-hover);
-      transform: translateY(-2px);
-      box-shadow: 0 10px 28px rgba(37, 99, 235, 0.25);
-      color: white;
-    }
-
-    /* ════════════════════════════════════════
-       PAGE LAYOUT — Split Screen
-    ════════════════════════════════════════ */
-    .page-wrapper {
-      flex: 1;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      min-height: 100vh;
-    }
-
-    /* ─── LEFT PANEL — Image/Branding ─── */
-    .left-panel {
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      padding: 6rem 3rem 3rem;
-      overflow: hidden;
-      background: var(--gray-900);
-    }
-
-    /* Background image */
-    .left-bg {
+    /* Bottom content */
+    .left-bottom {
       position: absolute;
-      inset: 0;
-      background:
-        linear-gradient(180deg,
-          rgba(12, 12, 12, 0.33) 0%,
-          rgba(0, 0, 0, 0.56) 50%,
-          rgba(0, 0, 0, 0.7) 100%),
-        url("https://ik.imagekit.io/zygvxqqhx/Front2.jpg?updatedAt=1750071617078")
-        center / cover no-repeat;
-    }
-
-    /* Subtle geometric shapes */
-    .left-shapes {
-      position: absolute;
-      inset: 0;
-      overflow: hidden;
-      pointer-events: none;
-    }
-
-    .shape {
-      position: absolute;
-      border: 1px solid rgba(255, 255, 255, 0.19);
-      border-radius: 24px;
-    }
-
-    .shape-1 {
-      width: 300px; height: 300px;
-      top: -60px; left: -60px;
-      transform: rotate(15deg);
-    }
-
-    .shape-2 {
-      width: 200px; height: 200px;
-      bottom: 80px; right: -40px;
-      transform: rotate(-25deg);
-    }
-
-    .shape-3 {
-      width: 150px; height: 150px;
-      top: 40%; left: 60%;
-      transform: rotate(45deg);
-      border-color: rgba(255, 255, 255, 0.16);
-    }
-
-    /* Left panel content */
-    .left-content {
-      position: relative;
-      z-index: 1;
-      max-width: 420px;
-      text-align: left;
-      color: white;
-    }
-
-    .left-logo {
-      width: 220px;
-      height: 220px;
-      border-radius: 18px;
-      object-fit: contain;
-      padding: 4px;
-      border: 1px solid rgba(255, 255, 255, 0.27);
-      margin-bottom: 2rem;
+      bottom: 36px;
+      left: 36px;
+      right: 36px;
+      z-index: 5;
+      color: #fff;
     }
 
     .left-title {
-      font-size: 2.2rem;
-      font-weight: 900;
-      line-height: 1.2;
-      letter-spacing: -0.5px;
+      font-size: clamp(1.8rem, 3.4vw, 2.8rem);
+      font-weight: 800;
+      line-height: 1.15;
+      letter-spacing: -0.8px;
       margin-bottom: 1rem;
+      max-width: 520px;
     }
 
     .left-desc {
-      font-size: 0.95rem;
-      color: rgba(255,255,255,0.6);
+      font-size: 0.92rem;
       line-height: 1.7;
-      margin-bottom: 2.5rem;
+      color: rgba(255, 255, 255, 0.75);
+      max-width: 480px;
+      margin-bottom: 2rem;
     }
 
-    /* Feature list */
-    .feature-list {
+    .carousel-dots {
       display: flex;
-      flex-direction: column;
-      gap: 1.25rem;
+      gap: 8px;
     }
 
-    .feature-item {
-      display: flex;
-      align-items: flex-start;
-      gap: 14px;
+    .carousel-dot {
+      width: 28px;
+      height: 3px;
+      border-radius: 2px;
+      background: rgba(255, 255, 255, 0.3);
+      cursor: pointer;
+      transition: all var(--transition-base);
     }
 
-    .feature-icon {
-      width: 40px;
-      height: 40px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.08);
-      border: 1px solid rgba(255,255,255,0.08);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      color: rgba(255,255,255,0.7);
-      flex-shrink: 0;
+    .carousel-dot.active {
+      background: #fff;
+      width: 44px;
     }
 
-    .feature-text h4 {
-      font-size: 0.88rem;
-      font-weight: 700;
-      color: rgba(255,255,255,0.9);
-      margin-bottom: 3px;
+    .carousel-dot:hover:not(.active) {
+      background: rgba(255, 255, 255, 0.5);
     }
 
-    .feature-text p {
-      font-size: 0.78rem;
-      color: rgba(255,255,255,0.45);
-      line-height: 1.5;
-    }
 
-    /* Bottom stats */
-    .left-stats {
-      position: relative;
-      z-index: 1;
-      display: flex;
-      gap: 2rem;
-      margin-top: 3rem;
-      padding-top: 2rem;
-      border-top: 1px solid rgba(255,255,255,0.08);
-    }
 
-    .stat-block {
-      text-align: left;
-    }
-
-    .stat-number {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: white;
-      letter-spacing: -0.5px;
-    }
-
-    .stat-label {
-      font-size: 0.68rem;
-      color: rgba(255,255,255,0.4);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-weight: 600;
-      margin-top: 2px;
-    }
-
-    /* ─── RIGHT PANEL — Login/Portal ─── */
+        /* ════════════════════════════════════════
+       RIGHT — LANDING / PORTAL SELECT
+    ════════════════════════════════════════ */
     .right-panel {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
-      padding: 6rem 3rem 3rem;
-      background: var(--white);
+      padding: 3rem 2.5rem;
       position: relative;
     }
 
     .right-content {
-      max-width: 400px;
       width: 100%;
+      max-width: 420px;
     }
 
-    /* Status pill */
+    /* ─── Status pill ─── */
     .status-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
-      padding: 0.35rem 0.85rem;
+      padding: 6px 14px;
       border-radius: 100px;
-      background: var(--primary-light);
-      border: 1px solid rgba(37, 99, 235, 0.12);
+      background: var(--success-soft);
+      border: 1px solid rgba(5, 150, 105, 0.18);
       font-size: 0.72rem;
       font-weight: 600;
-      color: var(--primary);
-      margin-bottom: 2rem;
+      color: var(--success);
+      margin-bottom: 1.5rem;
     }
 
     .status-pill .dot {
       width: 6px;
       height: 6px;
       border-radius: 50%;
-      background: var(--primary);
-      animation: statusPulse 2s ease infinite;
+      background: var(--success);
+      animation: pulse 2s ease infinite;
     }
 
-    @keyframes statusPulse {
+    @keyframes pulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.4; transform: scale(0.85); }
     }
 
-    /* Heading */
-    .portal-heading {
-      font-size: 1.75rem;
+    /* ─── Headings ─── */
+    .welcome-heading {
+      font-size: 1.85rem;
       font-weight: 800;
       color: var(--gray-900);
-      letter-spacing: -0.5px;
+      letter-spacing: -0.6px;
       margin-bottom: 0.5rem;
       line-height: 1.2;
     }
 
-    .portal-subheading {
-      font-size: 0.9rem;
+    .welcome-sub {
+      font-size: 0.92rem;
       color: var(--gray-500);
       line-height: 1.6;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2.2rem;
     }
 
-    /* Portal selector label */
+    /* ─── Portal label ─── */
     .portal-label {
       font-size: 0.68rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1.2px;
+      letter-spacing: 1.3px;
       color: var(--gray-400);
       margin-bottom: 0.85rem;
     }
 
-    /* ─── Portal Cards ─── */
+    /* ─── Portal cards ─── */
     .portal-cards {
       display: flex;
       flex-direction: column;
       gap: 12px;
-      margin-bottom: 2.5rem;
+      margin-bottom: 2rem;
     }
 
     .portal-card {
@@ -488,35 +353,40 @@
       gap: 16px;
       padding: 1.15rem 1.25rem;
       border-radius: var(--radius-lg);
-      border: 1.5px solid blue;
+      background: var(--white);
+      border: 1.5px solid var(--gray-200);
       transition: all var(--transition-base);
       cursor: pointer;
       position: relative;
+      overflow: hidden;
+    }
+
+    .portal-card::before {
+      content: '';
+      position: absolute;
+      left: 0; top: 0; bottom: 0;
+      width: 3px;
+      background: var(--accent);
+      transform: scaleY(0);
+      transform-origin: center;
+      transition: transform var(--transition-base);
     }
 
     .portal-card:hover {
-      border-color: var(--primary);
-      background: var(--primary-50);
-      box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.06);
+      border-color: var(--gray-900);
       transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
     }
 
-    .portal-card:hover .p-icon {
-      transform: scale(1.05);
-      box-shadow: var(--shadow-primary);
+    .portal-card:hover::before {
+      transform: scaleY(1);
     }
 
     .portal-card:hover .p-arrow {
-      opacity: 1;
-      transform: translateX(3px);
-      color: var(--primary);
+      transform: translateX(4px);
+      color: var(--gray-900);
     }
 
-    .portal-card:active {
-      transform: translateY(0);
-    }
-
-    /* Card icon */
     .p-icon {
       width: 48px;
       height: 48px;
@@ -524,123 +394,129 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       flex-shrink: 0;
       transition: all var(--transition-base);
     }
 
     .p-icon-admin {
-      background: var(--primary-light);
-      color: var(--primary);
-      border: 1px solid var(--primary-border);
+      background: var(--accent-soft);
+      color: var(--accent);
     }
 
     .p-icon-client {
-      background: var(--success-light);
+      background: var(--success-soft);
       color: var(--success);
-      border: 1px solid rgba(5, 150, 105, 0.12);
     }
 
-    /* Card text */
+    .portal-card:hover .p-icon {
+      transform: scale(1.05);
+    }
+
     .p-text {
       flex: 1;
       min-width: 0;
     }
 
     .p-title {
-      font-size: 0.92rem;
+      font-size: 0.95rem;
       font-weight: 700;
       color: var(--gray-900);
-      margin-bottom: 2px;
+      margin-bottom: 3px;
       line-height: 1.3;
     }
 
     .p-desc {
-      font-size: 0.76rem;
+      font-size: 0.78rem;
       color: var(--gray-500);
-      line-height: 1.4;
+      line-height: 1.45;
     }
 
     .p-arrow {
-      font-size: 1rem;
-      color: blue;
-      opacity: 0.5;
+      font-size: 1.1rem;
+      color: var(--gray-400);
       transition: all var(--transition-base);
+      flex-shrink: 0;
     }
 
-    /* ─── Divider ─── */
-    .or-divider {
+    /* ─── Trust section ─── */
+    .trust-divider {
       display: flex;
       align-items: center;
-      gap: 16px;
-      margin-bottom: 2rem;
+      gap: 14px;
+      margin: 1.6rem 0 1.1rem;
     }
 
-    .or-divider .line {
+    .trust-divider .line {
       flex: 1;
       height: 1px;
       background: var(--gray-200);
     }
 
-    .or-divider .or-text {
-      font-size: 0.7rem;
-      font-weight: 600;
+    .trust-divider .text {
+      font-size: 0.68rem;
+      font-weight: 700;
       color: var(--gray-400);
       text-transform: uppercase;
-      letter-spacing: 1.5px;
-    }
-
-    /* ─── Security / Trust ─── */
-    .trust-section {
-      text-align: center;
+      letter-spacing: 1.3px;
     }
 
     .trust-badges {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 8px;
       flex-wrap: wrap;
-      margin-bottom: 1.25rem;
+      margin-bottom: 1.1rem;
     }
 
     .trust-badge {
       display: inline-flex;
       align-items: center;
-      gap: 5px;
-      padding: 0.3rem 0.7rem;
+      gap: 6px;
+      padding: 6px 12px;
       border-radius: 100px;
       background: var(--gray-50);
       border: 1px solid var(--gray-200);
-      font-size: 0.68rem;
+      font-size: 0.7rem;
       font-weight: 600;
-      color: var(--gray-500);
+      color: var(--gray-600);
     }
 
     .trust-badge i {
-      font-size: 0.72rem;
+      font-size: 0.78rem;
     }
 
     .trust-badge .bi-shield-fill-check { color: var(--success); }
-    .trust-badge .bi-lock-fill { color: var(--primary); }
-    .trust-badge .bi-patch-check-fill { color: var(--warning); }
+    .trust-badge .bi-lock-fill { color: var(--accent); }
+    .trust-badge .bi-patch-check-fill { color: #d97706; }
 
-    .trust-text {
-      font-size: 0.72rem;
-      color: var(--gray-400);
+    /* ─── Contact info ─── */
+    .contact-info {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.76rem;
+      color: var(--gray-500);
+      text-align: center;
       line-height: 1.5;
     }
 
-    .trust-text a {
-      color: var(--primary);
+    .contact-info i {
+      color: var(--gray-400);
+    }
+
+    .contact-info a {
+      color: var(--gray-900);
       font-weight: 600;
     }
 
-    .trust-text a:hover {
-      text-decoration: underline;
+    .contact-info a:hover {
+      color: var(--accent);
     }
 
-    /* ─── Footer inside right panel ─── */
+    /* ─── Panel footer ─── */
     .panel-footer {
       position: absolute;
       bottom: 1.5rem;
@@ -649,18 +525,14 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       color: var(--gray-400);
       white-space: nowrap;
     }
 
-    .panel-footer a {
-      color: var(--primary);
+    .panel-footer strong {
+      color: var(--gray-700);
       font-weight: 600;
-    }
-
-    .panel-footer a:hover {
-      text-decoration: underline;
     }
 
     /* ════════════════════════════════════════
@@ -669,89 +541,47 @@
     @media (max-width: 1024px) {
       .page-wrapper {
         grid-template-columns: 1fr;
+        padding: 0;
+        gap: 0;
       }
-
-      .left-panel {
-        display: none;
-      }
-
+      .left-panel { display: none; }
       .right-panel {
         min-height: 100vh;
-        padding: 6rem 1.5rem 4rem;
-        background:
-          linear-gradient(180deg, var(--white) 0%, var(--gray-50) 100%);
+        padding: 2.5rem 1.5rem 5rem;
       }
-
-      .right-content {
-        max-width: 420px;
-      }
-
-      /* Show a mini header on mobile */
-      .mobile-brand {
-        display: flex !important;
-        align-items: center;
-        justify-content: center;
-        gap: 12px;
-        margin-bottom: 2rem;
-      }
-
-      .mobile-brand img {
-        width: 48px;
-        height: 48px;
-        border-radius: 14px;
-        border: 1px solid var(--gray-200);
-      }
-
-      .mobile-brand .brand-text {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: var(--gray-900);
-      }
-
-      .mobile-brand .brand-text span {
-        color: var(--primary);
-      }
+      .mobile-brand { display: flex !important; }
     }
 
     @media (max-width: 480px) {
-      .navbar {
-        height: 62px;
-        padding: 0 1rem;
-      }
-
-      .nav-brand-divider,
-      .nav-brand-sub {
-        display: none;
-      }
-
-      .portal-heading {
-        font-size: 1.5rem;
-      }
-
-      .portal-card {
-        padding: 1rem;
-      }
-
-      .p-icon {
-        width: 42px;
-        height: 42px;
-        font-size: 1.05rem;
-      }
-
-      .trust-badges {
-        gap: 4px;
-      }
-
-      .trust-badge {
-        padding: 0.25rem 0.55rem;
-        font-size: 0.62rem;
-      }
+      .welcome-heading { font-size: 1.55rem; }
+      .right-panel { padding: 2rem 1.25rem 5rem; }
+      .portal-card { padding: 1rem; }
+      .p-icon { width: 42px; height: 42px; font-size: 1.1rem; }
     }
 
-    /* ─── Hidden on desktop ─── */
-    .mobile-brand { display: none; }
+    /* Mobile brand */
+    .mobile-brand {
+      display: none;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-bottom: 2rem;
+    }
 
-    /* ─── Hidden SEO ─── */
+    .mobile-brand img {
+      width: 38px;
+      height: 38px;
+      border-radius: 10px;
+      object-fit: contain;
+    }
+
+    .mobile-brand .brand-name {
+      font-size: 1.15rem;
+      font-weight: 800;
+      color: var(--gray-900);
+    }
+
+    /* SEO hidden */
     .seo-hidden {
       position: absolute;
       width: 1px; height: 1px;
@@ -762,129 +592,91 @@
     }
   </style>
 </head>
+
+
+
 <body>
 
-  <!-- ════════════════════════════════════════
-       NAVBAR
-  ════════════════════════════════════════ -->
-  <nav class="navbar" id="navbar">
-    <div class="nav-brand">
-      <img src="{% static 'images/logo.PNG' %}" alt="EDB Logo" class="nav-logo">
-      <span class="nav-brand-name">EDB <span>Billing</span></span>
-      <div class="nav-brand-divider"></div>
-      <span class="nav-brand-sub">Billing Management</span>
-    </div>
-    <div class="nav-right">
-      <a href="{% url 'admin_login' %}" class="nav-btn nav-btn-ghost">
-        Admin Login
-      </a>
-      <a href="{% url 'client_login' %}" class="nav-btn nav-btn-primary">
-        <i class="bi bi-box-arrow-in-right" style="margin-right: 4px;"></i>
-        Client Login
-      </a>
-    </div>
-  </nav>
-
-  <!-- ════════════════════════════════════════
-       SPLIT LAYOUT
-  ════════════════════════════════════════ -->
   <div class="page-wrapper">
 
-    <!-- ─── LEFT: Brand / Image Panel ─── -->
-    <div class="left-panel">
-      <div class="left-bg"></div>
-      <div class="left-shapes">
-        <div class="shape shape-1"></div>
-        <div class="shape shape-2"></div>
-        <div class="shape shape-3"></div>
+    <!-- ═══════════════════════════════
+         LEFT — IMAGE CAROUSEL
+    ═══════════════════════════════ -->
+    <aside class="left-panel">
+
+      <!-- Carousel slides -->
+      <div class="carousel-slide active"
+           style="background-image: url('https://ik.imagekit.io/zygvxqqhx/20250726_1234_Construction%20Logo%20Design_remix_01k12rmzbsf9rvd9mfn1m3g2sc.jpg?updatedAt=1753518833161');"></div>
+      <div class="carousel-slide"
+           style="background-image: url('https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=1600&q=80');"></div>
+      <div class="carousel-slide"
+           style="background-image: url('https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1600&q=80');"></div>
+
+      <div class="carousel-overlay"></div>
+
+      <!-- Top bar -->
+      <div class="left-top">
+        <div class="left-brand">
+          <div class="left-brand-logo">
+            <img src="{% static 'images/logo.PNG' %}" alt="EDB Logo">
+          </div>
+          <span class="left-brand-name">EDB Billing</span>
+        </div>
+
+        <a href="https://elitedreambuilders.in/" class="back-pill">
+          <i class="bi bi-arrow-left"></i>
+          Back to Website
+        </a>
       </div>
 
-      <div class="left-content">
-        <img src="{% static 'images/logo.PNG' %}" alt="EDB" class="left-logo">
-
+      <!-- Bottom content -->
+      <div class="left-bottom">
         <h1 class="left-title">
-          Build Better.<br>
-          Bill Smarter.
+          Build Stronger.<br>
+          Trusted Everywhere.<br>
+          Crafted to Last.
         </h1>
-
         <p class="left-desc">
-          The complete platform for construction project management, 
-          transparent billing, and real-time financial tracking.
+          Trusted construction & billing experts in Trichy. From planning
+          to handover, we deliver projects with transparency, precision,
+          and uncompromising quality.
         </p>
 
-        <div class="feature-list">
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="bi bi-bar-chart-fill"></i>
-            </div>
-            <div class="feature-text">
-              <h4>Real-Time Analytics</h4>
-              <p>Track project costs, payments, and profitability instantly</p>
-            </div>
-          </div>
-
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="bi bi-receipt-cutoff"></i>
-            </div>
-            <div class="feature-text">
-              <h4>Automated Invoicing</h4>
-              <p>Generate and send professional invoices in seconds</p>
-            </div>
-          </div>
-
-          <div class="feature-item">
-            <div class="feature-icon">
-              <i class="bi bi-shield-check"></i>
-            </div>
-            <div class="feature-text">
-              <h4>Secure & Reliable</h4>
-              <p>Bank-grade encryption with automated daily backups</p>
-            </div>
-          </div>
-        </div>
-
-        <div class="left-stats">
-          <div class="stat-block">
-            <div class="stat-number">50+</div>
-            <div class="stat-label">Projects</div>
-          </div>
-          <div class="stat-block">
-            <div class="stat-number">99.9%</div>
-            <div class="stat-label">Uptime</div>
-          </div>
-          <div class="stat-block">
-            <div class="stat-number">20+</div>
-            <div class="stat-label">Satisfied Users</div>
-          </div>
+        <div class="carousel-dots" id="carouselDots">
+          <button class="carousel-dot active" data-slide="0" aria-label="Slide 1"></button>
+          <button class="carousel-dot" data-slide="1" aria-label="Slide 2"></button>
+          <button class="carousel-dot" data-slide="2" aria-label="Slide 3"></button>
         </div>
       </div>
-    </div>
+    </aside>
 
-    <!-- ─── RIGHT: Portal Selection ─── -->
-    <div class="right-panel">
+    <!-- ═══════════════════════════════
+         RIGHT — LANDING (Portal Select)
+    ═══════════════════════════════ -->
+    <main class="right-panel">
       <div class="right-content">
 
-        <!-- Mobile brand (shown < 1024px) -->
+        <!-- Mobile brand -->
         <div class="mobile-brand">
-          <img src="{% static 'images/logo.PNG' %}" alt="EDB Logo">
-          <div class="brand-text">EDB <span>Billing</span></div>
+          <img src="{% static 'images/logo.PNG' %}" alt="EDB">
+          <span class="brand-name">EDB Billing</span>
         </div>
 
-        <!-- Status -->
+        <!-- Status pill -->
         <div class="status-pill">
           <span class="dot"></span>
           All systems operational
         </div>
 
         <!-- Heading -->
-        <h2 class="portal-heading">Welcome back</h2>
-        <p class="portal-subheading">
-          Select your portal to access your dashboard, projects, and billing information.
+        <h2 class="welcome-heading">Welcome to EDB Billing</h2>
+        <p class="welcome-sub">
+          Choose your portal to access your dashboard, manage projects,
+          view invoices, and track payments.
         </p>
 
         <!-- Portal label -->
-        <div class="portal-label">Choose your portal</div>
+        <div class="portal-label">Select your portal</div>
 
         <!-- Portal Cards -->
         <div class="portal-cards">
@@ -896,7 +688,7 @@
             </div>
             <div class="p-text">
               <div class="p-title">Admin Dashboard</div>
-              <div class="p-desc">Full access to projects, billing, analytics & settings</div>
+              <div class="p-desc">Manage projects, billing, clients & analytics</div>
             </div>
             <i class="bi bi-arrow-right p-arrow"></i>
           </a>
@@ -904,44 +696,49 @@
           <!-- Client -->
           <a href="{% url 'client_login' %}" class="portal-card">
             <div class="p-icon p-icon-client">
-              <i class="bi bi-person-fill"></i>
+              <i class="bi bi-house-door-fill"></i>
             </div>
             <div class="p-text">
               <div class="p-title">Client Portal</div>
-              <div class="p-desc">View your invoices, payments & project progress</div>
+              <div class="p-desc">View invoices, payments & project progress</div>
             </div>
             <i class="bi bi-arrow-right p-arrow"></i>
           </a>
 
         </div>
 
-        <!-- Divider -->
-        <div class="or-divider">
+        <!-- Trust divider -->
+        <div class="trust-divider">
           <div class="line"></div>
-          <span class="or-text">Secured by</span>
+          <span class="text">Secured Access</span>
           <div class="line"></div>
         </div>
 
-        <!-- Trust -->
-        <div class="trust-section">
-          <div class="trust-badges">
-            <span class="trust-badge">
-              <i class="bi bi-shield-fill-check"></i>
-              SSL Encrypted
-            </span>
-            <span class="trust-badge">
-              <i class="bi bi-lock-fill"></i>
-              Secure Login
-            </span>
-            <span class="trust-badge">
-              <i class="bi bi-patch-check-fill"></i>
-              Verified
-            </span>
-          </div>
-          <p class="trust-text">
-            Your data is protected with enterprise-grade security.<br>
-            Need help? <a href="mailto:support@edbbilling.com">Contact Support</a>
-          </p>
+        <!-- Trust badges -->
+        <div class="trust-badges">
+          <span class="trust-badge">
+            <i class="bi bi-shield-fill-check"></i>
+            SSL Encrypted
+          </span>
+          <span class="trust-badge">
+            <i class="bi bi-lock-fill"></i>
+            Secure Login
+          </span>
+          <span class="trust-badge">
+            <i class="bi bi-patch-check-fill"></i>
+            Verified
+          </span>
+        </div>
+
+        <!-- Contact info -->
+        <div class="contact-info">
+          <i class="bi bi-envelope-fill"></i>
+          <span>
+            Need help? Contact
+            <a href="mailto:elitedreambuildersofficial@gmail.com">
+              elitedreambuildersofficial@gmail.com
+            </a>
+          </span>
         </div>
 
       </div>
@@ -949,11 +746,11 @@
       <!-- Footer -->
       <div class="panel-footer">
         <span>© 2025</span>
-        <a href="https://www.edbbilling.com">Elite Dream Builders</a>
+        <strong>Elite Dream Builders</strong>
         <span>·</span>
         <span>All rights reserved</span>
       </div>
-    </div>
+    </main>
 
   </div>
 
@@ -961,43 +758,100 @@
        HIDDEN SEO
   ════════════════════════════════════════ -->
   <div class="seo-hidden">
-    <h2>Elite Dream Builders – Trusted Builders & Billing Experts in Trichy</h2>
+    <h1>Elite Dream Builders — Trusted Construction & Billing Experts in Trichy</h1>
+    <h2>Construction Company in Trichy | Building Contractors | Project Billing Management</h2>
     <p>
-      Elite Dream Builders, also known as EDB Billing or Elite Billing,
-      is a trusted construction and project billing company in Trichy.
-      We specialize in transparent billing, construction management,
-      and end-to-end building solutions.
+      Elite Dream Builders (EDB Billing) is a leading construction company in
+      Trichy, Tamil Nadu, specializing in residential and commercial building
+      projects, transparent billing management, and end-to-end construction
+      services. From foundation to finishing, we deliver quality homes,
+      villas, apartments, and commercial spaces with precision, integrity,
+      and on-time completion.
+    </p>
+    <h3>Our Construction Services</h3>
+    <ul>
+      <li>Residential construction — independent houses, villas, duplex homes</li>
+      <li>Commercial construction — offices, retail spaces, warehouses</li>
+      <li>Apartment & multi-storey building construction</li>
+      <li>Renovation, remodeling, and extension projects</li>
+      <li>Interior design and finishing works</li>
+      <li>Project billing, costing, and budget management</li>
+      <li>Architectural planning and structural design</li>
+      <li>Civil engineering and site supervision</li>
+    </ul>
+    <h3>Why Choose Elite Dream Builders</h3>
+    <ul>
+      <li>20+ years of construction experience in Trichy and Tamil Nadu</li>
+      <li>Transparent billing with no hidden costs</li>
+      <li>On-time project delivery backed by detailed planning</li>
+      <li>Quality materials sourced from trusted suppliers</li>
+      <li>Skilled engineers, architects, and certified contractors</li>
+      <li>Real-time project tracking through our client portal</li>
+      <li>Affordable pricing with flexible payment plans</li>
+      <li>Post-construction support and warranty</li>
+    </ul>
+    <h3>Service Areas</h3>
+    <p>
+      We proudly serve clients across Trichy, Thanjavur, Pudukkottai,
+      Karur, Perambalur, Srirangam, Thuvakudi, Manapparai, Lalgudi, and
+      surrounding regions of central Tamil Nadu.
+    </p>
+    <h3>About EDB Billing Platform</h3>
+    <p>
+      Our integrated billing platform helps clients track project progress,
+      view itemized invoices, monitor payments, and access construction
+      reports in real time. Built for transparency, EDB Billing keeps
+      homeowners and businesses fully informed at every stage of construction.
+    </p>
+    <p>
+      Also known as: Elite Builders Trichy, EDB Construction, Elite Dream
+      Builders Trichy, Best Builders in Trichy, Top Construction Company
+      Tamil Nadu, House Construction Trichy, Civil Contractors Trichy.
     </p>
   </div>
 
-  <!-- ════════════════════════════════════════
-       SCRIPTS
-  ════════════════════════════════════════ -->
-  <script>
-    // ─── Navbar scroll ───
-    const navbar = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      navbar.classList.toggle('scrolled', window.scrollY > 20);
+    <script>
+    // ════════════════════════════════════
+    // Carousel
+    // ════════════════════════════════════
+    const slides = document.querySelectorAll('.carousel-slide');
+    const dots = document.querySelectorAll('.carousel-dot');
+    let current = 0;
+    let carouselTimer;
+
+    function showSlide(index) {
+      slides.forEach((s, i) => s.classList.toggle('active', i === index));
+      dots.forEach((d, i) => d.classList.toggle('active', i === index));
+      current = index;
+    }
+
+    function nextSlide() {
+      showSlide((current + 1) % slides.length);
+    }
+
+    function startCarousel() {
+      carouselTimer = setInterval(nextSlide, 5000);
+    }
+
+    function resetCarousel() {
+      clearInterval(carouselTimer);
+      startCarousel();
+    }
+
+    dots.forEach(dot => {
+      dot.addEventListener('click', () => {
+        showSlide(parseInt(dot.dataset.slide));
+        resetCarousel();
+      });
     });
 
-    // ─── Portal card interaction ───
+    startCarousel();
+
+    // ════════════════════════════════════
+    // Portal card ripple feedback
+    // ════════════════════════════════════
     document.querySelectorAll('.portal-card').forEach(card => {
-
-      // Subtle press feedback
-      card.addEventListener('mousedown', () => {
-        card.style.transform = 'translateY(0) scale(0.995)';
-      });
-
-      card.addEventListener('mouseup', () => {
-        card.style.transform = '';
-      });
-
-      card.addEventListener('mouseleave', () => {
-        card.style.transform = '';
-      });
-
-      // Ripple
-      card.addEventListener('click', function(e) {
+      card.addEventListener('click', function (e) {
         const rect = this.getBoundingClientRect();
         const ripple = document.createElement('span');
         ripple.style.cssText = `
@@ -1011,32 +865,31 @@
           pointer-events: none;
           animation: ripple 0.5s ease-out forwards;
         `;
-        this.style.overflow = 'hidden';
         this.appendChild(ripple);
         setTimeout(() => ripple.remove(), 500);
       });
     });
 
-    // Inject ripple keyframe
-    const s = document.createElement('style');
-    s.textContent = `
+    const rippleStyle = document.createElement('style');
+    rippleStyle.textContent = `
       @keyframes ripple {
         to { width: 300px; height: 300px; opacity: 0; }
       }
     `;
-    document.head.appendChild(s);
+    document.head.appendChild(rippleStyle);
 
-    // ─── Entrance animation on load ───
+    // ════════════════════════════════════
+    // Entrance animation
+    // ════════════════════════════════════
     window.addEventListener('load', () => {
       const elements = document.querySelectorAll(
-        '.left-content, .status-pill, .portal-heading, .portal-subheading, .portal-label, .portal-cards, .or-divider, .trust-section, .mobile-brand'
+        '.status-pill, .welcome-heading, .welcome-sub, .portal-label, .portal-cards, .trust-divider, .trust-badges, .contact-info, .mobile-brand, .left-top, .left-bottom'
       );
 
       elements.forEach((el, i) => {
         el.style.opacity = '0';
-        el.style.transform = 'translateY(16px)';
+        el.style.transform = 'translateY(14px)';
         el.style.transition = `opacity 0.5s ease ${i * 0.06}s, transform 0.5s ease ${i * 0.06}s`;
-
         requestAnimationFrame(() => {
           el.style.opacity = '1';
           el.style.transform = 'translateY(0)';
